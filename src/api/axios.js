@@ -1,9 +1,10 @@
-// frontend/src/api/axios.js (ACTUALIZADO)
+// src/api/axios.js
 import axios from 'axios';
 
 const instance = axios.create({
-    baseURL: 'https://fercalc-pro.onrender.com', // <-- Pega la URL de tu backend de Render aquí
-    withCredentials: true,
+  // ¡ESTA ES LA LÍNEA MÁS IMPORTANTE!
+  baseURL: 'https://TU_API_DE_RENDER.onrender.com/api', 
+  withCredentials: true
 });
 
 export default instance;
