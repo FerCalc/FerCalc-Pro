@@ -14,16 +14,14 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser]                   = useState(null);
+  const [user, setUser]                       = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [errors, setErrors]               = useState([]);
-  const [loading, setLoading]             = useState(true);
+  const [errors, setErrors]                   = useState([]);
+  const [loading, setLoading]                 = useState(true);
   const navigate = useNavigate();
 
-  // ✅ Helper para extraer mensajes de error de forma segura
   const handleError = (error) => {
     if (!error.response) {
-      // Sin respuesta del servidor (caído, CORS, red)
       return setErrors(['No se pudo conectar con el servidor. Intente más tarde.']);
     }
     const data = error.response.data;
@@ -39,7 +37,7 @@ export const AuthProvider = ({ children }) => {
       const res = await registerRequest(user);
       setUser(res.data);
       setIsAuthenticated(true);
-      navigate('/tasks');
+      navigate('/app'); // ✅ Redirige a FerCalc
     } catch (error) {
       handleError(error);
     }
@@ -50,7 +48,7 @@ export const AuthProvider = ({ children }) => {
       const res = await loginRequest(user);
       setUser(res.data);
       setIsAuthenticated(true);
-      navigate('/tasks');
+      navigate('/app'); // ✅ Redirige a FerCalc
     } catch (error) {
       handleError(error);
     }
@@ -65,11 +63,10 @@ export const AuthProvider = ({ children }) => {
       Cookies.remove('token');
       setUser(null);
       setIsAuthenticated(false);
-      navigate('/');
+      navigate('/'); // ✅ Redirige al home al cerrar sesión
     }
   };
 
-  // Limpia errores después de 5 segundos
   useEffect(() => {
     if (errors.length > 0) {
       const timer = setTimeout(() => setErrors([]), 5000);
@@ -77,7 +74,6 @@ export const AuthProvider = ({ children }) => {
     }
   }, [errors]);
 
-  // Verifica si el usuario ya está logueado al cargar la página
   useEffect(() => {
     async function checkLogin() {
       const cookies = Cookies.get();
@@ -100,7 +96,6 @@ export const AuthProvider = ({ children }) => {
         setIsAuthenticated(false);
         setUser(null);
       } finally {
-        // ✅ Siempre se ejecuta, evita que loading quede en true para siempre
         setLoading(false);
       }
     }
