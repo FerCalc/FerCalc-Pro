@@ -1,12 +1,10 @@
 import { createContext, useState, useContext, useEffect } from "react";
-import { registerRequest, loginRequest, verifyTokenRequest, logoutRequest } from "../api/auth.js"; 
+import { registerRequest, loginRequest, verifyTokenRequest, logoutRequest } from "../api/auth.js";
 import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
 
-// 1. Creación del Contexto
 export const AuthContext = createContext();
 
-// 2. Hook personalizado para usar el contexto más fácilmente
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
@@ -15,51 +13,50 @@ export const useAuth = () => {
   return context;
 };
 
-// 3. Componente Proveedor que envuelve la aplicación
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+  const [user, setUser]                   = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [errors, setErrors] = useState([]);
-  const [loading, setLoading] = useState(true); // Estado para saber si aún se está verificando el token
+  const [errors, setErrors]               = useState([]);
+  const [loading, setLoading]             = useState(true);
   const navigate = useNavigate();
 
-  // --- Funciones de Autenticación ---
+  // ✅ Helper para extraer mensajes de error de forma segura
+  const handleError = (error) => {
+    if (!error.response) {
+      // Sin respuesta del servidor (caído, CORS, red)
+      return setErrors(['No se pudo conectar con el servidor. Intente más tarde.']);
+    }
+    const data = error.response.data;
+    if (Array.isArray(data)) {
+      setErrors(data);
+    } else {
+      setErrors([data?.message || 'Ocurrió un error inesperado.']);
+    }
+  };
 
   const signup = async (user) => {
     try {
-        const res = await registerRequest(user);
-        setUser(res.data);
-        setIsAuthenticated(true);
-        navigate('/tasks'); // Redirige al usuario después del registro exitoso
+      const res = await registerRequest(user);
+      setUser(res.data);
+      setIsAuthenticated(true);
+      navigate('/tasks');
     } catch (error) {
-        // **MEJORA CLAVE**: Manejo de errores robusto.
-        // Asegura que 'errors' siempre sea un array para evitar que .map() falle.
-        if (Array.isArray(error.response.data)) {
-            setErrors(error.response.data);
-        } else {
-            setErrors([error.response.data.message || 'Error en el registro, intente de nuevo.']);
-        }
+      handleError(error);
     }
   };
 
   const signin = async (user) => {
     try {
-        const res = await loginRequest(user);
-        setUser(res.data);
-        setIsAuthenticated(true);
-        navigate('/tasks'); // Redirige al usuario después del login exitoso
+      const res = await loginRequest(user);
+      setUser(res.data);
+      setIsAuthenticated(true);
+      navigate('/tasks');
     } catch (error) {
-        // Esta lógica ya era correcta, la mantenemos.
-        if (Array.isArray(error.response.data)) {
-            return setErrors(error.response.data);
-        }
-        setErrors([error.response.data.message]);
+      handleError(error);
     }
   };
 
   const logout = async () => {
-    // Esta función limpia el estado local y las cookies, asegurando el cierre de sesión
-    // incluso si la petición al servidor falla.
     try {
       await logoutRequest();
     } catch (error) {
@@ -72,51 +69,44 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // --- Efectos Secundarios (useEffect) ---
-
-  // Efecto para limpiar los mensajes de error después de 5 segundos
+  // Limpia errores después de 5 segundos
   useEffect(() => {
     if (errors.length > 0) {
-        const timer = setTimeout(() => {
-            setErrors([]);
-        }, 5000);
-        // Limpia el temporizador si el componente se desmonta o los errores cambian
-        return () => clearTimeout(timer);
+      const timer = setTimeout(() => setErrors([]), 5000);
+      return () => clearTimeout(timer);
     }
   }, [errors]);
 
-  // Efecto para verificar si el usuario ya está logueado al cargar la página
+  // Verifica si el usuario ya está logueado al cargar la página
   useEffect(() => {
     async function checkLogin() {
-        const cookies = Cookies.get();
-        if (!cookies.token) {
-            setIsAuthenticated(false);
-            setLoading(false);
-            return setUser(null);
+      const cookies = Cookies.get();
+      if (!cookies.token) {
+        setIsAuthenticated(false);
+        setUser(null);
+        setLoading(false);
+        return;
+      }
+      try {
+        const res = await verifyTokenRequest(cookies.token);
+        if (!res.data) {
+          setIsAuthenticated(false);
+          setLoading(false);
+          return;
         }
-
-        try {
-            const res = await verifyTokenRequest(cookies.token);
-            if (!res.data) {
-                setIsAuthenticated(false);
-                setLoading(false);
-                return;
-            }
-
-            setIsAuthenticated(true);
-            setUser(res.data);
-            setLoading(false);
-        } catch (error) {
-            // Si el token no es válido (o hay otro error), limpiamos todo.
-            setIsAuthenticated(false);
-            setUser(null);
-            setLoading(false);
-        }
+        setIsAuthenticated(true);
+        setUser(res.data);
+      } catch (error) {
+        setIsAuthenticated(false);
+        setUser(null);
+      } finally {
+        // ✅ Siempre se ejecuta, evita que loading quede en true para siempre
+        setLoading(false);
+      }
     }
     checkLogin();
   }, []);
 
-  // 4. Retorno del Proveedor con los valores que se compartirán
   return (
     <AuthContext.Provider value={{
       signup,

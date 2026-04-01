@@ -1,14 +1,7 @@
 // src/api/auth.js
+import axios from './axios';
 
-// ¡Importante! Asegúrate de que importa desde './axios', no desde 'axios' directamente.
-import axios from './axios'; 
-
-// Estas funciones simplemente definen el método (POST/GET) y la ruta específica.
-export const registerRequest = (user) => axios.post(`/register`, user);
-
-export const loginRequest = (user) => axios.post(`/login`, user);
-
-export const verifyTokenRequest = () => axios.get('/verify');
-
-// Es posible que tengas esta también, para el logout
-export const logoutRequest = () => axios.post('/logout');
+export const registerRequest = (user) => axios.post('/auth/register', user);
+export const loginRequest    = (user) => axios.post('/auth/login', user);
+export const verifyTokenRequest = ()  => axios.get('/auth/verify');
+export const logoutRequest   = ()     => axios.post('/auth/logout');
