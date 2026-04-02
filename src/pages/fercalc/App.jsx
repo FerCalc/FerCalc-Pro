@@ -117,7 +117,8 @@ function App() {
           <img src={logo} alt="Logo de la aplicación" className="h-16 w-auto" />
           <div>
             <h1 className="text-2xl font-bold">
-              <span className="text-gray-800">Fer</span><span className="text-green-600">Calc</span>
+              // ✅ Después — quitar el espacio visual entre Fer y Calc
+<span className="text-gray-800">Fer</span><span className="text-green-600">Calc</span>
             </h1>
             <p className="text-gray-600">Calculadora Nutricional y Planificador de Dietas</p>
           </div>
