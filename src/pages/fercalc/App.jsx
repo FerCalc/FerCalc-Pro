@@ -36,6 +36,8 @@ function App() {
   const [planIntercambio, setPlanIntercambio] = useState(initialState.planIntercambio);
   const [annotations, setAnnotations] = useState(initialState.annotations);
   const [chronologicalAge, setChronologicalAge] = useState(initialChronologicalAge);
+  // ✅ Estado distribucion agregado para evitar error en CalculadoraTab
+  const [distribucion, setDistribucion] = useState({});
 
   const [savedDiets, setSavedDiets] = useState(() => {
     try {
@@ -87,7 +89,7 @@ function App() {
     setPlanIntercambio(nuevoPlan);
   }, [setPlanIntercambio]);
 
-  // ✅ handleNewDiet sin confirm — el modal lo maneja ActionToolbar
+  // ✅ Sin confirm — el modal lo maneja ActionToolbar
   const handleNewDiet = () => {
     setPatientData(initialState.patientData);
     setDietGoals(initialState.dietGoals);
@@ -95,6 +97,7 @@ function App() {
     setPlanIntercambio(initialState.planIntercambio);
     setAnnotations(initialState.annotations);
     setChronologicalAge(initialChronologicalAge);
+    setDistribucion({});
     toast.success('Se ha iniciado una nueva dieta.');
   };
 
@@ -108,7 +111,7 @@ function App() {
   );
 
   const showGyTTab = patientData.sex === 'Femenino' &&
-                     patientData.estaEmbarazada === 'Si' &&
+                     patientData.estaEmbarazada === 'Sí' &&
                      patientData.semanasGestacion >= 10;
 
   const showGrowthTab = chronologicalAge.totalYears >= 0 && chronologicalAge.totalYears <= 19;
@@ -121,10 +124,8 @@ function App() {
         <div className="flex items-center gap-4 mb-4 md:mb-0">
           <img src={logo} alt="Logo FerCalc" className="h-16 w-auto" />
           <div>
-            {/* ✅ Nombre corregido sin espacio */}
-            <h1 className="text-2xl font-bold">
-              <span className="text-gray-800">Fer</span><span className="text-green-600">Calc</span>
-            </h1>
+            {/* ✅ Sin espacio entre Fer y Calc */}
+            <h1 className="text-2xl font-bold"><span className="text-gray-800">Fer</span><span className="text-green-600">Calc</span></h1>
             <p className="text-gray-600">Calculadora Nutricional</p>
           </div>
         </div>
@@ -177,6 +178,7 @@ function App() {
           <CalculadoraTab
             dietaActual={dietaActual}
             setDietaActual={setDietaActual}
+            setDistribucion={setDistribucion}
             patientData={patientData}
             dietGoals={dietGoals}
             onPlanIntercambioUpdate={handlePlanIntercambioUpdate}
