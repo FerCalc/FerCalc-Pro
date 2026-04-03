@@ -225,7 +225,7 @@ const CalculadoraTab = ({ dietaActual, setDietaActual, setDistribucion, patientD
     }
   }, [onPlanIntercambioUpdate]); // La dependencia es la función que viene del padre.
 
-  const tableHeaders = ["Alimento", "Gramos", "Kcal", "HC", "Proteina", "Grasa", "Agua", "Na", "K", "P", "Ca", "Fe", "Col.", "Purinas", "Fibra", "Acción"];
+  const tableHeaders = ["Alimento", "Gramos", "Kcal", "HC", "Proteina", "Grasa", "Agua", "Na", "K", "P", "Ca", "Fe", "Col.", "Purinas", "Fibra", "Accion"];
 
   const SubTabButton = ({ tabId, label, icon }) => (
     <button onClick={() => setActiveSubTab(tabId)} className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-colors ${activeSubTab === tabId ? 'bg-green-600 text-white' : 'text-gray-600 hover:bg-gray-200'}`}>
