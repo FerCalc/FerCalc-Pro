@@ -9,7 +9,6 @@ import ActionToolbar from './ActionToolbar.jsx';
 import { User, Activity, PieChart, Baby, TrendingUp } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 import logo from './logo.png';
-// ✅ Importamos useAuth para obtener el usuario autenticado
 import { useAuth } from '../../context/AuthContext.jsx';
 
 const initialState = {
@@ -27,10 +26,7 @@ const initialChronologicalAge = {
 };
 
 function App() {
-  // ✅ Obtenemos el usuario autenticado
   const { user } = useAuth();
-
-  // ✅ Clave única por usuario para localStorage
   const storageKey = `savedDiets_${user?.id || 'guest'}`;
 
   const [activeTab, setActiveTab] = useState('paciente');
@@ -41,7 +37,6 @@ function App() {
   const [annotations, setAnnotations] = useState(initialState.annotations);
   const [chronologicalAge, setChronologicalAge] = useState(initialChronologicalAge);
 
-  // ✅ Lee las dietas usando la clave única del usuario
   const [savedDiets, setSavedDiets] = useState(() => {
     try {
       const item = localStorage.getItem(storageKey);
@@ -52,7 +47,6 @@ function App() {
     }
   });
 
-  // ✅ Guarda las dietas usando la clave única del usuario
   useEffect(() => {
     try {
       localStorage.setItem(storageKey, JSON.stringify(savedDiets));
@@ -60,6 +54,16 @@ function App() {
       console.error("Error al guardar dietas en localStorage:", error);
     }
   }, [savedDiets, storageKey]);
+
+  // ✅ Advertencia al recargar o cerrar la pestaña
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      e.preventDefault();
+      e.returnValue = '';
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, []);
 
   const getCurrentDietState = () => ({
     patientData,
@@ -83,27 +87,28 @@ function App() {
     setPlanIntercambio(nuevoPlan);
   }, [setPlanIntercambio]);
 
+  // ✅ handleNewDiet sin confirm — el modal lo maneja ActionToolbar
   const handleNewDiet = () => {
-    const confirmed = window.confirm("¿Estás seguro? Esto borrará todos los datos de la dieta actual.");
-    if (confirmed) {
-      setPatientData(initialState.patientData);
-      setDietGoals(initialState.dietGoals);
-      setDietaActual(initialState.dietaActual);
-      setPlanIntercambio(initialState.planIntercambio);
-      setAnnotations(initialState.annotations);
-      setChronologicalAge(initialChronologicalAge);
-      toast.success('Se ha iniciado una nueva dieta.');
-    }
+    setPatientData(initialState.patientData);
+    setDietGoals(initialState.dietGoals);
+    setDietaActual(initialState.dietaActual);
+    setPlanIntercambio(initialState.planIntercambio);
+    setAnnotations(initialState.annotations);
+    setChronologicalAge(initialChronologicalAge);
+    toast.success('Se ha iniciado una nueva dieta.');
   };
 
   const TabButton = ({ tabName, icon, label }) => (
-    <button onClick={() => setActiveTab(tabName)} className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-colors ${activeTab === tabName ? 'bg-green-600 text-white' : 'text-gray-600 hover:bg-gray-200'}`}>
+    <button
+      onClick={() => setActiveTab(tabName)}
+      className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-colors ${activeTab === tabName ? 'bg-green-600 text-white' : 'text-gray-600 hover:bg-gray-200'}`}
+    >
       {icon} {label}
     </button>
   );
 
   const showGyTTab = patientData.sex === 'Femenino' &&
-                     patientData.estaEmbarazada === 'Sí' &&
+                     patientData.estaEmbarazada === 'Si' &&
                      patientData.semanasGestacion >= 10;
 
   const showGrowthTab = chronologicalAge.totalYears >= 0 && chronologicalAge.totalYears <= 19;
@@ -114,12 +119,13 @@ function App() {
 
       <header className="bg-white rounded-lg shadow-lg p-6 mb-6 flex justify-between items-center flex-wrap">
         <div className="flex items-center gap-4 mb-4 md:mb-0">
-          <img src={logo} alt="Logo de la aplicación" className="h-16 w-auto" />
+          <img src={logo} alt="Logo FerCalc" className="h-16 w-auto" />
           <div>
+            {/* ✅ Nombre corregido sin espacio */}
             <h1 className="text-2xl font-bold">
-          <span className="text-gray-800">Fer</span><span className="text-green-600">Calc</span>
+              <span className="text-gray-800">Fer</span><span className="text-green-600">Calc</span>
             </h1>
-            <p className="text-gray-600">Calculadora Nutricional y Planificador de Dietas</p>
+            <p className="text-gray-600">Calculadora Nutricional</p>
           </div>
         </div>
         <ActionToolbar
@@ -184,7 +190,9 @@ function App() {
         </div>
       </main>
 
-      <footer className="mt-8 pt-4 text-center text-sm text-gray-500 border-t">Creado por Fernando Chavez</footer>
+      <footer className="mt-8 pt-4 text-center text-sm text-gray-500 border-t">
+        Creado por Fernando Chavez
+      </footer>
     </div>
   );
 }
