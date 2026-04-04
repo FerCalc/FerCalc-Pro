@@ -161,14 +161,14 @@ function App() {
             setChronologicalAge={setChronologicalAge}
           />
         </div>
-        {showGrowthTab && (
-          <div style={{ display: activeTab === 'crecimiento' ? 'block' : 'none' }}>
-            <GrowthAndDevelopmentTab
-              patientData={patientData}
-              chronologicalAge={chronologicalAge}
-            />
-          </div>
-        )}
+        {showGrowthTab && activeTab === 'crecimiento' && (
+  <div>
+    <GrowthAndDevelopmentTab
+      patientData={patientData}
+      chronologicalAge={chronologicalAge}
+    />
+  </div>
+)}
         {showGyTTab && (
           <div style={{ display: activeTab === 'gyt' ? 'block' : 'none' }}>
             <GyTTab patientData={patientData} />
