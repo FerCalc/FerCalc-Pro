@@ -1,16 +1,12 @@
-// src/CalculadoraTab.jsx
-// VERSIÓN CORREGIDA: Usa useCallback para estabilizar la función de callback y romper el bucle de renderizado.
-
-import React, { useState, useMemo, useEffect, useCallback } from 'react'; // CAMBIO 1: Importar useCallback
-import { Plus, Trash2, X, BookOpen, BarChart2 } from 'lucide-react';
+// mi-app-frontend/src/pages/fercalc/CalculadoraTab.jsx
+import React, { useState, useMemo, useCallback, useRef } from 'react';
+import { Plus, Trash2, X, BookOpen, BarChart2, Edit2, GripVertical } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 import IntercambioSubTab from './IntercambioSubTab.jsx';
 
 const CalculadoraTab = ({ dietaActual, setDietaActual, setDistribucion, patientData, dietGoals, onPlanIntercambioUpdate }) => {
-  // =======================================================
-  // ========= BASE DE DATOS DE ALIMENTOS COMPLETA =========
-  // =======================================================
-   const alimentosIniciales = [
+
+  const alimentosIniciales = [
     { nombre: "Leche condensada", medida: "1 cucharada", cantidad: 10, unidad: "g", hc: 5.6, proteina: 0.8, grasa: 0.8, na: 9.0, k: 0, p: 23.0, ca: 28.4, fe: 0, colesterol: 2.9, purinas: 0.0, fibra: 0, agua: 2.7, calorias: 32.8, categoria: "LÁCTEOS", origen: "animal" },
     { nombre: "Leche descremada fluida Trébol", medida: "1 taza", cantidad: 200, unidad: "ml", hc: 10.8, proteina: 7.4, grasa: 1.0, na: 104.0, k: 310.0, p: 176.0, ca: 230.0, fe: 0, colesterol: 6.0, purinas: 0.0, fibra: 0, agua: 178.0, calorias: 81.8, categoria: "LÁCTEOS", origen: "animal" },
     { nombre: "Leche descremada Mólico en polvo", medida: "1 cucharada", cantidad: 5, unidad: "g", hc: 2.6, proteina: 1.8, grasa: 0.1, na: 0, k: 0, p: 51.5, ca: 64.5, fe: 0.1, colesterol: 0.1, purinas: 0.0, fibra: 0, agua: 0.2, calorias: 18.5, categoria: "LÁCTEOS", origen: "animal" },
@@ -173,62 +169,137 @@ const CalculadoraTab = ({ dietaActual, setDietaActual, setDistribucion, patientD
     { nombre: "Papa (grande)", medida: "1 grande", cantidad: 300, unidad: "g", hc: 53.7, proteina: 5.4, grasa: 0.3, na: 3, k: 1230, p: 120, ca: 18, fe: 2.4, colesterol: 0, purinas: 15, fibra: 1.2, agua: 237, calorias: 239.1, categoria: "VEGETALES C", origen: "vegetal" }
   ];
 
-
-  const [alimentos, setAlimentos] = useState(() => {
-    // Tu lógica de localStorage está bien, la mantenemos.
-    // Solo quito la dependencia de localStorage para este ejemplo.
-    return alimentosIniciales;
-  });
-
-  // useEffect(() => {
-  //   localStorage.setItem('alimentos', JSON.stringify(alimentos));
-  // }, [alimentos]);
-  
-  const [activeSubTab, setActiveSubTab] = useState('intercambio'); 
-
+  const [alimentos, setAlimentos] = useState(alimentosIniciales);
+  const [activeSubTab, setActiveSubTab] = useState('intercambio');
   const [filtroCategoria, setFiltroCategoria] = useState('');
   const [busqueda, setBusqueda] = useState('');
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
-  const estadoInicialFormulario = { nombre: '', medida: '', cantidad: 0, unidad: 'g', hc: 0, proteina: 0, grasa: 0, na: 0, k: 0, p: 0, ca: 0, fe: 0, colesterol: 0, purinas: 0, fibra: 0, agua: 0, calorias: 0, categoria: 'OTRO', origen: 'vegetal' };
+  // ✅ Estado para editar alimento existente
+  const [alimentoEditando, setAlimentoEditando] = useState(null);
+
+  const estadoInicialFormulario = {
+    nombre: '', medida: '', cantidad: 0, unidad: 'g',
+    hc: 0, proteina: 0, grasa: 0, na: 0, k: 0, p: 0, ca: 0,
+    fe: 0, colesterol: 0, purinas: 0, fibra: 0, agua: 0,
+    calorias: 0, categoria: 'OTRO', origen: 'vegetal'
+  };
   const [nuevoAlimento, setNuevoAlimento] = useState(estadoInicialFormulario);
+
+  // ✅ Drag and drop state
+  const dragItem = useRef(null);
+  const dragOverItem = useRef(null);
+
   const categorias = useMemo(() => [...new Set(alimentos.map(a => a.categoria))].sort(), [alimentos]);
-  const alimentosFiltrados = useMemo(() => alimentos.filter(a => a.nombre.toLowerCase().includes(busqueda.toLowerCase()) && (!filtroCategoria || a.categoria === filtroCategoria)), [alimentos, busqueda, filtroCategoria]);
-  const totalesNutricionales = useMemo(() => { const totales = { cantidadUsada: 0, hc: 0, proteina: 0, grasa: 0, calorias: 0, na: 0, k: 0, p: 0, ca: 0, fe: 0, colesterol: 0, purinas: 0, fibra: 0, agua: 0 }; dietaActual.forEach(item => { const factor = item.cantidadUsada > 0 && item.alimento.cantidad > 0 ? item.cantidadUsada / item.alimento.cantidad : 0; Object.keys(totales).forEach(key => { if (key === 'cantidadUsada') totales.cantidadUsada += parseFloat(item.cantidadUsada) || 0; else totales[key] += (item.alimento[key] || 0) * factor; }); }); return totales; }, [dietaActual]);
-  
-  const agregarAlimentoADieta = (alimento) => { setDietaActual(prev => [...prev, { id: Date.now(), alimento: alimento, cantidadUsada: alimento.cantidad }]); toast.success(`${alimento.nombre} agregado.`); };
-  const eliminarDeDieta = (id) => { setDietaActual(prev => prev.filter(item => item.id !== id)); setDistribucion(prev => { const n = { ...prev }; for (const day in n) { if (n[day][id]) { delete n[day][id]; } } return n; }); toast.error("Alimento eliminado."); };
-  const actualizarCantidad = (id, nuevaCantidad) => setDietaActual(dietaActual.map(item => item.id === id ? { ...item, cantidadUsada: parseFloat(nuevaCantidad) || 0 } : item));
-  const limpiarDieta = () => { if (window.confirm("¿Estás seguro de que quieres limpiar toda la dieta actual? Se borrarán todos los alimentos de la tabla.")) { setDietaActual([]); setDistribucion(Array(14).fill(null).map(() => ({}))); toast('Dieta limpiada.', { icon: '🗑️' }); } };
-  
+  const alimentosFiltrados = useMemo(() =>
+    alimentos.filter(a =>
+      a.nombre.toLowerCase().includes(busqueda.toLowerCase()) &&
+      (!filtroCategoria || a.categoria === filtroCategoria)
+    ), [alimentos, busqueda, filtroCategoria]);
+
+  const totalesNutricionales = useMemo(() => {
+    const totales = { cantidadUsada: 0, hc: 0, proteina: 0, grasa: 0, calorias: 0, na: 0, k: 0, p: 0, ca: 0, fe: 0, colesterol: 0, purinas: 0, fibra: 0, agua: 0 };
+    dietaActual.forEach(item => {
+      const factor = item.cantidadUsada > 0 && item.alimento.cantidad > 0 ? item.cantidadUsada / item.alimento.cantidad : 0;
+      Object.keys(totales).forEach(key => {
+        if (key === 'cantidadUsada') totales.cantidadUsada += parseFloat(item.cantidadUsada) || 0;
+        else totales[key] += (item.alimento[key] || 0) * factor;
+      });
+    });
+    return totales;
+  }, [dietaActual]);
+
+  const agregarAlimentoADieta = (alimento) => {
+    setDietaActual(prev => [...prev, { id: Date.now(), alimento, cantidadUsada: alimento.cantidad }]);
+    toast.success(`${alimento.nombre} agregado.`);
+  };
+
+  const eliminarDeDieta = (id) => {
+    setDietaActual(prev => prev.filter(item => item.id !== id));
+    if (setDistribucion) {
+      setDistribucion(prev => {
+        const n = { ...prev };
+        for (const day in n) { if (n[day][id]) delete n[day][id]; }
+        return n;
+      });
+    }
+    toast.error('Alimento eliminado.');
+  };
+
+  // ✅ Fix input ceros — valor como string para permitir campo vacío
+  const actualizarCantidad = (id, valor) => {
+    setDietaActual(dietaActual.map(item =>
+      item.id === id ? { ...item, cantidadUsada: valor } : item
+    ));
+  };
+
+  const limpiarDieta = () => {
+    if (window.confirm('¿Estás seguro de que quieres limpiar toda la dieta actual?')) {
+      setDietaActual([]);
+      if (setDistribucion) setDistribucion({});
+      toast('Dieta limpiada.', { icon: '🗑️' });
+    }
+  };
+
   const handleNuevoAlimentoChange = (e) => {
     const { name, value } = e.target;
     const isNumber = typeof estadoInicialFormulario[name] === 'number';
-    setNuevoAlimento(prev => ({ ...prev, [name]: isNumber ? parseFloat(value) || 0 : value }));
+    setNuevoAlimento(prev => ({ ...prev, [name]: isNumber ? (value === '' ? '' : parseFloat(value) || 0) : value }));
   };
-  
+
   const handleGuardarNuevoAlimento = () => {
-    if (!nuevoAlimento.nombre || !nuevoAlimento.categoria) { toast.error("Nombre y categoría son obligatorios."); return; }
+    if (!nuevoAlimento.nombre || !nuevoAlimento.categoria) {
+      toast.error('Nombre y categoría son obligatorios.');
+      return;
+    }
     const caloriasCalculadas = (nuevoAlimento.hc * 4) + (nuevoAlimento.proteina * 4) + (nuevoAlimento.grasa * 9);
-    const alimentoFinal = { ...nuevoAlimento, id: Date.now(), calorias: caloriasCalculadas };
-    setAlimentos(prev => [...prev, alimentoFinal]);
+
+    if (alimentoEditando !== null) {
+      // ✅ Editar alimento existente
+      setAlimentos(prev => prev.map((a, i) =>
+        i === alimentoEditando ? { ...nuevoAlimento, calorias: caloriasCalculadas } : a
+      ));
+      toast.success('Alimento actualizado.');
+      setAlimentoEditando(null);
+    } else {
+      // Agregar nuevo
+      setAlimentos(prev => [...prev, { ...nuevoAlimento, id: Date.now(), calorias: caloriasCalculadas }]);
+      toast.success('Nuevo alimento guardado.');
+    }
     setNuevoAlimento(estadoInicialFormulario);
     setMostrarFormulario(false);
-    toast.success("Nuevo alimento guardado.");
   };
 
-  // CAMBIO 2: Crear una función "memorizada" con useCallback.
-  // Esta función ahora tendrá una referencia estable y no se creará de nuevo en cada render,
-  // rompiendo el bucle infinito.
-  const handlePlanUpdate = useCallback((nuevoPlan) => {
-    if (onPlanIntercambioUpdate) {
-      onPlanIntercambioUpdate(nuevoPlan);
-    }
-  }, [onPlanIntercambioUpdate]); // La dependencia es la función que viene del padre.
+  // ✅ Abrir formulario para editar alimento existente
+  const handleEditarAlimento = (alimento, index) => {
+    setNuevoAlimento({ ...alimento });
+    setAlimentoEditando(index);
+    setMostrarFormulario(true);
+  };
 
-  const tableHeaders = ["Alimento", "Gramos", "Kcal", "HC", "Proteina", "Grasa", "Agua", "Na", "K", "P", "Ca", "Fe", "Col.", "Purinas", "Fibra", "Accion"];
+  // ✅ Drag and drop handlers
+  const handleDragStart = (index) => { dragItem.current = index; };
+  const handleDragEnter = (index) => { dragOverItem.current = index; };
+  const handleDragEnd = () => {
+    if (dragItem.current === null || dragOverItem.current === null) return;
+    const newDieta = [...dietaActual];
+    const draggedItem = newDieta.splice(dragItem.current, 1)[0];
+    newDieta.splice(dragOverItem.current, 0, draggedItem);
+    setDietaActual(newDieta);
+    dragItem.current = null;
+    dragOverItem.current = null;
+  };
+
+  const handlePlanUpdate = useCallback((nuevoPlan) => {
+    if (onPlanIntercambioUpdate) onPlanIntercambioUpdate(nuevoPlan);
+  }, [onPlanIntercambioUpdate]);
+
+  const tableHeaders = ["", "Alimento", "Gramos", "Kcal", "HC", "Proteina", "Grasa", "Agua", "Na", "K", "P", "Ca", "Fe", "Col.", "Purinas", "Fibra", "Accion"];
 
   const SubTabButton = ({ tabId, label, icon }) => (
-    <button onClick={() => setActiveSubTab(tabId)} className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-colors ${activeSubTab === tabId ? 'bg-green-600 text-white' : 'text-gray-600 hover:bg-gray-200'}`}>
+    <button
+      onClick={() => setActiveSubTab(tabId)}
+      className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-colors ${activeSubTab === tabId ? 'bg-green-600 text-white' : 'text-gray-600 hover:bg-gray-200'}`}
+    >
       {icon} {label}
     </button>
   );
@@ -242,134 +313,242 @@ const CalculadoraTab = ({ dietaActual, setDietaActual, setDistribucion, patientD
         <SubTabButton tabId="desarrollada" label="Desarrollada" icon={<BookOpen size={16} />} />
       </div>
 
-      <div style={{ display: activeSubTab === 'intercambio' ? 'block' : 'none' }}>
-        {/* CAMBIO 3: Pasar la nueva función memorizada (handlePlanUpdate) al componente hijo. */}
-        <IntercambioSubTab 
-            patientData={patientData} 
-            dietGoals={dietGoals} 
-            onPlanUpdate={handlePlanUpdate} 
-        />
-      </div>
+      {activeSubTab === 'intercambio' && (
+        <IntercambioSubTab patientData={patientData} dietGoals={dietGoals} onPlanUpdate={handlePlanUpdate} />
+      )}
 
-      <div style={{ display: activeSubTab === 'desarrollada' ? 'block' : 'none' }}>
-        {mostrarFormulario && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4">
-            <div className="bg-white rounded-lg shadow-2xl p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-xl font-semibold">Agregar Nuevo Alimento</h3>
-                <button onClick={() => setMostrarFormulario(false)}><X /></button>
-              </div>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {Object.keys(estadoInicialFormulario).map(key => (
-                  <div key={key}>
-                    <label className="block text-sm font-medium capitalize">{key}</label>
-                    {key === 'origen' ? (
-                      <select name={key} value={nuevoAlimento[key]} onChange={handleNuevoAlimentoChange} className="mt-1 block w-full px-3 py-2 border rounded-md">
-                        <option value="vegetal">Vegetal</option>
-                        <option value="animal">Animal</option>
-                      </select>
-                    ) : (
-                      <input type={typeof estadoInicialFormulario[key] === 'number' ? 'number' : 'text'} name={key} value={nuevoAlimento[key]} onChange={handleNuevoAlimentoChange} className="mt-1 block w-full px-3 py-2 border rounded-md" />
-                    )}
-                  </div>
-                ))}
-              </div>
-              <div className="mt-6 flex justify-end gap-4">
-                <button onClick={() => setMostrarFormulario(false)} className="bg-gray-200 px-4 py-2 rounded-lg">Cancelar</button>
-                <button onClick={handleGuardarNuevoAlimento} className="bg-green-600 text-white px-4 py-2 rounded-lg">Guardar</button>
-              </div>
-            </div>
-          </div>
-        )}
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-          <div className="bg-white rounded-lg shadow-lg p-6 flex flex-col xl:col-span-1">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold">Base de Alimentos</h2>
-              <button onClick={() => setMostrarFormulario(true)} className="bg-green-600 text-white px-3 py-1 rounded-lg flex items-center gap-2 text-sm"><Plus size={16} />Nuevo</button>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-1 gap-4 mb-4">
-              <input type="text" placeholder="Buscar..." value={busqueda} onChange={e => setBusqueda(e.target.value)} className="px-3 py-2 border rounded-lg" />
-              <select value={filtroCategoria} onChange={e => setFiltroCategoria(e.target.value)} className="px-3 py-2 border rounded-lg">
-                <option value="">Todas</option>
-                {categorias.map(c => <option key={c} value={c}>{c}</option>)}
-              </select>
-            </div>
-            <div className="flex-grow h-96 xl:h-[60vh] overflow-y-auto border rounded-lg">
-              {alimentosFiltrados.map((a, i) => (
-                <div key={`${a.nombre}-${i}`} className="p-3 border-b flex justify-between items-center">
-                  <div className="pr-2">
-                    <h3 className="font-medium">{a.nombre}</h3>
-                    <p className="text-sm text-gray-600">{a.medida} ({a.cantidad}{a.unidad})</p>
-                  </div>
-                  <button onClick={() => agregarAlimentoADieta(a)} className="bg-blue-600 text-white p-2 rounded-md flex-shrink-0"><Plus size={16} /></button>
+      {activeSubTab === 'desarrollada' && (
+        <div>
+          {/* ✅ Modal agregar/editar alimento */}
+          {mostrarFormulario && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4">
+              <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+                <div className="flex justify-between items-center mb-6">
+                  <h3 className="text-xl font-bold text-gray-800">
+                    {alimentoEditando !== null ? 'Editar Alimento' : 'Agregar Nuevo Alimento'}
+                  </h3>
+                  <button onClick={() => { setMostrarFormulario(false); setAlimentoEditando(null); setNuevoAlimento(estadoInicialFormulario); }}>
+                    <X className="text-gray-500 hover:text-gray-800" />
+                  </button>
                 </div>
-              ))}
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {Object.keys(estadoInicialFormulario).map(key => (
+                    <div key={key}>
+                      <label className="block text-sm font-medium capitalize text-gray-700">{key}</label>
+                      {key === 'origen' ? (
+                        <select name={key} value={nuevoAlimento[key]} onChange={handleNuevoAlimentoChange} className="mt-1 block w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-green-500">
+                          <option value="vegetal">Vegetal</option>
+                          <option value="animal">Animal</option>
+                        </select>
+                      ) : (
+                        <input
+                          type={typeof estadoInicialFormulario[key] === 'number' ? 'number' : 'text'}
+                          name={key}
+                          value={nuevoAlimento[key]}
+                          onChange={handleNuevoAlimentoChange}
+                          // ✅ Fix ceros: si el valor es 0 mostrar vacío, onFocus limpiar
+                          onFocus={(e) => { if (e.target.value === '0') e.target.value = ''; }}
+                          onBlur={(e) => { if (e.target.value === '') { setNuevoAlimento(prev => ({ ...prev, [key]: 0 })); } }}
+                          className="mt-1 block w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-green-500"
+                        />
+                      )}
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-6 flex justify-end gap-3">
+                  <button
+                    onClick={() => { setMostrarFormulario(false); setAlimentoEditando(null); setNuevoAlimento(estadoInicialFormulario); }}
+                    className="px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200"
+                  >
+                    Cancelar
+                  </button>
+                  <button onClick={handleGuardarNuevoAlimento} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                    {alimentoEditando !== null ? 'Actualizar' : 'Guardar'}
+                  </button>
+                </div>
+              </div>
             </div>
-          </div>
-          <div className="bg-white rounded-lg shadow-lg p-6 flex flex-col xl:col-span-2">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold">Plan General de la Dieta</h2>
-              <button onClick={limpiarDieta} disabled={!dietaActual.length} className="bg-red-600 text-white px-4 py-2 rounded-lg disabled:opacity-50 flex items-center gap-2"><Trash2 size={16} />Limpiar</button>
+          )}
+
+          <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+            {/* Base de alimentos */}
+            <div className="bg-white rounded-xl shadow-lg p-6 flex flex-col xl:col-span-1">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold text-gray-800">Base de Alimentos</h2>
+                <button
+                  onClick={() => { setNuevoAlimento(estadoInicialFormulario); setAlimentoEditando(null); setMostrarFormulario(true); }}
+                  className="bg-green-600 text-white px-3 py-1 rounded-lg flex items-center gap-2 text-sm hover:bg-green-700"
+                >
+                  <Plus size={16} />Nuevo
+                </button>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-1 gap-3 mb-4">
+                <input
+                  type="text"
+                  placeholder="Buscar..."
+                  value={busqueda}
+                  onChange={e => setBusqueda(e.target.value)}
+                  className="px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none"
+                />
+                <select
+                  value={filtroCategoria}
+                  onChange={e => setFiltroCategoria(e.target.value)}
+                  className="px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none"
+                >
+                  <option value="">Todas las categorias</option>
+                  {categorias.map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </div>
+              <div className="flex-grow h-96 xl:h-[60vh] overflow-y-auto border rounded-lg divide-y">
+                {alimentosFiltrados.map((a, i) => {
+                  const indexReal = alimentos.findIndex(al => al === a);
+                  return (
+                    <div key={`${a.nombre}-${i}`} className="p-3 flex justify-between items-center hover:bg-gray-50 transition-colors">
+                      <div className="pr-2 flex-1 min-w-0">
+                        <h3 className="font-medium text-gray-800 truncate">{a.nombre}</h3>
+                        <p className="text-xs text-gray-500">{a.medida} ({a.cantidad}{a.unidad})</p>
+                      </div>
+                      <div className="flex gap-1 flex-shrink-0">
+                        {/* ✅ Botón editar alimento */}
+                        <button
+                          onClick={() => handleEditarAlimento(a, indexReal)}
+                          className="text-gray-400 hover:text-blue-600 p-1"
+                          title="Editar alimento"
+                        >
+                          <Edit2 size={14} />
+                        </button>
+                        <button
+                          onClick={() => agregarAlimentoADieta(a)}
+                          className="bg-blue-600 text-white p-2 rounded-md hover:bg-blue-700"
+                        >
+                          <Plus size={16} />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
-            <div className="overflow-x-auto">
-              {dietaActual.length === 0 ? (
-                <div className="h-64 flex items-center justify-center text-gray-500 border rounded-lg">Agrega alimentos desde la Base de Alimentos</div>
-              ) : (
-                <table className="w-full text-sm text-left table-auto">
-                  <thead className="text-xs text-gray-700 uppercase bg-gray-100">
-                    <tr>{tableHeaders.map(h => <th key={h} className="px-2 py-2 whitespace-nowrap">{h}</th>)}</tr>
-                  </thead>
-                  <tbody>
-                    {dietaActual.map(item => {
-                      const factor = item.cantidadUsada > 0 && item.alimento.cantidad > 0 ? item.cantidadUsada / item.alimento.cantidad : 0;
-                      return (
-                        <tr key={item.id} className="bg-white border-b">
-                          <td className="px-2 py-2 font-medium whitespace-nowrap">{item.alimento.nombre}</td>
-                          <td className="px-2 py-2"><input type="number" value={item.cantidadUsada} onChange={e => actualizarCantidad(item.id, e.target.value)} className="w-20 px-2 py-1 border rounded" /></td>
-                          <td className="px-2 py-2 font-bold text-green-600">{(item.alimento.calorias * factor).toFixed(1)}</td>
-                          <td className="px-2 py-2">{(item.alimento.hc * factor).toFixed(1)}</td>
-                          <td className="px-2 py-2">{(item.alimento.proteina * factor).toFixed(1)}</td>
-                          <td className="px-2 py-2">{(item.alimento.grasa * factor).toFixed(1)}</td>
-                          <td className="px-2 py-2">{(item.alimento.agua * factor).toFixed(1)}</td>
-                          <td className="px-2 py-2">{(item.alimento.na * factor).toFixed(1)}</td>
-                          <td className="px-2 py-2">{(item.alimento.k * factor).toFixed(1)}</td>
-                          <td className="px-2 py-2">{(item.alimento.p * factor).toFixed(1)}</td>
-                          <td className="px-2 py-2">{(item.alimento.ca * factor).toFixed(1)}</td>
-                          <td className="px-2 py-2">{(item.alimento.fe * factor).toFixed(1)}</td>
-                          <td className="px-2 py-2">{(item.alimento.colesterol * factor).toFixed(1)}</td>
-                          <td className="px-2 py-2">{(item.alimento.purinas * factor).toFixed(1)}</td>
-                          <td className="px-2 py-2">{(item.alimento.fibra * factor).toFixed(1)}</td>
-                          <td className="px-2 py-2"><button onClick={() => eliminarDeDieta(item.id)} className="text-red-500"><Trash2 size={18} /></button></td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                  <tfoot className="font-bold bg-green-50">
-                    <tr>
-                      <td className="px-2 py-2">TOTALES</td>
-                      <td className="px-2 py-2">{totalesNutricionales.cantidadUsada.toFixed(1)}</td>
-                      <td className="px-2 py-2">{totalesNutricionales.calorias.toFixed(1)}</td>
-                      <td className="px-2 py-2">{totalesNutricionales.hc.toFixed(1)}</td>
-                      <td className="px-2 py-2">{totalesNutricionales.proteina.toFixed(1)}</td>
-                      <td className="px-2 py-2">{totalesNutricionales.grasa.toFixed(1)}</td>
-                      <td className="px-2 py-2">{totalesNutricionales.agua.toFixed(1)}</td>
-                      <td className="px-2 py-2">{totalesNutricionales.na.toFixed(1)}</td>
-                      <td className="px-2 py-2">{totalesNutricionales.k.toFixed(1)}</td>
-                      <td className="px-2 py-2">{totalesNutricionales.p.toFixed(1)}</td>
-                      <td className="px-2 py-2">{totalesNutricionales.ca.toFixed(1)}</td>
-                      <td className="px-2 py-2">{totalesNutricionales.fe.toFixed(1)}</td>
-                      <td className="px-2 py-2">{totalesNutricionales.colesterol.toFixed(1)}</td>
-                      <td className="px-2 py-2">{totalesNutricionales.purinas.toFixed(1)}</td>
-                      <td className="px-2 py-2">{totalesNutricionales.fibra.toFixed(1)}</td>
-                      <td></td>
-                    </tr>
-                  </tfoot>
-                </table>
-              )}
+
+            {/* Plan de la dieta */}
+            <div className="bg-white rounded-xl shadow-lg p-6 flex flex-col xl:col-span-2">
+              <div className="flex justify-between items-center mb-4">
+                <div>
+                  <h2 className="text-xl font-semibold text-gray-800">Plan General de la Dieta</h2>
+                  {dietaActual.length > 0 && (
+                    <p className="text-xs text-gray-400 mt-1 flex items-center gap-1">
+                      <GripVertical size={12} /> Arrastra las filas para reordenar
+                    </p>
+                  )}
+                </div>
+                <button
+                  onClick={limpiarDieta}
+                  disabled={!dietaActual.length}
+                  className="bg-red-600 text-white px-4 py-2 rounded-lg disabled:opacity-50 flex items-center gap-2 hover:bg-red-700"
+                >
+                  <Trash2 size={16} />Limpiar
+                </button>
+              </div>
+
+              <div className="overflow-x-auto">
+                {dietaActual.length === 0 ? (
+                  <div className="h-64 flex flex-col items-center justify-center text-gray-400 border-2 border-dashed rounded-xl">
+                    <Plus size={40} className="mb-2 opacity-30" />
+                    <p>Agrega alimentos desde la Base de Alimentos</p>
+                  </div>
+                ) : (
+                  <table className="w-full text-sm text-left">
+                    {/* ✅ Tabla mejorada con diseño más profesional */}
+                    <thead>
+                      <tr className="bg-gray-800 text-white text-xs uppercase">
+                        {tableHeaders.map(h => (
+                          <th key={h} className="px-2 py-3 whitespace-nowrap font-semibold first:rounded-tl-lg last:rounded-tr-lg">
+                            {h}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {dietaActual.map((item, index) => {
+                        const cantidadNum = parseFloat(item.cantidadUsada) || 0;
+                        const factor = cantidadNum > 0 && item.alimento.cantidad > 0 ? cantidadNum / item.alimento.cantidad : 0;
+                        return (
+                          <tr
+                            key={item.id}
+                            draggable
+                            onDragStart={() => handleDragStart(index)}
+                            onDragEnter={() => handleDragEnter(index)}
+                            onDragEnd={handleDragEnd}
+                            onDragOver={e => e.preventDefault()}
+                            className={`border-b transition-colors cursor-grab active:cursor-grabbing hover:bg-green-50 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}
+                          >
+                            {/* ✅ Ícono de drag */}
+                            <td className="px-2 py-2 text-gray-300 hover:text-gray-500">
+                              <GripVertical size={16} />
+                            </td>
+                            <td className="px-2 py-2 font-medium text-gray-800 whitespace-nowrap">{item.alimento.nombre}</td>
+                            <td className="px-2 py-2">
+                              {/* ✅ Fix ceros en input */}
+                              <input
+                                type="number"
+                                value={item.cantidadUsada === 0 ? '' : item.cantidadUsada}
+                                onChange={e => actualizarCantidad(item.id, e.target.value === '' ? 0 : parseFloat(e.target.value) || 0)}
+                                onFocus={e => { if (e.target.value === '0') e.target.value = ''; }}
+                                onBlur={e => { if (e.target.value === '') actualizarCantidad(item.id, 0); }}
+                                className="w-20 px-2 py-1 border rounded-md focus:ring-2 focus:ring-green-400 focus:outline-none"
+                                min="0"
+                              />
+                            </td>
+                            <td className="px-2 py-2 font-bold text-green-600">{(item.alimento.calorias * factor).toFixed(1)}</td>
+                            <td className="px-2 py-2">{(item.alimento.hc * factor).toFixed(1)}</td>
+                            <td className="px-2 py-2">{(item.alimento.proteina * factor).toFixed(1)}</td>
+                            <td className="px-2 py-2">{(item.alimento.grasa * factor).toFixed(1)}</td>
+                            <td className="px-2 py-2">{(item.alimento.agua * factor).toFixed(1)}</td>
+                            <td className="px-2 py-2">{(item.alimento.na * factor).toFixed(1)}</td>
+                            <td className="px-2 py-2">{(item.alimento.k * factor).toFixed(1)}</td>
+                            <td className="px-2 py-2">{(item.alimento.p * factor).toFixed(1)}</td>
+                            <td className="px-2 py-2">{(item.alimento.ca * factor).toFixed(1)}</td>
+                            <td className="px-2 py-2">{(item.alimento.fe * factor).toFixed(1)}</td>
+                            <td className="px-2 py-2">{(item.alimento.colesterol * factor).toFixed(1)}</td>
+                            <td className="px-2 py-2">{(item.alimento.purinas * factor).toFixed(1)}</td>
+                            <td className="px-2 py-2">{(item.alimento.fibra * factor).toFixed(1)}</td>
+                            <td className="px-2 py-2">
+                              <button onClick={() => eliminarDeDieta(item.id)} className="text-red-400 hover:text-red-600 transition-colors">
+                                <Trash2 size={18} />
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                    <tfoot>
+                      <tr className="bg-green-700 text-white font-bold text-sm">
+                        <td className="px-2 py-3 rounded-bl-lg"></td>
+                        <td className="px-2 py-3">TOTALES</td>
+                        <td className="px-2 py-3">{totalesNutricionales.cantidadUsada.toFixed(1)}</td>
+                        <td className="px-2 py-3">{totalesNutricionales.calorias.toFixed(1)}</td>
+                        <td className="px-2 py-3">{totalesNutricionales.hc.toFixed(1)}</td>
+                        <td className="px-2 py-3">{totalesNutricionales.proteina.toFixed(1)}</td>
+                        <td className="px-2 py-3">{totalesNutricionales.grasa.toFixed(1)}</td>
+                        <td className="px-2 py-3">{totalesNutricionales.agua.toFixed(1)}</td>
+                        <td className="px-2 py-3">{totalesNutricionales.na.toFixed(1)}</td>
+                        <td className="px-2 py-3">{totalesNutricionales.k.toFixed(1)}</td>
+                        <td className="px-2 py-3">{totalesNutricionales.p.toFixed(1)}</td>
+                        <td className="px-2 py-3">{totalesNutricionales.ca.toFixed(1)}</td>
+                        <td className="px-2 py-3">{totalesNutricionales.fe.toFixed(1)}</td>
+                        <td className="px-2 py-3">{totalesNutricionales.colesterol.toFixed(1)}</td>
+                        <td className="px-2 py-3">{totalesNutricionales.purinas.toFixed(1)}</td>
+                        <td className="px-2 py-3 rounded-br-lg">{totalesNutricionales.fibra.toFixed(1)}</td>
+                        <td></td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                )}
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

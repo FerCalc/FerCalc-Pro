@@ -404,14 +404,26 @@ const DatosPacienteTab = ({ patientData, setPatientData, dietGoals, setDietGoals
           </div>
 
           {/* PAVB */}
-          <div className="border-t pt-4">
-            <h3 className="text-lg font-semibold mb-1 flex items-center gap-2">
-              <Target size={20} className="text-blue-500"/>PAVB
-            </h3>
-            <p className="text-sm text-gray-500">Progreso de Proteínas de Alto Valor Biológico.</p>
-            <ProgressBar label="PAVB" currentValue={pavbPercentage} goalValue={dietGoals.pavbPercentage} unit="%"/>
-          </div>
-
+<div className="border-t pt-4">
+  <h3 className="text-lg font-semibold mb-1 flex items-center gap-2">
+    <Target size={20} className="text-blue-500"/>PAVB
+  </h3>
+  <p className="text-sm text-gray-500">Proteinas de Alto Valor Biologico.</p>
+  {/* ✅ Gramos de PAVB agregados */}
+  <div className="flex items-end gap-4 mt-1 mb-2">
+    <div>
+      <p className="text-xs text-gray-500">Consumido</p>
+      <p className="text-2xl font-bold text-blue-600">
+        {(totales.proteina > 0 ? (pavbPercentage / 100) * totales.proteina : 0).toFixed(1)} g
+      </p>
+    </div>
+    <div>
+      <p className="text-xs text-gray-500">Objetivo %</p>
+      <p className="text-2xl font-bold text-blue-400">{dietGoals.pavbPercentage}%</p>
+    </div>
+  </div>
+  <ProgressBar label="PAVB" currentValue={pavbPercentage} goalValue={dietGoals.pavbPercentage} unit="%"/>
+</div>
           {/* ✅ AGS — con % y gramos */}
           <div className="border-t pt-4">
             <h3 className="text-lg font-semibold mb-1 flex items-center gap-2">
