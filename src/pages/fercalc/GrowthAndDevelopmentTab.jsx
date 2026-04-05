@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { ComposedChart, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Scatter, Area, Legend } from 'recharts';
-import { AlertTriangle, CheckCircle, TrendingDown, Baby, Ruler, Weight, Info } from 'lucide-react';
+import { AlertTriangle, CheckCircle, TrendingDown, Baby, Ruler, Weight, Info, Activity } from 'lucide-react';
 
 // --- DATOS OMS (Z-scores) ---
 const whoData = {
@@ -15,32 +15,27 @@ const whoData = {
     girl: {
         wfa: [ { month: 0, neg3: 2.0, neg2: 2.4, neg1: 2.8, median: 3.2, pos1: 3.7, pos2: 4.2, pos3: 4.8 }, { month: 2, neg3: 3.4, neg2: 3.9, neg1: 4.5, median: 5.1, pos1: 5.8, pos2: 6.6, pos3: 7.5 }, { month: 6, neg3: 5.1, neg2: 5.7, neg1: 6.4, median: 7.3, pos1: 8.2, pos2: 9.3, pos3: 10.6 }, { month: 12, neg3: 6.5, neg2: 7.1, neg1: 7.9, median: 8.9, pos1: 10.0, pos2: 11.4, pos3: 12.9 }, { month: 18, neg3: 7.4, neg2: 8.2, neg1: 9.1, median: 10.2, pos1: 11.6, pos2: 13.2, pos3: 14.8 }, { month: 24, neg3: 8.1, neg2: 8.9, neg1: 10.0, median: 11.5, pos1: 13.0, pos2: 14.8, pos3: 16.9 }, { month: 36, neg3: 9.4, neg2: 10.5, neg1: 11.8, median: 13.9, pos1: 15.4, pos2: 17.2, pos3: 19.2 }, { month: 48, neg3: 10.6, neg2: 11.8, neg1: 13.2, median: 15.8, pos1: 17.5, pos2: 19.5, pos3: 21.8 }, { month: 60, neg3: 11.8, neg2: 13.1, neg1: 14.6, median: 17.7, pos1: 19.7, pos2: 22.1, pos3: 24.8 } ],
         lfa: [ { month: 0, neg3: 43.6, neg2: 45.4, neg1: 47.3, median: 49.1, pos1: 51.0, pos2: 52.9, pos3: 54.7 }, { month: 2, neg3: 51.2, neg2: 53.0, neg1: 55.0, median: 57.1, pos1: 59.1, pos2: 61.1, pos3: 63.2 }, { month: 6, neg3: 59.5, neg2: 61.5, neg1: 63.5, median: 65.7, pos1: 67.9, pos2: 70.0, pos3: 72.2 }, { month: 12, neg3: 67.1, neg2: 68.9, neg1: 71.4, median: 74.0, pos1: 76.6, pos2: 79.2, pos3: 81.7 }, { month: 18, neg3: 72.8, neg2: 75.0, neg1: 77.5, median: 80.7, pos1: 83.2, pos2: 85.7, pos3: 88.0 }, { month: 24, neg3: 77.2, neg2: 79.1, neg1: 81.7, median: 85.5, pos1: 88.0, pos2: 90.7, pos3: 93.2 }, { month: 36, neg3: 83.9, neg2: 87.4, neg1: 90.7, median: 94.1, pos1: 97.6, pos2: 101.0, pos3: 104.5 }, { month: 48, neg3: 89.8, neg2: 93.5, neg1: 96.8, median: 101.6, pos1: 106.4, pos2: 111.2, pos3: 116.0 }, { month: 60, neg3: 95.2, neg2: 99.0, neg1: 102.7, median: 108.0, pos1: 113.3, pos2: 118.6, pos3: 124.0 } ],
-        hcfa: [ { month: 0, neg3: 30.9, neg2: 31.7, neg1: 33.0, median: 34.2, pos1: 35.5, pos2: 36.6, pos3: 37.6 }, { month: 2, neg3: 35.1, neg2: 36.0, neg1: 37.3, median: 38.7, pos1: 40.0, pos2: 41.2, pos3: 42.2 }, { month: 6, neg3: 39.2, neg2: 40.2, neg1: 41.6, median: 43.0, pos1: 44.4, pos2: 45.8, pos3: 46.8 }, { month: 12, neg3: 41.7, neg2: 42.8, neg1: 44.2, median: 45.7, pos1: 47.1, pos2: 48.5, pos3: 49.5 }, { month: 24, neg3: 44.5, neg2: 45.5, neg1: 46.9, median: 48.3, pos1: 49.7, pos2: 51.1, pos3: 52.2 }, { month: 36, neg3: 45.8, neg2: 46.9, neg1: 48.3, median: 49.8, pos1: 51.2, pos2: 52.6, pos3: 53.7 }, { month: 48, neg3: 46.5, neg2: 47.6, neg1: 49.0, median: 50.5, pos1: 52.0, pos2: 53.4, pos3: 54.5 }, { month: 60, neg3: 47.0, neg2: 48.1, neg1: 49.5, median: 51.0, pos1: 52.5, pos2: 53.9, pos3: 55.0 } ],
+        hcfa: [ { month: 0, neg3: 30.9, neg2: 31.7, neg1: 33.0, median: 34.2, pos1: 35.5, pos2: 36.6, pos3: 37.6 }, { month: 2, neg3: 35.1, neg2: 36.0, neg1: 37.3, median: 38.7, pos1: 40.0, pos2: 41.2, pos3: 42.2 }, { month: 6, neg3: 39.2, neg2: 40.2, neg1: 41.6, median: 43.0, pos1: 44.4, pos2: 45.8, pos3: 46.8 }, { month: 12, neg3: 41.7, neg2: 42.8, neg1: 44.2, median: 45.7, pos1: 47.1, pos2: 48.5, pos3: 49.5 }, { month: 24, neg3: 44.5, neg2: 45.5, neg1: 46.9, median: 48.3, pos1: 49.7, pos2: 51.1, pos3: 52.2 }, { month: 36, neg3: 45.8, neg2: 46.9, neg1: 48.3, median: 50.7, pos1: 52.1, pos2: 53.5, pos3: 54.6 }, { month: 48, neg3: 47.5, neg2: 48.6, neg1: 50.0, median: 51.5, pos1: 53.0, pos2: 54.4, pos3: 55.5 }, { month: 60, neg3: 48.0, neg2: 49.1, neg1: 50.5, median: 52.0, pos1: 53.5, pos2: 54.9, pos3: 56.0 } ],
         wfh: [ { height: 65, neg3: 5.6, neg2: 6.1, neg1: 6.6, median: 7.1, pos1: 7.7, pos2: 8.4, pos3: 9.2 }, { height: 70, neg3: 6.5, neg2: 7.0, neg1: 7.5, median: 8.2, pos1: 8.9, pos2: 9.7, pos3: 10.6 }, { height: 75, neg3: 7.4, neg2: 8.0, neg1: 8.6, median: 9.3, pos1: 10.1, pos2: 11.0, pos3: 12.0 }, { height: 80, neg3: 8.3, neg2: 9.0, neg1: 9.7, median: 10.5, pos1: 11.4, pos2: 12.4, pos3: 13.6 }, { height: 85, neg3: 9.5, neg2: 10.2, neg1: 11.0, median: 12.0, pos1: 13.0, pos2: 14.1, pos3: 15.4 }, { height: 90, neg3: 10.3, neg2: 11.1, neg1: 11.9, median: 12.9, pos1: 14.1, pos2: 15.3, pos3: 16.7 }, { height: 95, neg3: 11.5, neg2: 12.3, neg1: 13.3, median: 14.4, pos1: 15.7, pos2: 17.1, pos3: 18.7 }, { height: 100, neg3: 12.5, neg2: 13.5, neg1: 14.5, median: 15.8, pos1: 17.2, pos2: 18.8, pos3: 20.6 }, { height: 105, neg3: 13.7, neg2: 14.8, neg1: 16.0, median: 17.5, pos1: 19.1, pos2: 21.0, pos3: 23.1 }, { height: 110, neg3: 14.9, neg2: 16.1, neg1: 17.5, median: 19.2, pos1: 21.0, pos2: 23.1, pos3: 25.5 }, { height: 115, neg3: 16.2, neg2: 17.6, neg1: 19.2, median: 21.0, pos1: 23.1, pos2: 25.5, pos3: 28.1 }, { height: 120, neg3: 17.5, neg2: 19.1, neg1: 20.8, median: 22.8, pos1: 25.1, pos2: 27.7, pos3: 30.7 } ],
         lfa_5_19: [ { month: 60, neg3: 98.1, neg2: 102.7, neg1: 107.3, median: 112.0, pos1: 116.6, pos2: 121.2, pos3: 125.8 }, { month: 120, neg3: 124.5, neg2: 130.1, neg1: 135.7, median: 141.3, pos1: 146.9, pos2: 152.5, pos3: 158.1 }, { month: 180, neg3: 147.2, neg2: 152.6, neg1: 158.0, median: 163.4, pos1: 168.8, pos2: 174.2, pos3: 179.6 }, { month: 228, neg3: 148.0, neg2: 153.5, neg1: 159.0, median: 164.5, pos1: 170.0, pos2: 175.5, pos3: 181.0 } ],
         bmifa_5_19: [ { month: 60, neg3: 12.3, neg2: 13.0, neg1: 13.8, median: 15.0, pos1: 16.4, pos2: 18.0, pos3: 20.0 }, { month: 120, neg3: 13.8, neg2: 14.8, neg1: 16.0, median: 17.7, pos1: 20.0, pos2: 22.5, pos3: 25.5 }, { month: 180, neg3: 15.8, neg2: 17.2, neg1: 18.8, median: 21.0, pos1: 23.8, pos2: 27.0, pos3: 30.8 }, { month: 228, neg3: 16.5, neg2: 18.0, neg1: 19.7, median: 22.2, pos1: 25.2, pos2: 28.8, pos3: 33.0 } ],
     }
 };
 
-// --- CONFIGURACIÓN ---
-// ▼▼▼ ¡REEMPLAZA ESTE BLOQUE CON EL CÓDIGO DEL SIMULADOR! ▼▼▼
+// --- COLORES VIVOS ---
 const legendColorCodes = {
-    red: '#EF4444',
-    orange: '#F97316',
-    yellow: '#EAB308',
-    green: '#22C55E'
+    red:    '#EF1C1C',   // Rojo intenso
+    orange: '#EA6000',   // Naranja intenso y vivo
+    yellow: '#FFCC00',   // Amarillo brillante y saturado
+    green:  '#16A34A',   // Verde brillante
 };
 
-const zoneColors = {
-    red:    legendColorCodes.red,
-    orange: legendColorCodes.orange,
-    yellow: legendColorCodes.yellow,
-    green:  legendColorCodes.green,
-};
-// ▲▲▲ ¡REEMPLAZA ESTE BLOQUE CON EL CÓDIGO DEL SIMULADOR! ▲▲▲
+const zoneColors = { ...legendColorCodes };
 
+// --- CONFIGURACIÓN DE GRÁFICOS ---
 const chartConfig = {
     pe: { key: 'pe', name: 'P/E', title: 'Peso para la Edad (0-2 años)', icon: Weight, unit: 'kg', dataKey: 'wfa', xAxisKey: 'month',
+        tooltipMeasurementLabel: 'Peso del paciente',
         diagnostics: (val, sds) => {
             if (val < sds.neg3) return { text: 'Desnutrición grave', color: 'red' };
             if (val < sds.neg2) return { text: 'Desnutrición moderada', color: 'orange' };
@@ -50,6 +45,7 @@ const chartConfig = {
         legendMap: { green: 'Adecuado', yellow: 'En riesgo de desnutrición', orange: 'Desnutrición moderada', red: 'Desnutrición grave' }
     },
     te: { key: 'te', name: 'T/E', title: 'Talla para la Edad', icon: Ruler, unit: 'cm', dataKey: 'lfa', xAxisKey: 'month',
+        tooltipMeasurementLabel: 'Talla del paciente',
         diagnostics: (val, sds) => {
             if (val < sds.neg3) return { text: 'Talla muy baja', color: 'red' };
             if (val < sds.neg2) return { text: 'Talla baja', color: 'orange' };
@@ -59,6 +55,7 @@ const chartConfig = {
         legendMap: { green: 'Talla adecuada', yellow: 'En riesgo de talla baja', orange: 'Talla baja', red: 'Talla muy baja' }
     },
     hc: { key: 'hc', name: 'C. Cefálica', title: 'Perímetro Cefálico (0-3 años)', icon: Baby, unit: 'cm', dataKey: 'hcfa', xAxisKey: 'month',
+        tooltipMeasurementLabel: 'Perímetro cefálico',
         diagnostics: (val, sds) => {
             if (val > sds.pos2) return { text: 'Macrocefalia', color: 'red' };
             if (val > sds.pos1) return { text: 'Riesgo de Macrocefalia', color: 'yellow' };
@@ -69,6 +66,7 @@ const chartConfig = {
         legendMap: { red: 'Microcefalia / Macrocefalia', yellow: 'Riesgo de Micro/Macrocefalia', green: 'Adecuado' }
     },
     pt: { key: 'pt', name: 'P/T', title: 'Peso para la Talla (2-5 años)', icon: Weight, unit: 'kg', dataKey: 'wfh', xAxisKey: 'height',
+        tooltipMeasurementLabel: 'Peso del paciente',
         diagnostics: (val, sds) => {
             if (val > sds.pos2) return { text: 'Obesidad', color: 'red' };
             if (val > sds.pos1) return { text: 'Sobrepeso', color: 'yellow' };
@@ -79,7 +77,8 @@ const chartConfig = {
         },
         legendMap: { red: 'Obesidad / Desnutrición grave', orange: 'Desnutrición moderada', yellow: 'Sobrepeso / Riesgo de desnutrición', green: 'Adecuado' }
     },
-    bmifa_5_19: { key: 'bmifa_5_19', name: 'IMC/E', title: 'IMC para la Edad (5-19 años)', icon: Weight, unit: 'IMC', dataKey: 'bmifa_5_19', xAxisKey: 'month',
+    bmifa_5_19: { key: 'bmifa_5_19', name: 'IMC/E', title: 'IMC para la Edad (5-19 años)', icon: Activity, unit: 'kg/m²', dataKey: 'bmifa_5_19', xAxisKey: 'month',
+        tooltipMeasurementLabel: 'IMC del paciente',
         diagnostics: (val, sds) => {
             if (val > sds.pos2) return { text: 'Obesidad', color: 'red' };
             if (val > sds.pos1) return { text: 'Sobrepeso', color: 'yellow' };
@@ -90,6 +89,7 @@ const chartConfig = {
         legendMap: { red: 'Obesidad / Desnutrición', yellow: 'Sobrepeso / Riesgo de desnutrición', green: 'Adecuado' }
     },
     lfa_5_19: { key: 'lfa_5_19', name: 'T/E', title: 'Talla para la Edad (5-19 años)', icon: Ruler, unit: 'cm', dataKey: 'lfa_5_19', xAxisKey: 'month',
+        tooltipMeasurementLabel: 'Talla del paciente',
         diagnostics: (val, sds) => {
             if (val < sds.neg3) return { text: 'Talla muy baja', color: 'red' };
             if (val < sds.neg2) return { text: 'Talla baja', color: 'orange' };
@@ -106,22 +106,52 @@ const formatAge = (totalMonths) => {
     if (totalMonths < 12) return `${totalMonths} meses`;
     const years = Math.floor(totalMonths / 12);
     const months = totalMonths % 12;
-    if (months === 0) return `${years} años`;
-    return `${years} años y ${months} meses`;
+    if (months === 0) return `${years} ${years === 1 ? 'año' : 'años'}`;
+    return `${years} ${years === 1 ? 'año' : 'años'} y ${months} ${months === 1 ? 'mes' : 'meses'}`;
 };
 
-const CustomLegend = (props) => {
-    const { legendMap } = props;
-    if (!legendMap) return null;
+// --- TOOLTIP PERSONALIZADO Y LIMPIO ---
+const CustomTooltip = ({ active, payload, label, config, ageInMonths, heightCm, weightKg, headCircumferenceCm, bmi }) => {
+    if (!active || !payload || payload.length === 0 || !config) return null;
 
-    const order = ['green', 'yellow', 'orange', 'red'];
-    const sortedLegend = Object.entries(legendMap).sort(([a], [b]) => order.indexOf(a) - order.indexOf(b));
+    const isHeightAxis = config.xAxisKey === 'height';
+    const xLabel = isHeightAxis ? `Talla: ${label} cm` : `Edad: ${formatAge(label)}`;
+
+    // Buscar el punto del paciente en el payload
+    const patientPayload = payload.find(p => p.name === 'Paciente');
+    const measurements = {
+        pe: { value: weightKg, unit: 'kg', label: 'Peso' },
+        te: { value: heightCm, unit: 'cm', label: 'Talla' },
+        hc: { value: headCircumferenceCm, unit: 'cm', label: 'Perímetro cefálico' },
+        pt: { value: weightKg, unit: 'kg', label: 'Peso' },
+        lfa_5_19: { value: heightCm, unit: 'cm', label: 'Talla' },
+        bmifa_5_19: { value: bmi.toFixed(2), unit: 'kg/m²', label: 'IMC' },
+    };
+    const measurement = measurements[config.key];
 
     return (
-        <div className="flex justify-center items-center flex-wrap gap-x-4 gap-y-1 mt-3 text-xs text-slate-600">
-            {sortedLegend.map(([color, text]) => (
-                <div key={color} className="flex items-center">
-                    <span className="w-3 h-3 rounded-full mr-1.5" style={{ backgroundColor: legendColorCodes[color] }}></span>
+        <div className="bg-white border border-slate-200 rounded-xl shadow-xl p-4 text-sm min-w-[200px]">
+            <p className="font-bold text-slate-700 border-b border-slate-100 pb-2 mb-2">{xLabel}</p>
+            {measurement && patientPayload && (
+                <div className="flex items-center justify-between gap-4 py-1">
+                    <span className="text-slate-500">{measurement.label}</span>
+                    <span className="font-bold text-indigo-600">{measurement.value} {measurement.unit}</span>
+                </div>
+            )}
+        </div>
+    );
+};
+
+// --- LEYENDA PERSONALIZADA ---
+const CustomLegend = ({ legendMap }) => {
+    if (!legendMap) return null;
+    const order = ['green', 'yellow', 'orange', 'red'];
+    const sorted = Object.entries(legendMap).sort(([a], [b]) => order.indexOf(a) - order.indexOf(b));
+    return (
+        <div className="flex justify-center items-center flex-wrap gap-x-5 gap-y-1.5 mt-4 text-xs text-slate-600 font-medium">
+            {sorted.map(([color, text]) => (
+                <div key={color} className="flex items-center gap-1.5">
+                    <span className="w-3 h-3 rounded-sm" style={{ backgroundColor: legendColorCodes[color] }}></span>
                     <span>{text}</span>
                 </div>
             ))}
@@ -129,12 +159,15 @@ const CustomLegend = (props) => {
     );
 };
 
+// --- COMPONENTE PRINCIPAL ---
 export default function GrowthAndDevelopmentTab() {
     const [gender, setGender] = useState('boy');
     const [ageInMonths, setAgeInMonths] = useState(72);
     const [weightKg, setWeightKg] = useState(22);
     const [heightCm, setHeightCm] = useState(115);
     const [headCircumferenceCm, setHeadCircumferenceCm] = useState(47);
+
+    const bmi = heightCm > 0 ? weightKg / ((heightCm / 100) ** 2) : 0;
 
     const availableMainTabs = useMemo(() => {
         const tabs = {};
@@ -151,19 +184,14 @@ export default function GrowthAndDevelopmentTab() {
     useEffect(() => {
         const mainTabsKeys = Object.keys(availableMainTabs);
         const currentMainTabIsValid = mainTabsKeys.includes(activeMainTab);
-        
         let newMainTab = activeMainTab;
         if (!currentMainTabIsValid) {
             newMainTab = mainTabsKeys[0] || null;
             setActiveMainTab(newMainTab);
         }
-
         if (newMainTab) {
             const subCharts = availableMainTabs[newMainTab].charts;
-            const currentSubChartIsValid = subCharts.includes(activeSubChart);
-            if (!currentSubChartIsValid) {
-                setActiveSubChart(subCharts[0]);
-            }
+            if (!subCharts.includes(activeSubChart)) setActiveSubChart(subCharts[0]);
         } else {
             setActiveSubChart(null);
         }
@@ -172,9 +200,7 @@ export default function GrowthAndDevelopmentTab() {
     const handleMainTabClick = (tabKey) => {
         setActiveMainTab(tabKey);
         const charts = availableMainTabs[tabKey].charts;
-        if (!charts.includes(activeSubChart)) {
-            setActiveSubChart(charts[0]);
-        }
+        if (!charts.includes(activeSubChart)) setActiveSubChart(charts[0]);
     };
 
     const { currentConfig, chartData, userPoint, diagnosis, fullTitle, xAxisDomain, yAxisDomain, xAxisTicks, xAxisTickFormatter, xAxisLabel, areaFills } = useMemo(() => {
@@ -186,10 +212,9 @@ export default function GrowthAndDevelopmentTab() {
             config.title = ageInMonths <= 24 ? 'Talla para la Edad (0-2 años)' : 'Talla para la Edad (2-5 años)';
         }
 
-        const bmi = (heightCm > 0) ? weightKg / ((heightCm / 100) ** 2) : 0;
         const measurements = { pe: weightKg, te: heightCm, hc: headCircumferenceCm, pt: weightKg, lfa_5_19: heightCm, bmifa_5_19: bmi };
         const measurement = measurements[chartKey];
-        
+
         let rawData = whoData[gender][config.dataKey];
         let xValue = config.xAxisKey === 'height' ? heightCm : ageInMonths;
 
@@ -202,13 +227,13 @@ export default function GrowthAndDevelopmentTab() {
                 sds[key] = interpolate(xValue, lowerPoint[config.xAxisKey], upperPoint[config.xAxisKey], lowerPoint[key], upperPoint[key]);
             });
         }
-        
+
         const userPt = { [config.xAxisKey]: xValue, userValue: measurement };
         const genderText = gender === 'boy' ? 'Niño' : 'Niña';
 
         const xDomains = { pe: [0, 24], te: [0, 60], hc: [0, 36], pt: [65, 120], lfa_5_19: [60, 228], bmifa_5_19: [60, 228] };
         let yDomain;
-        switch(chartKey) {
+        switch (chartKey) {
             case 'pe': yDomain = [2, 18]; break;
             case 'pt': yDomain = [5, 32]; break;
             case 'hc': yDomain = [30, 57]; break;
@@ -217,7 +242,7 @@ export default function GrowthAndDevelopmentTab() {
             case 'bmifa_5_19': yDomain = [10, 35]; break;
             default: yDomain = ['auto', 'auto'];
         }
-        
+
         const ticks = {
             pe: [0, 6, 12, 18, 24],
             te: ageInMonths <= 24 ? [0, 6, 12, 18, 24] : [0, 12, 24, 36, 48, 60],
@@ -228,16 +253,16 @@ export default function GrowthAndDevelopmentTab() {
         };
 
         const tickFormatters = {
-            pe: (tick) => `${tick} meses`,
-            te: (tick) => `${tick} meses`,
-            hc: (tick) => `${tick} meses`,
-            pt: (tick) => tick,
-            lfa_5_19: (tick) => `${Math.floor(tick/12)}a`,
-            bmifa_5_19: (tick) => `${Math.floor(tick/12)}a`,
+            pe: (t) => `${t} m`,
+            te: (t) => `${t} m`,
+            hc: (t) => `${t} m`,
+            pt: (t) => `${t}`,
+            lfa_5_19: (t) => `${Math.floor(t / 12)}a`,
+            bmifa_5_19: (t) => `${Math.floor(t / 12)}a`,
         };
-        
-        let fills = {};
+
         const { green, yellow, orange, red } = zoneColors;
+        let fills = {};
         switch (chartKey) {
             case 'pe': case 'te': case 'lfa_5_19':
                 fills = { pos3: green, pos2: green, pos1: green, neg1: yellow, neg2: orange, neg3: red }; break;
@@ -264,48 +289,83 @@ export default function GrowthAndDevelopmentTab() {
             xAxisLabel: config.xAxisKey === 'height' ? 'Talla (cm)' : 'Edad',
             areaFills: fills,
         };
-    }, [activeMainTab, activeSubChart, ageInMonths, gender, weightKg, heightCm, headCircumferenceCm]);
+    }, [activeMainTab, activeSubChart, ageInMonths, gender, weightKg, heightCm, headCircumferenceCm, bmi]);
 
-    const diagnosisColors = { red: 'bg-red-100 border-red-500 text-red-800', orange: 'bg-orange-100 border-orange-500 text-orange-800', yellow: 'bg-yellow-100 border-yellow-500 text-yellow-800', green: 'bg-green-100 border-green-500 text-green-800' };
+    const diagnosisStyles = {
+        red:    { bg: 'bg-red-50',    border: 'border-red-500',    text: 'text-red-800',    icon: <AlertTriangle className="h-5 w-5 text-red-500" /> },
+        orange: { bg: 'bg-orange-50', border: 'border-orange-500', text: 'text-orange-800', icon: <AlertTriangle className="h-5 w-5 text-orange-500" /> },
+        yellow: { bg: 'bg-yellow-50', border: 'border-yellow-500', text: 'text-yellow-800', icon: <TrendingDown className="h-5 w-5 text-yellow-500" /> },
+        green:  { bg: 'bg-emerald-50',border: 'border-emerald-500',text: 'text-emerald-800',icon: <CheckCircle className="h-5 w-5 text-emerald-500" /> },
+    };
+
+    // Tarjeta de medida del paciente para el panel lateral
+    const patientSummary = useMemo(() => {
+        if (!currentConfig) return [];
+        const items = [];
+        items.push({ label: 'Edad', value: formatAge(ageInMonths) });
+        items.push({ label: 'Peso', value: `${weightKg.toFixed(1)} kg` });
+        items.push({ label: 'Talla', value: `${heightCm} cm` });
+        items.push({ label: 'IMC', value: `${bmi.toFixed(2)} kg/m²` });
+        if (activeSubChart === 'hc') items.push({ label: 'Perímetro cefálico', value: `${headCircumferenceCm} cm` });
+        return items;
+    }, [currentConfig, ageInMonths, weightKg, heightCm, bmi, headCircumferenceCm, activeSubChart]);
 
     return (
-        <div className="bg-slate-50 p-4 sm:p-6 lg:p-8 font-sans">
-            <div className="max-w-7xl mx-auto">
-                <header className="mb-6">
-                    <h1 className="text-3xl font-bold text-slate-800">Curvas de Crecimiento y Desarrollo</h1>
-                    <p className="text-slate-600 mt-2">Evaluación del crecimiento infantil basada en estándares de la OMS.</p>
+        <div className="bg-slate-50 p-4 sm:p-6 font-sans">
+            <div className="max-w-7xl mx-auto space-y-5">
+
+                {/* Encabezado */}
+                <header className="flex items-center gap-3">
+                    <div className="p-2 bg-sky-100 rounded-lg">
+                        <Activity className="h-6 w-6 text-sky-600" />
+                    </div>
+                    <div>
+                        <h1 className="text-2xl font-bold text-slate-800 leading-tight">Curvas de Crecimiento y Desarrollo</h1>
+                        <p className="text-sm text-slate-500">Evaluación basada en estándares de la OMS</p>
+                    </div>
                 </header>
 
-                <div className="mb-6 bg-white p-4 rounded-xl shadow-md border border-slate-200">
-                    <h3 className="text-lg font-bold text-slate-800 mb-4">Simulador de Datos del Paciente</h3>
+                {/* Simulador */}
+                <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+                    <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-widest mb-4">Ingreso de Datos del Paciente</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                         <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">Sexo</label>
-                            <div className="flex space-x-4">
-                                <label className="flex items-center"><input type="radio" name="gender" value="boy" checked={gender === 'boy'} onChange={() => setGender('boy')} className="h-4 w-4 text-sky-600 border-slate-300 focus:ring-sky-500" /> <span className="ml-2">Niño</span></label>
-                                <label className="flex items-center"><input type="radio" name="gender" value="girl" checked={gender === 'girl'} onChange={() => setGender('girl')} className="h-4 w-4 text-pink-600 border-slate-300 focus:ring-pink-500" /> <span className="ml-2">Niña</span></label>
+                            <p className="text-sm font-medium text-slate-600 mb-2">Sexo</p>
+                            <div className="flex gap-4">
+                                {[{ val: 'boy', label: 'Niño', color: 'text-sky-600' }, { val: 'girl', label: 'Niña', color: 'text-pink-500' }].map(({ val, label, color }) => (
+                                    <label key={val} className={`flex items-center gap-2 cursor-pointer font-medium text-sm ${gender === val ? color : 'text-slate-400'}`}>
+                                        <input type="radio" name="gender" value={val} checked={gender === val} onChange={() => setGender(val)} className="hidden" />
+                                        <span className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${gender === val ? 'border-current' : 'border-slate-300'}`}>
+                                            {gender === val && <span className="w-2 h-2 rounded-full bg-current" />}
+                                        </span>
+                                        {label}
+                                    </label>
+                                ))}
                             </div>
                         </div>
-                        <div>
-                             <label htmlFor="age" className="block text-sm font-medium text-slate-700">Edad: <span className="font-bold text-sky-600">{formatAge(ageInMonths)}</span></label>
-                             <input id="age" type="range" min="0" max="228" value={ageInMonths} onChange={(e) => setAgeInMonths(Number(e.target.value))} className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer" />
-                        </div>
-                        <div>
-                             <label htmlFor="weight" className="block text-sm font-medium text-slate-700">Peso: <span className="font-bold text-sky-600">{weightKg.toFixed(1)} kg</span></label>
-                             <input id="weight" type="range" min="1" max="120" step="0.1" value={weightKg} onChange={(e) => setWeightKg(Number(e.target.value))} className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer" />
-                        </div>
-                        <div>
-                             <label htmlFor="height" className="block text-sm font-medium text-slate-700">Talla: <span className="font-bold text-sky-600">{heightCm} cm</span></label>
-                             <input id="height" type="range" min="40" max="200" value={heightCm} onChange={(e) => setHeightCm(Number(e.target.value))} className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer" />
-                        </div>
+
+                        {[
+                            { id: 'age', label: 'Edad', display: formatAge(ageInMonths), min: 0, max: 228, step: 1, value: ageInMonths, onChange: (v) => setAgeInMonths(Number(v)) },
+                            { id: 'weight', label: 'Peso', display: `${weightKg.toFixed(1)} kg`, min: 1, max: 120, step: 0.1, value: weightKg, onChange: (v) => setWeightKg(Number(v)) },
+                            { id: 'height', label: 'Talla', display: `${heightCm} cm`, min: 40, max: 200, step: 1, value: heightCm, onChange: (v) => setHeightCm(Number(v)) },
+                        ].map(({ id, label, display, min, max, step, value, onChange }) => (
+                            <div key={id}>
+                                <p className="text-sm font-medium text-slate-600 mb-1">{label}: <span className="font-bold text-sky-600">{display}</span></p>
+                                <input type="range" min={min} max={max} step={step} value={value} onChange={(e) => onChange(e.target.value)}
+                                    className="w-full h-1.5 bg-slate-200 rounded-full appearance-none cursor-pointer accent-sky-500" />
+                            </div>
+                        ))}
                     </div>
                 </div>
 
-                <div className="bg-white p-2 sm:p-4 rounded-xl shadow-md border border-slate-200">
-                    <div className="border-b border-slate-200">
-                        <nav className="-mb-px flex space-x-2 sm:space-x-4 overflow-x-auto" aria-label="Tabs">
+                {/* Contenido principal */}
+                <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                    {/* Tabs principales */}
+                    <div className="border-b border-slate-200 px-4">
+                        <nav className="flex gap-1 overflow-x-auto">
                             {Object.entries(availableMainTabs).map(([key, { name }]) => (
-                                <button key={key} onClick={() => handleMainTabClick(key)} className={`whitespace-nowrap flex items-center py-3 px-2 sm:px-4 border-b-2 font-semibold text-base transition-colors ${activeMainTab === key ? 'border-sky-500 text-sky-600' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'}`}>
+                                <button key={key} onClick={() => handleMainTabClick(key)}
+                                    className={`whitespace-nowrap py-3.5 px-4 border-b-2 font-semibold text-sm transition-all ${activeMainTab === key ? 'border-sky-500 text-sky-600' : 'border-transparent text-slate-400 hover:text-slate-600'}`}>
                                     {name}
                                 </button>
                             ))}
@@ -313,18 +373,20 @@ export default function GrowthAndDevelopmentTab() {
                     </div>
 
                     {Object.keys(availableMainTabs).length === 0 ? (
-                        <div className="p-8 text-center">
-                            <Info className="mx-auto h-12 w-12 text-sky-500" />
-                            <h3 className="mt-2 text-lg font-medium text-slate-900">Edad fuera de rango</h3>
-                            <p className="mt-1 text-sm text-slate-600">El paciente tiene más de 19 años. Estos gráficos aplican solo hasta los 19 años (228 meses).</p>
+                        <div className="p-12 text-center">
+                            <Info className="mx-auto h-12 w-12 text-slate-300 mb-3" />
+                            <h3 className="text-lg font-semibold text-slate-700">Edad fuera de rango</h3>
+                            <p className="text-sm text-slate-400 mt-1">Los gráficos aplican solo hasta los 19 años (228 meses).</p>
                         </div>
                     ) : (
-                        <div className="pt-4">
+                        <div className="p-4 sm:p-6">
+                            {/* Sub-tabs */}
                             {activeMainTab && availableMainTabs[activeMainTab]?.charts.length > 1 && (
-                                <div className="px-2 sm:px-4 mb-4">
-                                    <div className="flex space-x-2 p-1 bg-slate-100 rounded-lg">
+                                <div className="mb-5">
+                                    <div className="inline-flex p-1 bg-slate-100 rounded-xl gap-1">
                                         {availableMainTabs[activeMainTab].charts.map(chartKey => (
-                                            <button key={chartKey} onClick={() => setActiveSubChart(chartKey)} className={`w-full text-center rounded-md py-1.5 text-sm font-medium transition-colors ${activeSubChart === chartKey ? 'bg-white text-slate-800 shadow' : 'text-slate-600 hover:bg-slate-200'}`}>
+                                            <button key={chartKey} onClick={() => setActiveSubChart(chartKey)}
+                                                className={`px-5 py-1.5 rounded-lg text-sm font-semibold transition-all ${activeSubChart === chartKey ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
                                                 {chartConfig[chartKey].name}
                                             </button>
                                         ))}
@@ -334,57 +396,92 @@ export default function GrowthAndDevelopmentTab() {
 
                             {currentConfig && (
                                 <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-                                    <div className="lg:col-span-3 w-full h-96 min-h-max">
-                                        <h3 className="text-center font-semibold text-slate-700 mb-2">{fullTitle}</h3>
-                                        <ResponsiveContainer>
-                                            <ComposedChart data={chartData} margin={{ top: 5, right: 20, left: 25, bottom: 20 }}>
-                                                <XAxis dataKey={currentConfig.xAxisKey} type="number" domain={xAxisDomain} ticks={xAxisTicks} tickFormatter={xAxisTickFormatter} label={{ value: xAxisLabel, position: "insideBottom", offset: -15 }} allowDataOverflow={true} />
-                                                <YAxis type="number" domain={yAxisDomain} unit={currentConfig.unit} label={{ value: `${currentConfig.name} (${currentConfig.unit})`, angle: -90, position: 'insideLeft', offset: -10 }} allowDataOverflow={true} />
-                                                <Tooltip formatter={(value, name, props) => [`${typeof value === 'number' ? value.toFixed(2) : value} ${props.unit}`]} labelFormatter={(label) => `${xAxisLabel}: ${currentConfig.xAxisKey === 'month' ? formatAge(label) : label}`} />
-                                                <Legend content={<CustomLegend legendMap={currentConfig.legendMap} />} verticalAlign="bottom" wrapperStyle={{ paddingTop: '20px' }}/>
+                                    {/* Gráfico */}
+                                    <div className="lg:col-span-3">
+                                        <h3 className="text-center font-semibold text-slate-600 text-sm mb-3">{fullTitle}</h3>
+                                        <div className="w-full h-96">
+                                            <ResponsiveContainer width="100%" height="100%">
+                                                <ComposedChart data={chartData} margin={{ top: 5, right: 20, left: 25, bottom: 25 }}>
+                                                    <XAxis dataKey={currentConfig.xAxisKey} type="number" domain={xAxisDomain} ticks={xAxisTicks} tickFormatter={xAxisTickFormatter}
+                                                        label={{ value: xAxisLabel, position: 'insideBottom', offset: -15, style: { fontSize: 12, fill: '#64748b' } }}
+                                                        tick={{ fontSize: 11, fill: '#94a3b8' }} />
+                                                    <YAxis type="number" domain={yAxisDomain}
+                                                        label={{ value: `${currentConfig.name} (${currentConfig.unit})`, angle: -90, position: 'insideLeft', offset: -10, style: { fontSize: 12, fill: '#64748b' } }}
+                                                        tick={{ fontSize: 11, fill: '#94a3b8' }} allowDataOverflow={true} />
+                                                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                                                    <Tooltip
+                                                        content={
+                                                            <CustomTooltip
+                                                                config={currentConfig}
+                                                                ageInMonths={ageInMonths}
+                                                                heightCm={heightCm}
+                                                                weightKg={weightKg}
+                                                                headCircumferenceCm={headCircumferenceCm}
+                                                                bmi={bmi}
+                                                            />
+                                                        }
+                                                    />
+                                                    <Legend content={<CustomLegend legendMap={currentConfig.legendMap} />} verticalAlign="bottom" wrapperStyle={{ paddingTop: '10px' }} />
 
-                                                {areaFills && <>
-                                                    <Area type="monotone" dataKey="pos3" stroke={null} fill={areaFills.pos3} dot={false} activeDot={false} />
-                                                    <Area type="monotone" dataKey="pos2" stroke={null} fill={areaFills.pos2} dot={false} activeDot={false} />
-                                                    <Area type="monotone" dataKey="pos1" stroke={null} fill={areaFills.pos1} dot={false} activeDot={false} />
-                                                    <Area type="monotone" dataKey="neg1" stroke={null} fill={areaFills.neg1} dot={false} activeDot={false} />
-                                                    <Area type="monotone" dataKey="neg2" stroke={null} fill={areaFills.neg2} dot={false} activeDot={false} />
-                                                    <Area type="monotone" dataKey="neg3" stroke={null} fill={areaFills.neg3} dot={false} activeDot={false} />
-                                                </>}
+                                                    {areaFills && <>
+                                                        <Area type="monotone" dataKey="pos3" stroke="none" fill={areaFills.pos3} fillOpacity={0.85} dot={false} activeDot={false} legendType="none" />
+                                                        <Area type="monotone" dataKey="pos2" stroke="none" fill={areaFills.pos2} fillOpacity={0.85} dot={false} activeDot={false} legendType="none" />
+                                                        <Area type="monotone" dataKey="pos1" stroke="none" fill={areaFills.pos1} fillOpacity={0.85} dot={false} activeDot={false} legendType="none" />
+                                                        <Area type="monotone" dataKey="neg1" stroke="none" fill={areaFills.neg1} fillOpacity={0.85} dot={false} activeDot={false} legendType="none" />
+                                                        <Area type="monotone" dataKey="neg2" stroke="none" fill={areaFills.neg2} fillOpacity={0.85} dot={false} activeDot={false} legendType="none" />
+                                                        <Area type="monotone" dataKey="neg3" stroke="none" fill={areaFills.neg3} fillOpacity={0.85} dot={false} activeDot={false} legendType="none" />
+                                                    </>}
 
-                                                <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
-
-                                                <Scatter name="Paciente" data={userPoint} dataKey="userValue" fill="rgb(79 70 229)" stroke="#ffffff" strokeWidth={3} r={10} zIndex={100} unit={currentConfig.unit} />
-                                            </ComposedChart>
-                                        </ResponsiveContainer>
+                                                    <Scatter name="Paciente" data={userPoint} dataKey="userValue"
+                                                        fill="#4F46E5" stroke="#ffffff" strokeWidth={3} r={9} zIndex={100} />
+                                                </ComposedChart>
+                                            </ResponsiveContainer>
+                                        </div>
                                     </div>
-                                    <div className="lg:col-span-2 flex flex-col space-y-4">
+
+                                    {/* Panel lateral */}
+                                    <div className="lg:col-span-2 flex flex-col gap-4">
+
+                                        {/* Slider circunferencia cefálica */}
                                         {activeSubChart === 'hc' && (
-                                            <div className="bg-slate-100 p-4 rounded-lg border border-slate-200">
-                                                <label htmlFor="hc-input" className="block text-sm font-medium text-slate-700">C. Cefálica del Paciente: <span className="font-bold text-sky-600">{headCircumferenceCm} cm</span></label>
-                                                <input id="hc-input" type="range" min="30" max="57" step="0.5" value={headCircumferenceCm} onChange={(e) => setHeadCircumferenceCm(Number(e.target.value))} className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer" />
+                                            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                                                <p className="text-sm font-medium text-slate-600 mb-2">
+                                                    C. Cefálica: <span className="font-bold text-sky-600">{headCircumferenceCm} cm</span>
+                                                </p>
+                                                <input type="range" min="30" max="57" step="0.5" value={headCircumferenceCm}
+                                                    onChange={(e) => setHeadCircumferenceCm(Number(e.target.value))}
+                                                    className="w-full h-1.5 bg-slate-200 rounded-full appearance-none cursor-pointer accent-sky-500" />
                                             </div>
                                         )}
-                                        <div className="bg-white p-4 rounded-lg border border-slate-200 flex-grow">
-                                            <h4 className="text-lg font-bold text-slate-800 mb-3">Diagnóstico Nutricional</h4>
-                                            {diagnosis ? (
-                                                <div className={`p-4 border-l-4 rounded-r-lg ${diagnosisColors[diagnosis.color]}`}>
-                                                    <div className="flex">
-                                                        <div className="flex-shrink-0">
-                                                            {diagnosis.color === 'red' && <AlertTriangle className="h-5 w-5 text-red-500" />}
-                                                            {diagnosis.color === 'orange' && <AlertTriangle className="h-5 w-5 text-orange-500" />}
-                                                            {diagnosis.color === 'yellow' && <TrendingDown className="h-5 w-5 text-yellow-500" />}
-                                                            {diagnosis.color === 'green' && <CheckCircle className="h-5 w-5 text-green-500" />}
-                                                        </div>
-                                                        <div className="ml-3">
-                                                            <p className="text-sm font-bold">{diagnosis.text}</p>
-                                                        </div>
+
+                                        {/* Resumen del paciente */}
+                                        <div className="bg-slate-50 rounded-xl border border-slate-200 p-4">
+                                            <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">Datos del Paciente</h4>
+                                            <div className="space-y-2">
+                                                {patientSummary.map(({ label, value }) => (
+                                                    <div key={label} className="flex justify-between items-center text-sm">
+                                                        <span className="text-slate-500">{label}</span>
+                                                        <span className="font-semibold text-slate-700">{value}</span>
                                                     </div>
-                                                </div>
-                                            ) : (
-                                                <div className="text-center py-4">
-                                                    <Info className="mx-auto h-8 w-8 text-slate-400" />
-                                                    <p className="mt-2 text-sm text-slate-600">Datos insuficientes para el diagnóstico.</p>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        {/* Diagnóstico */}
+                                        <div className="bg-white rounded-xl border border-slate-200 p-4 flex-grow">
+                                            <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">Diagnóstico Nutricional</h4>
+                                            {diagnosis ? (() => {
+                                                const s = diagnosisStyles[diagnosis.color];
+                                                return (
+                                                    <div className={`flex items-center gap-3 p-4 rounded-xl border-l-4 ${s.bg} ${s.border}`}>
+                                                        {s.icon}
+                                                        <p className={`font-bold text-base ${s.text}`}>{diagnosis.text}</p>
+                                                    </div>
+                                                );
+                                            })() : (
+                                                <div className="text-center py-6">
+                                                    <Info className="mx-auto h-8 w-8 text-slate-300" />
+                                                    <p className="mt-2 text-sm text-slate-400">Datos insuficientes.</p>
                                                 </div>
                                             )}
                                         </div>
