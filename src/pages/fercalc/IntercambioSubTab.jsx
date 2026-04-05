@@ -1,7 +1,5 @@
-// src/IntercambioSubTab.jsx
-// VERSIÓN CORREGIDA: Ahora envía el objeto piramideData para cálculos detallados en el fraccionamiento.
-
-import React, { useState, useMemo, useEffect } from 'react';
+// mi-app-frontend/src/pages/fercalc/IntercambioSubTab.jsx
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { Award, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 
 const piramideData = {
@@ -16,8 +14,8 @@ const piramideData = {
   'Lacteos Medios en grasa': { calorias: 85.0, hc: 9.0, lipidos: 3.0, proteinas: 5.0 },
   'Lacteos Bajos en grasa': { calorias: 70.0, hc: 10.0, lipidos: 0.0, proteinas: 7.0 },
   'Aceite y grasas': { calorias: 180.0, hc: 0.0, lipidos: 20.0, proteinas: 0.0 },
-  'Alimentos ricos en lípidos': { calorias: 175.0, hc: 5.0, lipidos: 15.0, proteinas: 5.0 },
-  'Azúcar': { calorias: 20.0, hc: 5.0, lipidos: 0.0, proteinas: 0.0 },
+  'Alimentos ricos en lipidos': { calorias: 175.0, hc: 5.0, lipidos: 15.0, proteinas: 5.0 },
+  'Azucar': { calorias: 20.0, hc: 5.0, lipidos: 0.0, proteinas: 0.0 },
 };
 
 const grupos = [
@@ -29,22 +27,24 @@ const grupos = [
   { key: 'Carnes Altas en grasas', label: 'Altas en grasas', indent: true },
   { key: 'Carnes Bajas en grasas', label: 'Bajas en grasas', indent: true },
   { key: 'Leguminosas', label: 'Leguminosas' },
-  { type: 'header', label: 'Lácteos' },
+  { type: 'header', label: 'Lacteos' },
   { key: 'Lacteos Altos en grasa', label: 'Altos en grasa', indent: true },
   { key: 'Lacteos Medios en grasa', label: 'Medios en grasa', indent: true },
   { key: 'Lacteos Bajos en grasa', label: 'Bajos en grasa', indent: true },
   { key: 'Aceite y grasas', label: 'Aceite y grasas' },
-  { key: 'Alimentos ricos en lípidos', label: 'Alimentos ricos en lípidos' },
-  { key: 'Azúcar', label: 'Azúcar' },
+  { key: 'Alimentos ricos en lipidos', label: 'Alimentos ricos en lipidos' },
+  { key: 'Azucar', label: 'Azucar' },
 ];
 
+// ✅ Estado inicial fuera del componente para que persista entre renders
+const porcionesInicial = grupos.reduce((acc, grupo) => {
+  if (grupo.key) acc[grupo.key] = '';
+  return acc;
+}, {});
+
 const IntercambioSubTab = ({ patientData, dietGoals, onPlanUpdate }) => {
-  const [porciones, setPorciones] = useState(
-    grupos.reduce((acc, grupo) => {
-      if (grupo.key) acc[grupo.key] = '';
-      return acc;
-    }, {})
-  );
+  // ✅ Estado persistente — se mantiene aunque se cambie de pestaña
+  const [porciones, setPorciones] = useState(porcionesInicial);
 
   const calculosPorGrupo = useMemo(() => {
     const resultados = {};
@@ -52,12 +52,14 @@ const IntercambioSubTab = ({ patientData, dietGoals, onPlanUpdate }) => {
       if (grupo.key) {
         const porcion = parseFloat(porciones[grupo.key]) || 0;
         const base = piramideData[grupo.key];
-        resultados[grupo.key] = {
-          calorias: base.calorias * porcion,
-          hc: base.hc * porcion,
-          lipidos: base.lipidos * porcion,
-          proteinas: base.proteinas * porcion,
-        };
+        if (base) {
+          resultados[grupo.key] = {
+            calorias: base.calorias * porcion,
+            hc: base.hc * porcion,
+            lipidos: base.lipidos * porcion,
+            proteinas: base.proteinas * porcion,
+          };
+        }
       }
     }
     return resultados;
@@ -66,38 +68,34 @@ const IntercambioSubTab = ({ patientData, dietGoals, onPlanUpdate }) => {
   const totalesCalculados = useMemo(() => {
     return Object.values(calculosPorGrupo).reduce(
       (acc, curr) => {
-        acc.calorias += curr.calorias;
-        acc.hc += curr.hc;
-        acc.lipidos += curr.lipidos;
-        acc.proteinas += curr.proteinas;
+        acc.calorias += curr.calorias || 0;
+        acc.hc += curr.hc || 0;
+        acc.lipidos += curr.lipidos || 0;
+        acc.proteinas += curr.proteinas || 0;
         return acc;
       },
       { calorias: 0, hc: 0, lipidos: 0, proteinas: 0 }
     );
   }, [calculosPorGrupo]);
 
-  useEffect(() => {
-    if (onPlanUpdate) {
-      const porcionesConValor = Object.entries(porciones).reduce((acc, [key, value]) => {
-        const numValue = parseFloat(value);
-        if (!isNaN(numValue) && numValue > 0) {
-          acc[key] = numValue;
-        }
-        return acc;
-      }, {});
-
-      // --- CAMBIO CLAVE ---
-      // Ahora el objeto enviado incluye 'piramideData' para que otros componentes puedan usarlo.
-      const planCompleto = {
-        porciones: porcionesConValor,
-        totales: totalesCalculados,
-        piramideData: piramideData // <-- AÑADIDO
-      };
-      
-      onPlanUpdate(planCompleto);
-    }
+  // ✅ useCallback para estabilizar la referencia y evitar loops
+  const emitirPlan = useCallback(() => {
+    if (!onPlanUpdate) return;
+    const porcionesConValor = Object.entries(porciones).reduce((acc, [key, value]) => {
+      const numValue = parseFloat(value);
+      if (!isNaN(numValue) && numValue > 0) acc[key] = numValue;
+      return acc;
+    }, {});
+    onPlanUpdate({
+      porciones: porcionesConValor,
+      totales: totalesCalculados,
+      piramideData,
+    });
   }, [porciones, totalesCalculados, onPlanUpdate]);
 
+  useEffect(() => {
+    emitirPlan();
+  }, [emitirPlan]);
 
   const handlePorcionChange = (key, value) => {
     const numValue = value === '' ? '' : Math.max(0, parseFloat(value) || 0);
@@ -105,17 +103,19 @@ const IntercambioSubTab = ({ patientData, dietGoals, onPlanUpdate }) => {
   };
 
   const objetivosCaloricos = useMemo(() => {
-    const peso = patientData.weight || 0;
+    const peso = patientData?.weight || 0;
     return {
       disminuir: peso * 25,
       mantener: peso * 30,
       aumentar: peso * 35,
     };
-  }, [patientData.weight]);
+  }, [patientData?.weight]);
 
   const pavbCalculos = useMemo(() => {
     let pavbGrams = 0;
-    const porcionesNum = Object.fromEntries(Object.entries(porciones).map(([k, v]) => [k, parseFloat(v) || 0]));
+    const porcionesNum = Object.fromEntries(
+      Object.entries(porciones).map(([k, v]) => [k, parseFloat(v) || 0])
+    );
 
     const pavbAnimalKeys = [
       'Carnes Altas en grasas', 'Carnes Bajas en grasas',
@@ -130,83 +130,67 @@ const IntercambioSubTab = ({ patientData, dietGoals, onPlanUpdate }) => {
     const numeroDePares = Math.min(porcionesCereales, porcionesLeguminosas);
 
     if (numeroDePares > 0) {
-      const proteinaPorPorcionCereal = piramideData['Cereales'].proteinas;
-      const proteinaPorPorcionLeguminosa = piramideData['Leguminosas'].proteinas;
-      const pavbFromCereales = numeroDePares * proteinaPorPorcionCereal;
-      const pavbFromLeguminosas = numeroDePares * proteinaPorPorcionLeguminosa;
-      pavbGrams += pavbFromCereales + pavbFromLeguminosas;
+      pavbGrams += numeroDePares * (piramideData['Cereales'].proteinas + piramideData['Leguminosas'].proteinas);
     }
 
     const totalProteinas = totalesCalculados.proteinas;
     const pavbPercentage = totalProteinas > 0 ? (pavbGrams / totalProteinas) * 100 : 0;
 
-    return {
-      grams: pavbGrams,
-      percentage: pavbPercentage
-    };
+    return { grams: pavbGrams, percentage: pavbPercentage };
   }, [calculosPorGrupo, porciones, totalesCalculados.proteinas]);
-  
-  const adecuacion = useMemo(() => {
-    const objetivoGramos = {
-        calorias: dietGoals.calorias,
-        hc: dietGoals.hc,
-        proteinas: dietGoals.proteina,
-        lipidos: dietGoals.grasa,
-    };
 
-    return {
-      calorias: objetivoGramos.calorias > 0 ? (totalesCalculados.calorias / objetivoGramos.calorias) * 100 : 0,
-      hc: objetivoGramos.hc > 0 ? (totalesCalculados.hc / objetivoGramos.hc) * 100 : 0,
-      proteinas: objetivoGramos.proteinas > 0 ? (totalesCalculados.proteinas / objetivoGramos.proteinas) * 100 : 0,
-      lipidos: objetivoGramos.lipidos > 0 ? (totalesCalculados.lipidos / objetivoGramos.lipidos) * 100 : 0,
-    };
-  }, [totalesCalculados, dietGoals]);
+  const adecuacion = useMemo(() => ({
+    calorias: dietGoals?.calorias > 0 ? (totalesCalculados.calorias / dietGoals.calorias) * 100 : 0,
+    hc: dietGoals?.hc > 0 ? (totalesCalculados.hc / dietGoals.hc) * 100 : 0,
+    proteinas: dietGoals?.proteina > 0 ? (totalesCalculados.proteinas / dietGoals.proteina) * 100 : 0,
+    lipidos: dietGoals?.grasa > 0 ? (totalesCalculados.lipidos / dietGoals.grasa) * 100 : 0,
+  }), [totalesCalculados, dietGoals]);
 
   return (
     <div className="space-y-6 bg-white p-6 rounded-lg shadow-lg">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
         <div className="overflow-x-auto border rounded-lg p-4">
-          <h3 className="text-lg font-semibold mb-2">Objetivos Calóricos por Peso</h3>
+          <h3 className="text-lg font-semibold mb-2">Objetivos Caloricos por Peso</h3>
           <table className="w-full text-sm text-left">
             <thead className="bg-gray-100">
               <tr>
                 <th className="p-2 border font-semibold">Objetivo</th>
-                <th className="p-2 border font-semibold">Calorías Sugeridas</th>
+                <th className="p-2 border font-semibold">Calorias Sugeridas</th>
               </tr>
             </thead>
             <tbody>
               <tr className="hover:bg-blue-50">
-                <td className="p-2 border flex items-center gap-2"><TrendingDown className="text-red-500" size={16}/> Disminuir</td>
+                <td className="p-2 border flex items-center gap-2"><TrendingDown className="text-red-500" size={16} /> Disminuir</td>
                 <td className="p-2 border font-bold text-red-600">{objetivosCaloricos.disminuir.toFixed(0)} kcal</td>
               </tr>
               <tr className="hover:bg-blue-50">
-                <td className="p-2 border flex items-center gap-2"><Minus className="text-yellow-500" size={16}/> Mantener</td>
+                <td className="p-2 border flex items-center gap-2"><Minus className="text-yellow-500" size={16} /> Mantener</td>
                 <td className="p-2 border font-bold text-yellow-600">{objetivosCaloricos.mantener.toFixed(0)} kcal</td>
               </tr>
               <tr className="hover:bg-blue-50">
-                <td className="p-2 border flex items-center gap-2"><TrendingUp className="text-green-500" size={16}/> Aumentar</td>
+                <td className="p-2 border flex items-center gap-2"><TrendingUp className="text-green-500" size={16} /> Aumentar</td>
                 <td className="p-2 border font-bold text-green-600">{objetivosCaloricos.aumentar.toFixed(0)} kcal</td>
               </tr>
             </tbody>
           </table>
-          <p className="text-xs text-gray-500 mt-1">Basado en el peso actual de: {patientData.weight} kg</p>
+          <p className="text-xs text-gray-500 mt-1">Basado en el peso actual de: {patientData?.weight} kg</p>
         </div>
-        
-        <div className="border rounded-lg p-4 bg-indigo-50">
-          <h3 className="text-lg font-semibold mb-2 flex items-center gap-2 text-indigo-800">
-            <Award size={20} /> Proteína de Alto Valor Biológico (PAVB)
+
+        <div className="border rounded-lg p-4 bg-green-50">
+          <h3 className="text-lg font-semibold mb-2 flex items-center gap-2 text-green-800">
+            <Award size={20} /> Proteina de Alto Valor Biologico (PAVB)
           </h3>
           <div className="space-y-3 mt-4">
             <div>
-              <p className="text-sm font-medium text-indigo-700">Gramos PAVB</p>
-              <p className="text-3xl font-bold text-indigo-600">{pavbCalculos.grams.toFixed(1)} g</p>
+              <p className="text-sm font-medium text-green-700">Gramos PAVB</p>
+              <p className="text-3xl font-bold text-green-600">{pavbCalculos.grams.toFixed(1)} g</p>
             </div>
             <div className="border-t pt-3">
-              <p className="text-sm font-medium text-indigo-700">% PAVB del Total de Proteínas</p>
-              <p className="text-3xl font-bold text-indigo-600">{pavbCalculos.percentage.toFixed(1)} %</p>
+              <p className="text-sm font-medium text-green-700">% PAVB del Total de Proteinas</p>
+              <p className="text-3xl font-bold text-green-600">{pavbCalculos.percentage.toFixed(1)} %</p>
             </div>
           </div>
-           <p className="text-xs text-gray-500 mt-2">Suma de proteínas de carnes, lácteos y la combinación 1 a 1 de cereales con leguminosas.</p>
+          <p className="text-xs text-gray-500 mt-2">Suma de proteinas de carnes, lacteos y la combinacion 1 a 1 de cereales con leguminosas.</p>
         </div>
       </div>
 
@@ -217,9 +201,9 @@ const IntercambioSubTab = ({ patientData, dietGoals, onPlanUpdate }) => {
               <th className="p-2 border font-semibold">GRUPO</th>
               <th className="p-2 border font-semibold">PORCIONES</th>
               <th className="p-2 border font-semibold">CALORIAS</th>
-              <th className="p-2 border font-semibold">HIDRATOS DE CARBONO (g)</th>
-              <th className="p-2 border font-semibold">LÍPIDOS (g)</th>
-              <th className="p-2 border font-semibold">PROTEÍNAS (g)</th>
+              <th className="p-2 border font-semibold">HC (g)</th>
+              <th className="p-2 border font-semibold">LIPIDOS (g)</th>
+              <th className="p-2 border font-semibold">PROTEINAS (g)</th>
             </tr>
           </thead>
           <tbody>
@@ -227,7 +211,7 @@ const IntercambioSubTab = ({ patientData, dietGoals, onPlanUpdate }) => {
               if (grupo.type === 'header') {
                 return (
                   <tr key={index} className="bg-gray-50">
-                    <td className="p-2 border font-semibold" colSpan="6">{grupo.label}</td>
+                    <td className="p-2 border font-semibold text-gray-600" colSpan="6">{grupo.label}</td>
                   </tr>
                 );
               }
@@ -238,16 +222,17 @@ const IntercambioSubTab = ({ patientData, dietGoals, onPlanUpdate }) => {
                     <input
                       type="number"
                       value={porciones[grupo.key]}
-                      onChange={(e) => handlePorcionChange(grupo.key, e.target.value)}
-                      className="w-full p-1 border rounded focus:ring-2 focus:ring-green-500"
+                      onChange={e => handlePorcionChange(grupo.key, e.target.value)}
+                      onFocus={e => { if (e.target.value === '0') e.target.value = ''; }}
+                      className="w-full p-1 border rounded focus:ring-2 focus:ring-green-500 focus:outline-none"
                       placeholder="0"
                       min="0"
                     />
                   </td>
-                  <td className="p-2 border">{calculosPorGrupo[grupo.key]?.calorias.toFixed(1)}</td>
-                  <td className="p-2 border">{calculosPorGrupo[grupo.key]?.hc.toFixed(1)}</td>
-                  <td className="p-2 border">{calculosPorGrupo[grupo.key]?.lipidos.toFixed(1)}</td>
-                  <td className="p-2 border">{calculosPorGrupo[grupo.key]?.proteinas.toFixed(1)}</td>
+                  <td className="p-2 border">{(calculosPorGrupo[grupo.key]?.calorias || 0).toFixed(1)}</td>
+                  <td className="p-2 border">{(calculosPorGrupo[grupo.key]?.hc || 0).toFixed(1)}</td>
+                  <td className="p-2 border">{(calculosPorGrupo[grupo.key]?.lipidos || 0).toFixed(1)}</td>
+                  <td className="p-2 border">{(calculosPorGrupo[grupo.key]?.proteinas || 0).toFixed(1)}</td>
                 </tr>
               );
             })}
