@@ -20,40 +20,46 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading]                 = useState(true);
   const navigate = useNavigate();
 
+  // ── CORRECCIÓN: lee data.errors (array) antes que data.message ──
   const handleError = (error) => {
     if (!error.response) {
-      return setErrors(['No se pudo conectar con el servidor. Intente más tarde.']);
+      return setErrors(['No se pudo conectar con el servidor. Intentá de nuevo más tarde.']);
     }
     const data = error.response.data;
-    if (Array.isArray(data)) {
+    if (Array.isArray(data?.errors)) {
+      setErrors(data.errors);
+    } else if (Array.isArray(data)) {
       setErrors(data);
+    } else if (data?.message) {
+      setErrors([data.message]);
     } else {
-      setErrors([data?.message || 'Ocurrió un error inesperado.']);
+      setErrors(['Ocurrió un error inesperado.']);
     }
   };
 
-  const signup = async (user) => {
+  const signup = async (userData) => {
     try {
-      const res = await registerRequest(user);
+      const res = await registerRequest(userData);
       setUser(res.data);
       setIsAuthenticated(true);
-      navigate('/app'); // ✅ Redirige a FerCalc
+      navigate('/app');
     } catch (error) {
       handleError(error);
     }
   };
 
-  const signin = async (user) => {
+  const signin = async (userData) => {
     try {
-      const res = await loginRequest(user);
+      const res = await loginRequest(userData);
       setUser(res.data);
       setIsAuthenticated(true);
-      navigate('/app'); // ✅ Redirige a FerCalc
+      navigate('/app');
     } catch (error) {
       handleError(error);
     }
   };
 
+  // ── logout exportado también como "signout" para compatibilidad con AdminApenPage ──
   const logout = async () => {
     try {
       await logoutRequest();
@@ -63,9 +69,11 @@ export const AuthProvider = ({ children }) => {
       Cookies.remove('token');
       setUser(null);
       setIsAuthenticated(false);
-      navigate('/'); // ✅ Redirige al home al cerrar sesión
+      navigate('/');
     }
   };
+
+  const signout = logout; // alias
 
   useEffect(() => {
     if (errors.length > 0) {
@@ -107,6 +115,7 @@ export const AuthProvider = ({ children }) => {
       signup,
       signin,
       logout,
+      signout,   // ← alias para AdminApenPage
       loading,
       user,
       isAuthenticated,
