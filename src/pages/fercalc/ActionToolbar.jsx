@@ -1,13 +1,15 @@
 // mi-app-frontend/src/pages/fercalc/ActionToolbar.jsx
 import React, { useState, useEffect } from 'react';
-import { Save, FolderOpen, Download, Trash2, X, FileText, FilePlus, LogOut, User, ChevronRight, Menu, AlertTriangle } from 'lucide-react';
+import { Save, FolderOpen, Download, Trash2, X, FileText, FilePlus, LogOut, User, ChevronRight, Menu, AlertTriangle, ShieldCheck } from 'lucide-react';
 import toast from 'react-hot-toast';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { useAuth } from '../../context/AuthContext.jsx';
+import { useNavigate } from 'react-router-dom';
 
 const ActionToolbar = ({ getCurrentDietState, savedDiets, setSavedDiets, loadDietState, handleNewDiet, allData }) => {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [modal, setModal] = useState(null);
   const [dietName, setDietName] = useState('');
@@ -56,13 +58,11 @@ const ActionToolbar = ({ getCurrentDietState, savedDiets, setSavedDiets, loadDie
     toast.error('Dieta eliminada.');
   };
 
-  // ✅ Modal personalizado para nueva dieta
   const handleNewDietWithWarning = () => {
     setShowNewDietWarning(true);
     setIsDrawerOpen(false);
   };
 
-  // ✅ Modal personalizado para cargar dieta
   const handleLoadDietWithWarning = (diet) => {
     setShowLoadWarning(diet);
   };
@@ -91,7 +91,6 @@ const ActionToolbar = ({ getCurrentDietState, savedDiets, setSavedDiets, loadDie
       const LIGHT_GRAY = [236, 240, 241];
       const WHITE = [255, 255, 255];
 
-      // ✅ Sin emojis — jsPDF no los soporta
       const addSectionHeader = (title) => {
         if (lastY > 250) { doc.addPage(); lastY = 20; }
         doc.setFillColor(...GREEN);
@@ -160,7 +159,6 @@ const ActionToolbar = ({ getCurrentDietState, savedDiets, setSavedDiets, loadDie
         });
         lastY = doc.lastAutoTable.finalY + 10;
 
-        // Objetivos nutricionales
         checkPageBreak(40);
         addSectionHeader('OBJETIVOS NUTRICIONALES');
 
@@ -281,6 +279,7 @@ const ActionToolbar = ({ getCurrentDietState, savedDiets, setSavedDiets, loadDie
   };
 
   const userInitial = user?.username?.charAt(0).toUpperCase() || '?';
+  const isAdmin = user?.role === 'admin';
 
   return (
     <>
@@ -338,10 +337,35 @@ const ActionToolbar = ({ getCurrentDietState, savedDiets, setSavedDiets, loadDie
 
           <p className="font-bold text-lg">{user?.username}</p>
           <p className="text-gray-400 text-sm">{user?.email}</p>
+
+          {/* Badge admin */}
+          {isAdmin && (
+            <span className="mt-2 inline-flex items-center gap-1 bg-green-700 text-green-200 text-xs font-semibold px-3 py-1 rounded-full">
+              <ShieldCheck size={12} />
+              Administrador
+            </span>
+          )}
         </div>
 
         {/* Opciones */}
         <nav className="flex-1 overflow-y-auto py-4">
+
+          {/* ── Sección Admin — solo visible para admins ── */}
+          {isAdmin && (
+            <>
+              <p className="text-gray-500 text-xs uppercase font-semibold px-6 mb-2 tracking-wider">
+                Administración
+              </p>
+              <MenuItem
+                icon={<ShieldCheck size={18} />}
+                label="Panel APEN"
+                onClick={() => { setIsDrawerOpen(false); navigate('/admin'); }}
+                color="text-green-400"
+              />
+              <div className="border-t border-gray-700 my-4" />
+            </>
+          )}
+
           <p className="text-gray-500 text-xs uppercase font-semibold px-6 mb-2 tracking-wider">
             Gestion de Dietas
           </p>
@@ -382,16 +406,10 @@ const ActionToolbar = ({ getCurrentDietState, savedDiets, setSavedDiets, loadDie
               Los datos actuales que no hayas guardado se perderan permanentemente. Esta accion no se puede deshacer.
             </p>
             <div className="flex justify-end gap-3">
-              <button
-                onClick={() => setShowNewDietWarning(false)}
-                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium"
-              >
+              <button onClick={() => setShowNewDietWarning(false)} className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium">
                 Cancelar
               </button>
-              <button
-                onClick={() => { handleNewDiet(); setShowNewDietWarning(false); }}
-                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium"
-              >
+              <button onClick={() => { handleNewDiet(); setShowNewDietWarning(false); }} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium">
                 Continuar
               </button>
             </div>
@@ -416,16 +434,10 @@ const ActionToolbar = ({ getCurrentDietState, savedDiets, setSavedDiets, loadDie
               Los datos actuales no guardados se perderan. Esta accion no se puede deshacer.
             </p>
             <div className="flex justify-end gap-3">
-              <button
-                onClick={() => setShowLoadWarning(null)}
-                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium"
-              >
+              <button onClick={() => setShowLoadWarning(null)} className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium">
                 Cancelar
               </button>
-              <button
-                onClick={confirmLoadDiet}
-                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium"
-              >
+              <button onClick={confirmLoadDiet} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium">
                 Cargar de todas formas
               </button>
             </div>
@@ -443,17 +455,13 @@ const ActionToolbar = ({ getCurrentDietState, savedDiets, setSavedDiets, loadDie
                 {modal === 'load' && 'Cargar Dieta'}
                 {modal === 'pdf' && 'Descargar PDF'}
               </h3>
-              <button onClick={() => setModal(null)} className="text-gray-400 hover:text-gray-700">
-                <X />
-              </button>
+              <button onClick={() => setModal(null)} className="text-gray-400 hover:text-gray-700"><X /></button>
             </div>
 
             {/* Guardar */}
             {modal === 'save' && (
               <div className="space-y-4">
-                <label className="block text-sm font-medium text-gray-700">
-                  Nombre de la Dieta
-                </label>
+                <label className="block text-sm font-medium text-gray-700">Nombre de la Dieta</label>
                 <input
                   type="text"
                   value={dietName}
@@ -463,12 +471,8 @@ const ActionToolbar = ({ getCurrentDietState, savedDiets, setSavedDiets, loadDie
                   onKeyDown={e => e.key === 'Enter' && handleSave()}
                 />
                 <div className="flex justify-end gap-3">
-                  <button onClick={() => setModal(null)} className="px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200">
-                    Cancelar
-                  </button>
-                  <button onClick={handleSave} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
-                    Guardar
-                  </button>
+                  <button onClick={() => setModal(null)} className="px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200">Cancelar</button>
+                  <button onClick={handleSave} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">Guardar</button>
                 </div>
               </div>
             )}
@@ -483,18 +487,8 @@ const ActionToolbar = ({ getCurrentDietState, savedDiets, setSavedDiets, loadDie
                       {diet.name}
                     </span>
                     <div className="flex gap-2">
-                      <button
-                        onClick={() => handleLoadDietWithWarning(diet)}
-                        className="bg-green-500 text-white px-3 py-1 rounded-lg hover:bg-green-600 text-sm"
-                      >
-                        Cargar
-                      </button>
-                      <button
-                        onClick={() => handleDelete(diet.id)}
-                        className="bg-red-500 text-white p-1 rounded-lg hover:bg-red-600"
-                      >
-                        <Trash2 size={16} />
-                      </button>
+                      <button onClick={() => handleLoadDietWithWarning(diet)} className="bg-green-500 text-white px-3 py-1 rounded-lg hover:bg-green-600 text-sm">Cargar</button>
+                      <button onClick={() => handleDelete(diet.id)} className="bg-red-500 text-white p-1 rounded-lg hover:bg-red-600"><Trash2 size={16} /></button>
                     </div>
                   </div>
                 )) : (
@@ -506,9 +500,7 @@ const ActionToolbar = ({ getCurrentDietState, savedDiets, setSavedDiets, loadDie
             {/* PDF */}
             {modal === 'pdf' && (
               <div className="space-y-4">
-                <p className="text-gray-600 text-sm">
-                  Selecciona las secciones que queres incluir en el PDF:
-                </p>
+                <p className="text-gray-600 text-sm">Selecciona las secciones que queres incluir en el PDF:</p>
                 <div className="space-y-2">
                   {[
                     { key: 'datos', label: 'Datos del paciente y objetivos nutricionales' },
@@ -527,14 +519,8 @@ const ActionToolbar = ({ getCurrentDietState, savedDiets, setSavedDiets, loadDie
                   ))}
                 </div>
                 <div className="flex justify-end gap-3 mt-4">
-                  <button onClick={() => setModal(null)} className="px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200">
-                    Cancelar
-                  </button>
-                  <button
-                    onClick={handlePdfDownload}
-                    disabled={isProcessing}
-                    className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
-                  >
+                  <button onClick={() => setModal(null)} className="px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200">Cancelar</button>
+                  <button onClick={handlePdfDownload} disabled={isProcessing} className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50">
                     {isProcessing ? 'Generando...' : 'Generar PDF'}
                   </button>
                 </div>
