@@ -1,6 +1,6 @@
 // mi-app-frontend/src/pages/fercalc/FraccionamientoTab.jsx
 import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { PlusCircle, X, Edit, Trash2, Settings, CalendarDays, Clock, ClipboardList, Repeat, AlertTriangle, Zap, Droplet, GripVertical, Check, ChevronDown, ChevronRight } from 'lucide-react';
+import { PlusCircle, X, Edit, Trash2, Settings, CalendarDays, Clock, ClipboardList, Repeat, AlertTriangle, Zap, Droplet, GripVertical, Check, ChevronDown, ChevronRight, BookOpen, Tag } from 'lucide-react';
 
 const Notification = ({ message, type, onDismiss }) => {
   useEffect(() => { const t = setTimeout(onDismiss, 4000); return () => clearTimeout(t); }, [onDismiss]);
@@ -44,13 +44,185 @@ const DistribucionNutricional = ({ calorias, hc, proteinas, lipidos, color = 'bl
   );
 };
 
+// ── MODAL DE RECETARIO ──
+const RecetarioModal = ({ mealKey, mealLabel, dayIndex, ingredientes, recetarios, setRecetarios, onClose }) => {
+  const recetarioKey = `${dayIndex}_${mealKey}`;
+  const [preparacion, setPreparacion] = useState(recetarios[recetarioKey]?.preparacion || '');
+
+  const handleSave = () => {
+    setRecetarios(prev => ({
+      ...prev,
+      [recetarioKey]: { preparacion }
+    }));
+    onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50 p-4">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-5 rounded-t-2xl">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-3">
+              <BookOpen className="text-white" size={22} />
+              <div>
+                <h3 className="text-lg font-bold text-white">Recetario</h3>
+                <p className="text-green-100 text-sm">{mealLabel} — Dia {dayIndex + 1}</p>
+              </div>
+            </div>
+            <button onClick={onClose} className="text-white hover:text-green-200 transition-colors">
+              <X size={22} />
+            </button>
+          </div>
+        </div>
+
+        <div className="p-6 space-y-6">
+          {/* Ingredientes */}
+          <div>
+            <h4 className="text-base font-bold text-gray-800 mb-3 flex items-center gap-2">
+              <span className="w-6 h-6 bg-green-100 text-green-700 rounded-full flex items-center justify-center text-xs font-bold">1</span>
+              Ingredientes
+            </h4>
+            {ingredientes.length === 0 ? (
+              <div className="bg-gray-50 border border-dashed border-gray-300 rounded-xl p-4 text-center text-gray-400 text-sm">
+                Aun no hay alimentos asignados a este menu. Asigna alimentos primero para ver los ingredientes aqui.
+              </div>
+            ) : (
+              <div className="bg-gray-50 rounded-xl border divide-y">
+                {ingredientes.map(({ nombre, cantidad, unidad }, i) => (
+                  <div key={i} className="flex justify-between items-center px-4 py-3">
+                    <span className="text-sm font-medium text-gray-800">{nombre}</span>
+                    <span className="text-sm font-bold text-green-700 bg-green-50 px-3 py-1 rounded-full">
+                      {cantidad.toFixed(1)} {unidad || 'g'}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Preparación */}
+          <div>
+            <h4 className="text-base font-bold text-gray-800 mb-3 flex items-center gap-2">
+              <span className="w-6 h-6 bg-green-100 text-green-700 rounded-full flex items-center justify-center text-xs font-bold">2</span>
+              Preparacion
+            </h4>
+            <textarea
+              value={preparacion}
+              onChange={e => setPreparacion(e.target.value)}
+              placeholder="Describe el modo de preparacion: pasos, tecnicas de coccion, tiempos, consejos..."
+              rows={7}
+              className="w-full p-4 border border-gray-200 rounded-xl text-sm text-gray-700 focus:ring-2 focus:ring-green-500 focus:outline-none resize-none placeholder-gray-400 leading-relaxed"
+            />
+            <p className="text-xs text-gray-400 mt-1 text-right">{preparacion.length} caracteres</p>
+          </div>
+
+          {/* Botones */}
+          <div className="flex gap-3 pt-2">
+            <button onClick={onClose} className="flex-1 px-4 py-2.5 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 font-medium transition-colors">
+              Cancelar
+            </button>
+            <button onClick={handleSave} className="flex-1 px-4 py-2.5 bg-green-600 text-white rounded-xl hover:bg-green-700 font-medium flex items-center justify-center gap-2 transition-colors">
+              <Check size={16} /> Guardar Recetario
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ── MODAL NOMBRE DE MENÚ POR DÍA ──
+const MealNameModal = ({ mealKey, numberOfDays, mealNamesByDay, onSave, onClose }) => {
+  const [nombre, setNombre] = useState('');
+  const [applyTo, setApplyTo] = useState('all');
+  const [selectedDays, setSelectedDays] = useState([]);
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50 p-4">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm">
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4 rounded-t-2xl flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <Tag className="text-white" size={18} />
+            <h3 className="text-base font-bold text-white">Nombre del menu</h3>
+          </div>
+          <button onClick={onClose} className="text-white hover:text-blue-200"><X size={20} /></button>
+        </div>
+        <div className="p-5 space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Nombre para <span className="font-bold text-blue-600">{mealKey}</span></label>
+            <input
+              type="text"
+              value={nombre}
+              onChange={e => setNombre(e.target.value)}
+              placeholder={`Ej: Cafe con leche, Omelet...`}
+              className="w-full p-2.5 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm"
+              autoFocus
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Aplicar a</label>
+            <div className="space-y-2">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input type="radio" checked={applyTo === 'all'} onChange={() => setApplyTo('all')} className="accent-blue-600" />
+                <span className="text-sm">Todos los dias</span>
+              </label>
+              {numberOfDays > 1 && (
+                <>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="radio" checked={applyTo === 'specific'} onChange={() => setApplyTo('specific')} className="accent-blue-600" />
+                    <span className="text-sm">Dias especificos</span>
+                  </label>
+                  {applyTo === 'specific' && (
+                    <div className="flex flex-wrap gap-2 pl-6 pt-1">
+                      {Array.from({ length: numberOfDays }, (_, i) => (
+                        <label key={i} className={`flex items-center gap-1 text-xs cursor-pointer px-2.5 py-1.5 rounded-lg border transition-colors ${selectedDays.includes(i) ? 'bg-blue-600 text-white border-blue-600' : 'bg-gray-50 text-gray-700 border-gray-200 hover:border-blue-400'}`}>
+                          <input type="checkbox" checked={selectedDays.includes(i)}
+                            onChange={e => setSelectedDays(prev => e.target.checked ? [...prev, i] : prev.filter(d => d !== i))}
+                            className="hidden" />
+                          Dia {i + 1}
+                        </label>
+                      ))}
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+          <div className="flex gap-3 pt-1">
+            <button onClick={onClose} className="flex-1 px-4 py-2 bg-gray-100 rounded-xl hover:bg-gray-200 text-sm font-medium">Cancelar</button>
+            <button
+              onClick={() => {
+                if (!nombre.trim()) return;
+                const days = applyTo === 'all'
+                  ? Array.from({ length: numberOfDays }, (_, i) => i)
+                  : selectedDays;
+                onSave(mealKey, nombre.trim(), days);
+                onClose();
+              }}
+              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 text-sm font-medium flex items-center justify-center gap-2"
+            >
+              <Check size={14} /> Guardar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // ── FRACCIONAMIENTO POR DESARROLLADA ──
 const FraccionamientoDesarrollada = ({ dietaActual, numberOfDays, mealSlots, getMealTimeForDay, distribucion, setDistribucion, showNotification }) => {
   const [assigningFood, setAssigningFood] = useState(null);
   const [editingFood, setEditingFood] = useState(null);
   const [quickAssignState, setQuickAssignState] = useState({});
-  // ✅ Estado retráctil por día
   const [collapsedDays, setCollapsedDays] = useState({});
+  // ✅ Recetarios: { "dayIndex_mealKey": { preparacion } }
+  const [recetarios, setRecetarios] = useState({});
+  const [recetarioModal, setRecetarioModal] = useState(null); // { dayIndex, mealKey }
+  // ✅ Nombres de menú por día: { "dayIndex_mealKey": nombre }
+  const [mealNamesByDay, setMealNamesByDay] = useState({});
+  const [mealNameModal, setMealNameModal] = useState(null); // mealKey
 
   const toggleDay = (dayIndex) => setCollapsedDays(prev => ({ ...prev, [dayIndex]: !prev[dayIndex] }));
 
@@ -65,27 +237,42 @@ const FraccionamientoDesarrollada = ({ dietaActual, numberOfDays, mealSlots, get
     }, { calorias: 0, hc: 0, proteinas: 0, lipidos: 0 });
   }, [dietaActual]);
 
-  // ✅ CORREGIDO: gramos disponibles POR DÍA (independiente entre días)
+  // ✅ Gramos disponibles SOLO para el día actual (independiente entre días)
   const getAvailableGramsForDay = (item, dayIndex) => {
     const assignedThisDay = Object.values((distribucion[dayIndex] || {})[item.id] || {})
       .reduce((s, v) => s + (parseFloat(v) || 0), 0);
     return item.cantidadUsada - assignedThisDay;
   };
 
-  // Gramos totales restantes para el banco
+  // ✅ Banco muestra gramos totales del plan (suma de todos los días) vs total disponible
   const remainingGrams = useMemo(() => {
     const r = {};
     (dietaActual || []).forEach(item => {
-      const total = Object.values(distribucion).reduce((daySum, dayData) => {
+      const totalAsignado = Object.values(distribucion).reduce((daySum, dayData) => {
         return daySum + Object.values(dayData[item.id] || {}).reduce((s, v) => s + (parseFloat(v) || 0), 0);
       }, 0);
-      r[item.id] = item.cantidadUsada - total;
+      // El banco muestra cuánto queda del total × días
+      r[item.id] = (item.cantidadUsada * numberOfDays) - totalAsignado;
     });
     return r;
-  }, [dietaActual, distribucion]);
+  }, [dietaActual, distribucion, numberOfDays]);
+
+  const getMealLabel = (mealKey, dayIndex) => {
+    return mealNamesByDay[`${dayIndex}_${mealKey}`] || mealKey;
+  };
+
+  const handleSaveMealName = (mealKey, nombre, days) => {
+    setMealNamesByDay(prev => {
+      const updated = { ...prev };
+      days.forEach(dayIndex => {
+        updated[`${dayIndex}_${mealKey}`] = nombre;
+      });
+      return updated;
+    });
+    showNotification('success', `Nombre guardado para ${mealKey}`);
+  };
 
   const handleQuickAssignSave = (dayIndex, mealKey) => {
-    // ✅ Validar que no se supere el total del alimento por día
     const errores = [];
     Object.entries(quickAssignState).forEach(([foodId, grams]) => {
       const g = parseFloat(grams) || 0;
@@ -93,7 +280,7 @@ const FraccionamientoDesarrollada = ({ dietaActual, numberOfDays, mealSlots, get
       const item = (dietaActual || []).find(i => String(i.id) === String(foodId));
       if (!item) return;
       const available = getAvailableGramsForDay(item, dayIndex);
-      if (g > available) errores.push(`${item.alimento.nombre}: maximo ${available.toFixed(1)}g disponibles`);
+      if (g > available + 0.01) errores.push(`${item.alimento.nombre}: max ${available.toFixed(1)}g disponibles hoy`);
     });
     if (errores.length > 0) { showNotification('error', errores[0]); return; }
 
@@ -109,7 +296,7 @@ const FraccionamientoDesarrollada = ({ dietaActual, numberOfDays, mealSlots, get
       });
       return d;
     });
-    showNotification('success', `Alimentos asignados a ${mealKey}`);
+    showNotification('success', `Alimentos asignados a ${getMealLabel(mealKey, dayIndex)}`);
     setQuickAssignState({});
     setAssigningFood(null);
   };
@@ -129,7 +316,7 @@ const FraccionamientoDesarrollada = ({ dietaActual, numberOfDays, mealSlots, get
     const distribucionDia = distribucion[dayIndex] || {};
     const [local, setLocal] = useState(distribucionDia[foodItem.id] || {});
     const total = Object.values(local).reduce((s, v) => s + (parseFloat(v) || 0), 0);
-    const over = total > foodItem.cantidadUsada;
+    const over = total > foodItem.cantidadUsada + 0.01;
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4">
         <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-md">
@@ -138,12 +325,12 @@ const FraccionamientoDesarrollada = ({ dietaActual, numberOfDays, mealSlots, get
             <button onClick={onCancel}><X className="text-gray-400 hover:text-gray-700" /></button>
           </div>
           <p className="text-sm text-gray-500 mb-4">
-            Dia {dayIndex + 1} — Max: <span className="font-bold">{foodItem.cantidadUsada}g</span> — Asignado: <span className={`font-bold ${over ? 'text-red-500' : 'text-green-600'}`}>{total.toFixed(1)}g</span>
+            Dia {dayIndex + 1} — Max por dia: <span className="font-bold">{foodItem.cantidadUsada}g</span> — Asignado: <span className={`font-bold ${over ? 'text-red-500' : 'text-green-600'}`}>{total.toFixed(1)}g</span>
           </p>
           <div className="space-y-3 max-h-64 overflow-y-auto pr-1">
             {mealSlots.map(mealKey => (
               <div key={mealKey} className="flex justify-between items-center">
-                <label className="text-gray-700 text-sm">{mealKey}</label>
+                <label className="text-gray-700 text-sm">{getMealLabel(mealKey, dayIndex)}</label>
                 <input type="number" min="0" value={local[mealKey] || ''}
                   onChange={e => setLocal(p => ({ ...p, [mealKey]: parseFloat(e.target.value) || 0 }))}
                   placeholder="0 g" className="w-24 p-1.5 border rounded-lg text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none" />
@@ -164,21 +351,28 @@ const FraccionamientoDesarrollada = ({ dietaActual, numberOfDays, mealSlots, get
     <div>
       <DistribucionNutricional calorias={totalDieta.calorias} hc={totalDieta.hc} proteinas={totalDieta.proteinas} lipidos={totalDieta.lipidos} color="blue" />
 
+      {/* ✅ Banco corregido: muestra total × días */}
       <div className="bg-white p-6 rounded-xl shadow-sm border mb-6">
         <h3 className="text-lg font-semibold mb-1">Banco de Alimentos para Distribuir</h3>
-        <p className="text-sm text-gray-500 mb-4">Gramos totales restantes en el ciclo completo.</p>
+        <p className="text-sm text-gray-500 mb-4">
+          Cada alimento puede usarse en <span className="font-semibold text-blue-600">cada dia</span> hasta su cantidad total. El banco muestra cuanto queda considerando los {numberOfDays} dia{numberOfDays > 1 ? 's' : ''} del ciclo.
+        </p>
         {(dietaActual || []).length === 0 ? (
           <p className="text-gray-400 italic">No hay alimentos en la dieta desarrollada.</p>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-            {(dietaActual || []).map(item => (
-              <div key={item.id} className={`p-3 border rounded-xl ${remainingGrams[item.id] < -0.01 ? 'bg-red-50 border-red-300' : 'bg-gray-50 border-gray-200'}`}>
-                <p className="font-medium text-sm text-gray-800">{item.alimento.nombre}</p>
-                <p className={`text-sm font-bold mt-1 ${Math.abs(remainingGrams[item.id]) < 0.01 ? 'text-gray-400' : remainingGrams[item.id] < 0 ? 'text-red-600' : 'text-green-600'}`}>
-                  {(remainingGrams[item.id] ?? item.cantidadUsada).toFixed(1)}g restantes
-                </p>
-              </div>
-            ))}
+            {(dietaActual || []).map(item => {
+              const rem = remainingGrams[item.id] ?? (item.cantidadUsada * numberOfDays);
+              return (
+                <div key={item.id} className={`p-3 border rounded-xl ${rem < -0.01 ? 'bg-red-50 border-red-300' : 'bg-gray-50 border-gray-200'}`}>
+                  <p className="font-medium text-sm text-gray-800">{item.alimento.nombre}</p>
+                  <p className="text-xs text-gray-400 mt-0.5">{item.cantidadUsada}g × {numberOfDays} dia{numberOfDays > 1 ? 's' : ''}</p>
+                  <p className={`text-sm font-bold mt-1 ${Math.abs(rem) < 0.01 ? 'text-gray-400' : rem < 0 ? 'text-red-600' : 'text-green-600'}`}>
+                    {rem.toFixed(1)}g restantes
+                  </p>
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
@@ -188,13 +382,12 @@ const FraccionamientoDesarrollada = ({ dietaActual, numberOfDays, mealSlots, get
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-end z-50">
           <div className="bg-white w-full max-w-sm h-full overflow-y-auto shadow-2xl p-6 flex flex-col">
             <div className="flex justify-between items-center mb-2">
-              <h3 className="text-lg font-bold text-gray-800">Asignar: {assigningFood.mealKey}</h3>
+              <h3 className="text-lg font-bold text-gray-800">Asignar: {getMealLabel(assigningFood.mealKey, assigningFood.dayIndex)}</h3>
               <button onClick={() => { setAssigningFood(null); setQuickAssignState({}); }}><X className="text-gray-400 hover:text-gray-700" /></button>
             </div>
-            <p className="text-sm text-gray-500 mb-4">Dia {assigningFood.dayIndex + 1}</p>
+            <p className="text-sm text-gray-500 mb-4">Dia {assigningFood.dayIndex + 1} — Disponible solo para este dia</p>
             <div className="flex-1 space-y-3 overflow-y-auto pr-1">
               {(dietaActual || []).map(item => {
-                // ✅ Muestra disponible POR DÍA
                 const availableThisDay = getAvailableGramsForDay(item, assigningFood.dayIndex);
                 return (
                   <div key={item.id} className="flex justify-between items-center p-2 bg-gray-50 rounded-lg">
@@ -204,13 +397,11 @@ const FraccionamientoDesarrollada = ({ dietaActual, numberOfDays, mealSlots, get
                         {availableThisDay.toFixed(1)}g disponibles hoy
                       </p>
                     </div>
-                    <input
-                      type="number" min="0" max={Math.max(0, availableThisDay)}
+                    <input type="number" min="0" max={Math.max(0, availableThisDay)}
                       value={quickAssignState[item.id] || ''}
                       onChange={e => setQuickAssignState(p => ({ ...p, [item.id]: e.target.value }))}
                       placeholder="0g"
-                      className="w-20 p-1.5 border rounded-lg text-sm text-right focus:ring-2 focus:ring-blue-400 focus:outline-none"
-                    />
+                      className="w-20 p-1.5 border rounded-lg text-sm text-right focus:ring-2 focus:ring-blue-400 focus:outline-none" />
                   </div>
                 );
               })}
@@ -230,13 +421,42 @@ const FraccionamientoDesarrollada = ({ dietaActual, numberOfDays, mealSlots, get
         <DistributionModal foodItem={editingFood.foodItem} dayIndex={editingFood.dayIndex} onSave={handleSaveDistribution} onCancel={() => setEditingFood(null)} />
       )}
 
-      {/* ✅ Días retráctiles */}
+      {/* Modal nombre de menú */}
+      {mealNameModal && (
+        <MealNameModal
+          mealKey={mealNameModal}
+          numberOfDays={numberOfDays}
+          mealNamesByDay={mealNamesByDay}
+          onSave={handleSaveMealName}
+          onClose={() => setMealNameModal(null)}
+        />
+      )}
+
+      {/* Modal recetario */}
+      {recetarioModal && (
+        <RecetarioModal
+          mealKey={recetarioModal.mealKey}
+          mealLabel={getMealLabel(recetarioModal.mealKey, recetarioModal.dayIndex)}
+          dayIndex={recetarioModal.dayIndex}
+          ingredientes={(() => {
+            const distribucionDelDia = distribucion[recetarioModal.dayIndex] || {};
+            return (dietaActual || []).map(foodItem => {
+              const grams = (distribucionDelDia[foodItem.id] || {})[recetarioModal.mealKey] || 0;
+              return grams > 0 ? { nombre: foodItem.alimento.nombre, cantidad: grams, unidad: foodItem.alimento.unidad } : null;
+            }).filter(Boolean);
+          })()}
+          recetarios={recetarios}
+          setRecetarios={setRecetarios}
+          onClose={() => setRecetarioModal(null)}
+        />
+      )}
+
+      {/* Días */}
       {Array.from({ length: numberOfDays }).map((_, dayIndex) => {
         const distribucionDelDia = distribucion[dayIndex] || {};
         const mealTimesForDay = getMealTimeForDay(dayIndex);
         const isCollapsed = collapsedDays[dayIndex] || false;
 
-        // Total kcal del día
         const totalKcalDia = mealSlots.reduce((dayTotal, mealKey) => {
           return dayTotal + (dietaActual || []).reduce((mealTotal, foodItem) => {
             const grams = (distribucionDelDia[foodItem.id] || {})[mealKey] || 0;
@@ -247,24 +467,22 @@ const FraccionamientoDesarrollada = ({ dietaActual, numberOfDays, mealSlots, get
 
         return (
           <div key={dayIndex} className="mb-6">
-            {/* ✅ Header retráctil del día */}
-            <button
-              onClick={() => toggleDay(dayIndex)}
-              className="w-full flex items-center justify-between px-4 py-3 bg-blue-600 text-white rounded-xl mb-3 hover:bg-blue-700 transition-colors"
-            >
+            <button onClick={() => toggleDay(dayIndex)}
+              className="w-full flex items-center justify-between px-4 py-3 bg-blue-600 text-white rounded-xl mb-3 hover:bg-blue-700 transition-colors">
               <div className="flex items-center gap-3">
                 {isCollapsed ? <ChevronRight size={20} /> : <ChevronDown size={20} />}
                 <span className="text-lg font-bold">Dia {dayIndex + 1}</span>
-                {totalKcalDia > 0 && (
-                  <span className="text-sm font-normal text-blue-200">
-                    {totalKcalDia.toFixed(0)} kcal totales
-                  </span>
-                )}
+                {totalKcalDia > 0 && <span className="text-sm font-normal text-blue-200">{totalKcalDia.toFixed(0)} kcal totales</span>}
               </div>
               <span className="text-sm text-blue-200">{isCollapsed ? 'Expandir' : 'Contraer'}</span>
             </button>
 
             {!isCollapsed && mealSlots.map(mealKey => {
+              const mealLabel = getMealLabel(mealKey, dayIndex);
+              const hasCustomName = mealNamesByDay[`${dayIndex}_${mealKey}`];
+              const recetarioKey = `${dayIndex}_${mealKey}`;
+              const tieneRecetario = recetarios[recetarioKey]?.preparacion;
+
               const mealFoods = (dietaActual || []).map(foodItem => {
                 const grams = (distribucionDelDia[foodItem.id] || {})[mealKey] || 0;
                 return grams > 0 ? { foodItem, assignedGrams: grams } : null;
@@ -280,14 +498,26 @@ const FraccionamientoDesarrollada = ({ dietaActual, numberOfDays, mealSlots, get
                 return acc;
               }, { calorias: 0, hc: 0, proteina: 0, grasa: 0, gramos: 0 });
 
-              // ✅ VCT calculado correctamente
               const pctVCT = totalKcalDia > 0 ? (mealTotals.calorias / totalKcalDia) * 100 : 0;
 
               return (
                 <div key={mealKey} className="bg-white rounded-xl shadow-sm border border-l-4 border-l-blue-500 mb-3 overflow-hidden">
                   <div className="px-5 py-3 flex justify-between items-center flex-wrap gap-2 bg-gray-50 border-b">
-                    <div className="flex items-center gap-3 flex-wrap">
-                      <h3 className="text-base font-bold text-gray-800">{mealKey}</h3>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {/* ✅ Nombre del menú con botón editar */}
+                      <div className="flex items-center gap-1.5">
+                        <h3 className="text-base font-bold text-gray-800">{mealLabel}</h3>
+                        {hasCustomName && (
+                          <span className="text-xs text-gray-400 italic">({mealKey})</span>
+                        )}
+                        <button
+                          onClick={() => setMealNameModal(mealKey)}
+                          className="text-gray-300 hover:text-blue-500 transition-colors"
+                          title="Nombrar este menu para dias especificos"
+                        >
+                          <Edit size={13} />
+                        </button>
+                      </div>
                       {mealTimesForDay[mealKey] && (
                         <span className="text-xs text-gray-500 flex items-center gap-1 bg-white border px-2 py-0.5 rounded-full">
                           <Clock size={12} />{mealTimesForDay[mealKey]}
@@ -299,13 +529,25 @@ const FraccionamientoDesarrollada = ({ dietaActual, numberOfDays, mealSlots, get
                         </span>
                       )}
                     </div>
-                    <button
-                      onClick={() => { setQuickAssignState({}); setAssigningFood({ dayIndex, mealKey }); }}
-                      className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm flex items-center gap-1 hover:bg-blue-700"
-                    >
-                      <PlusCircle size={15} /> Asignar Alimentos
-                    </button>
+                    {/* ✅ Botones Asignar + Recetario */}
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setRecetarioModal({ dayIndex, mealKey })}
+                        className={`px-3 py-1.5 rounded-lg text-sm flex items-center gap-1 transition-colors border ${tieneRecetario ? 'bg-emerald-50 text-emerald-700 border-emerald-300 hover:bg-emerald-100' : 'bg-white text-gray-600 border-gray-200 hover:border-green-400 hover:text-green-600'}`}
+                        title="Ver/editar recetario"
+                      >
+                        <BookOpen size={14} />
+                        {tieneRecetario ? 'Ver Receta' : 'Recetario'}
+                      </button>
+                      <button
+                        onClick={() => { setQuickAssignState({}); setAssigningFood({ dayIndex, mealKey }); }}
+                        className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm flex items-center gap-1 hover:bg-blue-700"
+                      >
+                        <PlusCircle size={15} /> Asignar
+                      </button>
+                    </div>
                   </div>
+
                   {mealFoods.length > 0 ? (
                     <div className="overflow-x-auto p-2">
                       <table className="w-full text-sm whitespace-nowrap">
@@ -379,8 +621,11 @@ const FraccionamientoIntercambio = ({ planIntercambio, numberOfDays, mealSlots, 
   const [editingGroup, setEditingGroup] = useState(null);
   const [assigningGroup, setAssigningGroup] = useState(null);
   const [quickAssignState, setQuickAssignState] = useState({});
-  // ✅ Estado retráctil
   const [collapsedDays, setCollapsedDays] = useState({});
+  const [recetarios, setRecetarios] = useState({});
+  const [recetarioModal, setRecetarioModal] = useState(null);
+  const [mealNamesByDay, setMealNamesByDay] = useState({});
+  const [mealNameModal, setMealNameModal] = useState(null);
 
   const toggleDay = (dayIndex) => setCollapsedDays(prev => ({ ...prev, [dayIndex]: !prev[dayIndex] }));
 
@@ -391,19 +636,29 @@ const FraccionamientoIntercambio = ({ planIntercambio, numberOfDays, mealSlots, 
   const remainingPortions = useMemo(() => {
     const r = {};
     Object.keys(porcionesDelPlan).forEach(groupName => {
-      const total = Object.values(distribucion).reduce((daySum, dayData) => {
+      const totalAsignado = Object.values(distribucion).reduce((daySum, dayData) => {
         return daySum + Object.values(dayData[groupName] || {}).reduce((s, v) => s + (parseFloat(v) || 0), 0);
       }, 0);
-      r[groupName] = (porcionesDelPlan[groupName] || 0) - total;
+      r[groupName] = (porcionesDelPlan[groupName] || 0) * numberOfDays - totalAsignado;
     });
     return r;
-  }, [porcionesDelPlan, distribucion]);
+  }, [porcionesDelPlan, distribucion, numberOfDays]);
 
-  // ✅ Porciones disponibles por día
   const getAvailablePortionsForDay = (groupName, dayIndex) => {
     const assignedThisDay = Object.values((distribucion[dayIndex] || {})[groupName] || {})
       .reduce((s, v) => s + (parseFloat(v) || 0), 0);
     return (porcionesDelPlan[groupName] || 0) - assignedThisDay;
+  };
+
+  const getMealLabel = (mealKey, dayIndex) => mealNamesByDay[`${dayIndex}_${mealKey}`] || mealKey;
+
+  const handleSaveMealName = (mealKey, nombre, days) => {
+    setMealNamesByDay(prev => {
+      const updated = { ...prev };
+      days.forEach(dayIndex => { updated[`${dayIndex}_${mealKey}`] = nombre; });
+      return updated;
+    });
+    showNotification('success', `Nombre guardado para ${mealKey}`);
   };
 
   const handleSaveDistribution = (dayIndex, groupName, newDist) => {
@@ -430,7 +685,7 @@ const FraccionamientoIntercambio = ({ planIntercambio, numberOfDays, mealSlots, 
       });
       return d;
     });
-    showNotification('success', `Grupos asignados a ${mealKey}`);
+    showNotification('success', `Grupos asignados a ${getMealLabel(mealKey, dayIndex)}`);
     setQuickAssignState({});
     setAssigningGroup(null);
   };
@@ -439,7 +694,7 @@ const FraccionamientoIntercambio = ({ planIntercambio, numberOfDays, mealSlots, 
     const [local, setLocal] = useState((distribucion[dayIndex] || {})[groupName] || {});
     const total = Object.values(local).reduce((s, v) => s + (parseFloat(v) || 0), 0);
     const totalPortions = porcionesDelPlan[groupName] || 0;
-    const over = total > totalPortions;
+    const over = total > totalPortions + 0.01;
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4">
         <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-md">
@@ -453,7 +708,7 @@ const FraccionamientoIntercambio = ({ planIntercambio, numberOfDays, mealSlots, 
           <div className="space-y-3 max-h-64 overflow-y-auto pr-1">
             {mealSlots.map(mealKey => (
               <div key={mealKey} className="flex justify-between items-center">
-                <label className="text-sm text-gray-700">{mealKey}</label>
+                <label className="text-sm text-gray-700">{getMealLabel(mealKey, dayIndex)}</label>
                 <input type="number" min="0" step="0.5" value={local[mealKey] || ''}
                   onChange={e => setLocal(p => ({ ...p, [mealKey]: parseFloat(e.target.value) || 0 }))}
                   placeholder="0" className="w-24 p-1.5 border rounded-lg text-sm focus:ring-2 focus:ring-green-400 focus:outline-none" />
@@ -486,7 +741,9 @@ const FraccionamientoIntercambio = ({ planIntercambio, numberOfDays, mealSlots, 
 
       <div className="bg-white p-6 rounded-xl shadow-sm border mb-6">
         <h3 className="text-lg font-semibold mb-1">Banco de Porciones para Distribuir</h3>
-        <p className="text-sm text-gray-500 mb-4">Porciones totales restantes en el ciclo.</p>
+        <p className="text-sm text-gray-500 mb-4">
+          Cada grupo puede usarse en <span className="font-semibold text-green-600">cada dia</span>. El banco muestra porciones restantes para los {numberOfDays} dia{numberOfDays > 1 ? 's' : ''} del ciclo.
+        </p>
         {Object.keys(porcionesDelPlan).length === 0 ? (
           <p className="text-gray-400 italic">No hay porciones definidas.</p>
         ) : (
@@ -494,10 +751,11 @@ const FraccionamientoIntercambio = ({ planIntercambio, numberOfDays, mealSlots, 
             {Object.keys(porcionesDelPlan).map(groupName => {
               const remaining = remainingPortions[groupName];
               return (
-                <div key={groupName} className={`p-3 border rounded-xl ${remaining < 0 ? 'bg-red-50 border-red-300' : 'bg-gray-50 border-gray-200'}`}>
+                <div key={groupName} className={`p-3 border rounded-xl ${remaining < -0.01 ? 'bg-red-50 border-red-300' : 'bg-gray-50 border-gray-200'}`}>
                   <p className="font-medium text-sm text-gray-800">{groupName}</p>
-                  <p className={`text-sm font-bold mt-1 ${remaining === 0 ? 'text-gray-400' : remaining < 0 ? 'text-red-600' : 'text-green-600'}`}>
-                    {remaining} porc. restante{Math.abs(remaining) === 1 ? '' : 's'}
+                  <p className="text-xs text-gray-400 mt-0.5">{porcionesDelPlan[groupName]} porc. × {numberOfDays} dia{numberOfDays > 1 ? 's' : ''}</p>
+                  <p className={`text-sm font-bold mt-1 ${Math.abs(remaining) < 0.01 ? 'text-gray-400' : remaining < 0 ? 'text-red-600' : 'text-green-600'}`}>
+                    {remaining.toFixed(1)} porc. restantes
                   </p>
                 </div>
               );
@@ -510,7 +768,7 @@ const FraccionamientoIntercambio = ({ planIntercambio, numberOfDays, mealSlots, 
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-end z-50">
           <div className="bg-white w-full max-w-sm h-full overflow-y-auto shadow-2xl p-6 flex flex-col">
             <div className="flex justify-between items-center mb-2">
-              <h3 className="text-lg font-bold">Asignar: {assigningGroup.mealKey}</h3>
+              <h3 className="text-lg font-bold">Asignar: {getMealLabel(assigningGroup.mealKey, assigningGroup.dayIndex)}</h3>
               <button onClick={() => { setAssigningGroup(null); setQuickAssignState({}); }}><X className="text-gray-400 hover:text-gray-700" /></button>
             </div>
             <p className="text-sm text-gray-500 mb-4">Dia {assigningGroup.dayIndex + 1}</p>
@@ -547,7 +805,35 @@ const FraccionamientoIntercambio = ({ planIntercambio, numberOfDays, mealSlots, 
         <DistributionModal groupName={editingGroup.groupName} dayIndex={editingGroup.dayIndex} onSave={handleSaveDistribution} onCancel={() => setEditingGroup(null)} />
       )}
 
-      {/* ✅ Días retráctiles */}
+      {mealNameModal && (
+        <MealNameModal
+          mealKey={mealNameModal}
+          numberOfDays={numberOfDays}
+          mealNamesByDay={mealNamesByDay}
+          onSave={handleSaveMealName}
+          onClose={() => setMealNameModal(null)}
+        />
+      )}
+
+      {recetarioModal && (
+        <RecetarioModal
+          mealKey={recetarioModal.mealKey}
+          mealLabel={getMealLabel(recetarioModal.mealKey, recetarioModal.dayIndex)}
+          dayIndex={recetarioModal.dayIndex}
+          ingredientes={(() => {
+            const distribucionDelDia = distribucion[recetarioModal.dayIndex] || {};
+            return Object.keys(distribucionDelDia)
+              .map(groupName => {
+                const portions = (distribucionDelDia[groupName] || {})[recetarioModal.mealKey] || 0;
+                return portions > 0 ? { nombre: groupName, cantidad: portions, unidad: 'porciones' } : null;
+              }).filter(Boolean);
+          })()}
+          recetarios={recetarios}
+          setRecetarios={setRecetarios}
+          onClose={() => setRecetarioModal(null)}
+        />
+      )}
+
       {Array.from({ length: numberOfDays }).map((_, dayIndex) => {
         const distribucionDelDia = distribucion[dayIndex] || {};
         const mealTimesForDay = getMealTimeForDay(dayIndex);
@@ -563,21 +849,22 @@ const FraccionamientoIntercambio = ({ planIntercambio, numberOfDays, mealSlots, 
 
         return (
           <div key={dayIndex} className="mb-6">
-            <button
-              onClick={() => toggleDay(dayIndex)}
-              className="w-full flex items-center justify-between px-4 py-3 bg-green-600 text-white rounded-xl mb-3 hover:bg-green-700 transition-colors"
-            >
+            <button onClick={() => toggleDay(dayIndex)}
+              className="w-full flex items-center justify-between px-4 py-3 bg-green-600 text-white rounded-xl mb-3 hover:bg-green-700 transition-colors">
               <div className="flex items-center gap-3">
                 {isCollapsed ? <ChevronRight size={20} /> : <ChevronDown size={20} />}
                 <span className="text-lg font-bold">Dia {dayIndex + 1}</span>
-                {totalKcalDia > 0 && (
-                  <span className="text-sm font-normal text-green-200">{totalKcalDia.toFixed(0)} kcal totales</span>
-                )}
+                {totalKcalDia > 0 && <span className="text-sm font-normal text-green-200">{totalKcalDia.toFixed(0)} kcal totales</span>}
               </div>
               <span className="text-sm text-green-200">{isCollapsed ? 'Expandir' : 'Contraer'}</span>
             </button>
 
             {!isCollapsed && mealSlots.map(mealKey => {
+              const mealLabel = getMealLabel(mealKey, dayIndex);
+              const hasCustomName = mealNamesByDay[`${dayIndex}_${mealKey}`];
+              const recetarioKey = `${dayIndex}_${mealKey}`;
+              const tieneRecetario = recetarios[recetarioKey]?.preparacion;
+
               const mealGroups = Object.keys(distribucionDelDia)
                 .filter(groupName => (distribucionDelDia[groupName][mealKey] || 0) > 0)
                 .map(groupName => ({ groupName, assignedPortions: distribucionDelDia[groupName][mealKey] }));
@@ -598,8 +885,14 @@ const FraccionamientoIntercambio = ({ planIntercambio, numberOfDays, mealSlots, 
               return (
                 <div key={mealKey} className="bg-white rounded-xl shadow-sm border border-l-4 border-l-green-500 mb-3 overflow-hidden">
                   <div className="px-5 py-3 flex justify-between items-center flex-wrap gap-2 bg-gray-50 border-b">
-                    <div className="flex items-center gap-3 flex-wrap">
-                      <h3 className="text-base font-bold text-gray-800">{mealKey}</h3>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <div className="flex items-center gap-1.5">
+                        <h3 className="text-base font-bold text-gray-800">{mealLabel}</h3>
+                        {hasCustomName && <span className="text-xs text-gray-400 italic">({mealKey})</span>}
+                        <button onClick={() => setMealNameModal(mealKey)} className="text-gray-300 hover:text-green-500 transition-colors" title="Nombrar este menu">
+                          <Edit size={13} />
+                        </button>
+                      </div>
                       {mealTimesForDay[mealKey] && (
                         <span className="text-xs text-gray-500 flex items-center gap-1 bg-white border px-2 py-0.5 rounded-full">
                           <Clock size={12} />{mealTimesForDay[mealKey]}
@@ -611,13 +904,23 @@ const FraccionamientoIntercambio = ({ planIntercambio, numberOfDays, mealSlots, 
                         </span>
                       )}
                     </div>
-                    <button
-                      onClick={() => { setQuickAssignState({}); setAssigningGroup({ dayIndex, mealKey }); }}
-                      className="bg-green-600 text-white px-3 py-1.5 rounded-lg text-sm flex items-center gap-1 hover:bg-green-700"
-                    >
-                      <PlusCircle size={15} /> Asignar Grupos
-                    </button>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setRecetarioModal({ dayIndex, mealKey })}
+                        className={`px-3 py-1.5 rounded-lg text-sm flex items-center gap-1 transition-colors border ${tieneRecetario ? 'bg-emerald-50 text-emerald-700 border-emerald-300 hover:bg-emerald-100' : 'bg-white text-gray-600 border-gray-200 hover:border-green-400 hover:text-green-600'}`}
+                      >
+                        <BookOpen size={14} />
+                        {tieneRecetario ? 'Ver Receta' : 'Recetario'}
+                      </button>
+                      <button
+                        onClick={() => { setQuickAssignState({}); setAssigningGroup({ dayIndex, mealKey }); }}
+                        className="bg-green-600 text-white px-3 py-1.5 rounded-lg text-sm flex items-center gap-1 hover:bg-green-700"
+                      >
+                        <PlusCircle size={15} /> Asignar
+                      </button>
+                    </div>
                   </div>
+
                   {mealGroups.length > 0 ? (
                     <div className="overflow-x-auto p-2">
                       <table className="w-full text-sm">
@@ -696,11 +999,9 @@ const FraccionamientoTab = ({ dietaActual, planIntercambio }) => {
   const showNotification = (type, message) => setNotification({ type, message });
   const isPlanIntercambioProvided = planIntercambio?.porciones && Object.keys(planIntercambio.porciones).length > 0;
 
-  // ✅ CORREGIDO: función que devuelve la hora correcta por día
   const getMealTimeForDay = (dayIndex) => {
     const result = {};
     mealSlots.forEach(mealKey => {
-      // Prioridad: hora específica del día → hora global
       const byDay = mealTimesByDay[dayIndex]?.[mealKey];
       result[mealKey] = byDay !== undefined ? byDay : (mealTimes[mealKey] || '');
     });
@@ -769,7 +1070,6 @@ const FraccionamientoTab = ({ dietaActual, planIntercambio }) => {
         return d;
       });
     } else if (Array.isArray(tempDays) && tempDays.length > 0) {
-      // ✅ CORREGIDO: guardar en mealTimesByDay para cada día seleccionado
       setMealTimesByDay(prev => {
         const d = JSON.parse(JSON.stringify(prev));
         tempDays.forEach(dayIndex => {
@@ -778,7 +1078,6 @@ const FraccionamientoTab = ({ dietaActual, planIntercambio }) => {
         });
         return d;
       });
-      // ✅ Si no es para todos, NO sobreescribir la hora global
     }
     setTimeModal(null);
     showNotification('success', `Horario guardado para ${mealKey}.`);
@@ -798,7 +1097,6 @@ const FraccionamientoTab = ({ dietaActual, planIntercambio }) => {
     <div className="space-y-6">
       {notification && <Notification message={notification.message} type={notification.type} onDismiss={() => setNotification(null)} />}
 
-      {/* Modal de hora */}
       {timeModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-sm">
@@ -827,11 +1125,10 @@ const FraccionamientoTab = ({ dietaActual, planIntercambio }) => {
                     {Array.isArray(tempDays) && (
                       <div className="flex flex-wrap gap-2 pl-6">
                         {Array.from({ length: numberOfDays }, (_, i) => (
-                          <label key={i} className="flex items-center gap-1 text-sm cursor-pointer bg-gray-50 px-2 py-1 rounded-lg border">
-                            <input type="checkbox"
-                              checked={tempDays.includes(i)}
+                          <label key={i} className={`flex items-center gap-1 text-xs cursor-pointer px-2.5 py-1.5 rounded-lg border transition-colors ${tempDays.includes(i) ? 'bg-green-600 text-white border-green-600' : 'bg-gray-50 text-gray-700 border-gray-200'}`}>
+                            <input type="checkbox" checked={tempDays.includes(i)}
                               onChange={e => setTempDays(prev => e.target.checked ? [...prev, i] : prev.filter(d => d !== i))}
-                              className="accent-green-600" />
+                              className="hidden" />
                             Dia {i + 1}
                           </label>
                         ))}
@@ -851,13 +1148,11 @@ const FraccionamientoTab = ({ dietaActual, planIntercambio }) => {
         </div>
       )}
 
-      {/* Tabs */}
       <div className="flex flex-wrap gap-3 p-3 bg-gray-100 rounded-xl">
         <SubTabButton tabId="desarrollada" label="Por Desarrollada" icon={<ClipboardList size={16} />} color="blue" />
         <SubTabButton tabId="intercambio" label="Por Intercambio" icon={<Repeat size={16} />} color="green" />
       </div>
 
-      {/* Configuración */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-white p-6 rounded-xl shadow-sm border">
           <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-gray-800">
@@ -912,14 +1207,17 @@ const FraccionamientoTab = ({ dietaActual, planIntercambio }) => {
           </div>
           {numberOfDays > 1 && (
             <div className="mt-4 p-3 bg-blue-50 rounded-xl text-sm text-blue-700">
-              <p className="font-medium">Consejo</p>
-              <p className="text-xs mt-1">Configura horarios diferentes por dia haciendo clic en el boton de hora. Los dias se pueden contraer para navegar mas rapido.</p>
+              <p className="font-medium">Consejos</p>
+              <ul className="text-xs mt-1 space-y-1 list-disc pl-4">
+                <li>Configura horarios diferentes por dia con el boton de reloj.</li>
+                <li>Nombra cada menu por dia con el icono de lapiz en cada menu.</li>
+                <li>Contrae los dias para navegar mas rapido.</li>
+              </ul>
             </div>
           )}
         </div>
       </div>
 
-      {/* ✅ Pasa getMealTimeForDay en lugar de mealTimes */}
       <div>
         {activeSubTab === 'desarrollada' && (
           <FraccionamientoDesarrollada
