@@ -303,6 +303,15 @@ const CalculadoraTab = ({ dietaActual, setDietaActual, setDistribucion, patientD
       {icon} {label}
     </button>
   );
+  <div style={{ display: activeSubTab === 'intercambio' ? 'block' : 'none' }}>
+  <IntercambioSubTab
+    patientData={patientData}
+    dietGoals={dietGoals}
+    onPlanUpdate={handlePlanUpdate}
+    porciones={porcionesIntercambio}
+    setPorciones={setPorcionesIntercambio}
+  />
+</div>
 
   return (
     <div id="calculadora-tab-content">

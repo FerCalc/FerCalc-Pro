@@ -1,5 +1,5 @@
 // mi-app-frontend/src/pages/fercalc/IntercambioSubTab.jsx
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import React, { useMemo, useEffect, useCallback } from 'react';
 import { Award, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 
 const piramideData = {
@@ -36,15 +36,9 @@ const grupos = [
   { key: 'Azucar', label: 'Azucar' },
 ];
 
-// ✅ Estado inicial fuera del componente para que persista entre renders
-const porcionesInicial = grupos.reduce((acc, grupo) => {
-  if (grupo.key) acc[grupo.key] = '';
-  return acc;
-}, {});
-
-const IntercambioSubTab = ({ patientData, dietGoals, onPlanUpdate }) => {
-  // ✅ Estado persistente — se mantiene aunque se cambie de pestaña
-  const [porciones, setPorciones] = useState(porcionesInicial);
+// ✅ El componente ya NO maneja su propio estado de porciones
+// Lo recibe como prop desde CalculadoraTab para que persista
+const IntercambioSubTab = ({ patientData, dietGoals, onPlanUpdate, porciones, setPorciones }) => {
 
   const calculosPorGrupo = useMemo(() => {
     const resultados = {};
@@ -78,7 +72,6 @@ const IntercambioSubTab = ({ patientData, dietGoals, onPlanUpdate }) => {
     );
   }, [calculosPorGrupo]);
 
-  // ✅ useCallback para estabilizar la referencia y evitar loops
   const emitirPlan = useCallback(() => {
     if (!onPlanUpdate) return;
     const porcionesConValor = Object.entries(porciones).reduce((acc, [key, value]) => {
@@ -111,18 +104,25 @@ const IntercambioSubTab = ({ patientData, dietGoals, onPlanUpdate }) => {
     };
   }, [patientData?.weight]);
 
+  // ✅ PAVB corregido - usa porciones directamente (no depende de calculosPorGrupo que puede ser stale)
   const pavbCalculos = useMemo(() => {
-    let pavbGrams = 0;
     const porcionesNum = Object.fromEntries(
       Object.entries(porciones).map(([k, v]) => [k, parseFloat(v) || 0])
     );
+
+    let pavbGrams = 0;
 
     const pavbAnimalKeys = [
       'Carnes Altas en grasas', 'Carnes Bajas en grasas',
       'Lacteos Altos en grasa', 'Lacteos Medios en grasa', 'Lacteos Bajos en grasa'
     ];
+
     pavbAnimalKeys.forEach(key => {
-      pavbGrams += calculosPorGrupo[key]?.proteinas || 0;
+      const porcion = porcionesNum[key] || 0;
+      const base = piramideData[key];
+      if (base && porcion > 0) {
+        pavbGrams += base.proteinas * porcion;
+      }
     });
 
     const porcionesCereales = porcionesNum['Cereales'] || 0;
@@ -137,7 +137,7 @@ const IntercambioSubTab = ({ patientData, dietGoals, onPlanUpdate }) => {
     const pavbPercentage = totalProteinas > 0 ? (pavbGrams / totalProteinas) * 100 : 0;
 
     return { grams: pavbGrams, percentage: pavbPercentage };
-  }, [calculosPorGrupo, porciones, totalesCalculados.proteinas]);
+  }, [porciones, totalesCalculados.proteinas]);
 
   const adecuacion = useMemo(() => ({
     calorias: dietGoals?.calorias > 0 ? (totalesCalculados.calorias / dietGoals.calorias) * 100 : 0,
@@ -160,15 +160,21 @@ const IntercambioSubTab = ({ patientData, dietGoals, onPlanUpdate }) => {
             </thead>
             <tbody>
               <tr className="hover:bg-blue-50">
-                <td className="p-2 border flex items-center gap-2"><TrendingDown className="text-red-500" size={16} /> Disminuir</td>
+                <td className="p-2 border flex items-center gap-2">
+                  <TrendingDown className="text-red-500" size={16} /> Disminuir
+                </td>
                 <td className="p-2 border font-bold text-red-600">{objetivosCaloricos.disminuir.toFixed(0)} kcal</td>
               </tr>
               <tr className="hover:bg-blue-50">
-                <td className="p-2 border flex items-center gap-2"><Minus className="text-yellow-500" size={16} /> Mantener</td>
+                <td className="p-2 border flex items-center gap-2">
+                  <Minus className="text-yellow-500" size={16} /> Mantener
+                </td>
                 <td className="p-2 border font-bold text-yellow-600">{objetivosCaloricos.mantener.toFixed(0)} kcal</td>
               </tr>
               <tr className="hover:bg-blue-50">
-                <td className="p-2 border flex items-center gap-2"><TrendingUp className="text-green-500" size={16} /> Aumentar</td>
+                <td className="p-2 border flex items-center gap-2">
+                  <TrendingUp className="text-green-500" size={16} /> Aumentar
+                </td>
                 <td className="p-2 border font-bold text-green-600">{objetivosCaloricos.aumentar.toFixed(0)} kcal</td>
               </tr>
             </tbody>
@@ -190,7 +196,9 @@ const IntercambioSubTab = ({ patientData, dietGoals, onPlanUpdate }) => {
               <p className="text-3xl font-bold text-green-600">{pavbCalculos.percentage.toFixed(1)} %</p>
             </div>
           </div>
-          <p className="text-xs text-gray-500 mt-2">Suma de proteinas de carnes, lacteos y la combinacion 1 a 1 de cereales con leguminosas.</p>
+          <p className="text-xs text-gray-500 mt-2">
+            Suma de proteinas de carnes, lacteos y la combinacion 1 a 1 de cereales con leguminosas.
+          </p>
         </div>
       </div>
 
@@ -221,7 +229,7 @@ const IntercambioSubTab = ({ patientData, dietGoals, onPlanUpdate }) => {
                   <td className="p-2 border w-24">
                     <input
                       type="number"
-                      value={porciones[grupo.key]}
+                      value={porciones[grupo.key] ?? ''}
                       onChange={e => handlePorcionChange(grupo.key, e.target.value)}
                       onFocus={e => { if (e.target.value === '0') e.target.value = ''; }}
                       className="w-full p-1 border rounded focus:ring-2 focus:ring-green-500 focus:outline-none"
