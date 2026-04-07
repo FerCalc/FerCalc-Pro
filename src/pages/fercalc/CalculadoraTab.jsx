@@ -174,8 +174,15 @@ const CalculadoraTab = ({ dietaActual, setDietaActual, setDistribucion, patientD
   const [filtroCategoria, setFiltroCategoria] = useState('');
   const [busqueda, setBusqueda] = useState('');
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
-  // ✅ Estado para editar alimento existente
   const [alimentoEditando, setAlimentoEditando] = useState(null);
+
+  // ✅ CLAVE: Estado de porciones DENTRO del componente para que persista entre tabs
+  const [porcionesIntercambio, setPorcionesIntercambio] = useState({
+    'Cereales': '', 'Verduras en gral': '', 'Verduras LC': '', 'Frutas': '',
+    'Carnes Altas en grasas': '', 'Carnes Bajas en grasas': '', 'Leguminosas': '',
+    'Lacteos Altos en grasa': '', 'Lacteos Medios en grasa': '', 'Lacteos Bajos en grasa': '',
+    'Aceite y grasas': '', 'Alimentos ricos en lipidos': '', 'Azucar': ''
+  });
 
   const estadoInicialFormulario = {
     nombre: '', medida: '', cantidad: 0, unidad: 'g',
@@ -185,7 +192,6 @@ const CalculadoraTab = ({ dietaActual, setDietaActual, setDistribucion, patientD
   };
   const [nuevoAlimento, setNuevoAlimento] = useState(estadoInicialFormulario);
 
-  // ✅ Drag and drop state
   const dragItem = useRef(null);
   const dragOverItem = useRef(null);
 
@@ -225,7 +231,6 @@ const CalculadoraTab = ({ dietaActual, setDietaActual, setDistribucion, patientD
     toast.error('Alimento eliminado.');
   };
 
-  // ✅ Fix input ceros — valor como string para permitir campo vacío
   const actualizarCantidad = (id, valor) => {
     setDietaActual(dietaActual.map(item =>
       item.id === id ? { ...item, cantidadUsada: valor } : item
@@ -252,16 +257,13 @@ const CalculadoraTab = ({ dietaActual, setDietaActual, setDistribucion, patientD
       return;
     }
     const caloriasCalculadas = (nuevoAlimento.hc * 4) + (nuevoAlimento.proteina * 4) + (nuevoAlimento.grasa * 9);
-
     if (alimentoEditando !== null) {
-      // ✅ Editar alimento existente
       setAlimentos(prev => prev.map((a, i) =>
         i === alimentoEditando ? { ...nuevoAlimento, calorias: caloriasCalculadas } : a
       ));
       toast.success('Alimento actualizado.');
       setAlimentoEditando(null);
     } else {
-      // Agregar nuevo
       setAlimentos(prev => [...prev, { ...nuevoAlimento, id: Date.now(), calorias: caloriasCalculadas }]);
       toast.success('Nuevo alimento guardado.');
     }
@@ -269,14 +271,12 @@ const CalculadoraTab = ({ dietaActual, setDietaActual, setDistribucion, patientD
     setMostrarFormulario(false);
   };
 
-  // ✅ Abrir formulario para editar alimento existente
   const handleEditarAlimento = (alimento, index) => {
     setNuevoAlimento({ ...alimento });
     setAlimentoEditando(index);
     setMostrarFormulario(true);
   };
 
-  // ✅ Drag and drop handlers
   const handleDragStart = (index) => { dragItem.current = index; };
   const handleDragEnter = (index) => { dragOverItem.current = index; };
   const handleDragEnd = () => {
@@ -303,15 +303,6 @@ const CalculadoraTab = ({ dietaActual, setDietaActual, setDistribucion, patientD
       {icon} {label}
     </button>
   );
-  <div style={{ display: activeSubTab === 'intercambio' ? 'block' : 'none' }}>
-  <IntercambioSubTab
-    patientData={patientData}
-    dietGoals={dietGoals}
-    onPlanUpdate={handlePlanUpdate}
-    porciones={porcionesIntercambio}
-    setPorciones={setPorcionesIntercambio}
-  />
-</div>
 
   return (
     <div id="calculadora-tab-content">
@@ -322,242 +313,211 @@ const CalculadoraTab = ({ dietaActual, setDietaActual, setDistribucion, patientD
         <SubTabButton tabId="desarrollada" label="Desarrollada" icon={<BookOpen size={16} />} />
       </div>
 
-      {activeSubTab === 'intercambio' && (
-        <IntercambioSubTab patientData={patientData} dietGoals={dietGoals} onPlanUpdate={handlePlanUpdate} />
-      )}
+      {/* ✅ CLAVE: display:none en vez de condicional para que el estado persista */}
+      <div style={{ display: activeSubTab === 'intercambio' ? 'block' : 'none' }}>
+        <IntercambioSubTab
+          patientData={patientData}
+          dietGoals={dietGoals}
+          onPlanUpdate={handlePlanUpdate}
+          porciones={porcionesIntercambio}
+          setPorciones={setPorcionesIntercambio}
+        />
+      </div>
 
-      {activeSubTab === 'desarrollada' && (
-        <div>
-          {/* ✅ Modal agregar/editar alimento */}
-          {mostrarFormulario && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4">
-              <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-                <div className="flex justify-between items-center mb-6">
-                  <h3 className="text-xl font-bold text-gray-800">
-                    {alimentoEditando !== null ? 'Editar Alimento' : 'Agregar Nuevo Alimento'}
-                  </h3>
-                  <button onClick={() => { setMostrarFormulario(false); setAlimentoEditando(null); setNuevoAlimento(estadoInicialFormulario); }}>
-                    <X className="text-gray-500 hover:text-gray-800" />
-                  </button>
-                </div>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {Object.keys(estadoInicialFormulario).map(key => (
-                    <div key={key}>
-                      <label className="block text-sm font-medium capitalize text-gray-700">{key}</label>
-                      {key === 'origen' ? (
-                        <select name={key} value={nuevoAlimento[key]} onChange={handleNuevoAlimentoChange} className="mt-1 block w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-green-500">
-                          <option value="vegetal">Vegetal</option>
-                          <option value="animal">Animal</option>
-                        </select>
-                      ) : (
-                        <input
-                          type={typeof estadoInicialFormulario[key] === 'number' ? 'number' : 'text'}
-                          name={key}
-                          value={nuevoAlimento[key]}
-                          onChange={handleNuevoAlimentoChange}
-                          // ✅ Fix ceros: si el valor es 0 mostrar vacío, onFocus limpiar
-                          onFocus={(e) => { if (e.target.value === '0') e.target.value = ''; }}
-                          onBlur={(e) => { if (e.target.value === '') { setNuevoAlimento(prev => ({ ...prev, [key]: 0 })); } }}
-                          className="mt-1 block w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-green-500"
-                        />
-                      )}
-                    </div>
-                  ))}
-                </div>
-                <div className="mt-6 flex justify-end gap-3">
-                  <button
-                    onClick={() => { setMostrarFormulario(false); setAlimentoEditando(null); setNuevoAlimento(estadoInicialFormulario); }}
-                    className="px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200"
-                  >
-                    Cancelar
-                  </button>
-                  <button onClick={handleGuardarNuevoAlimento} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
-                    {alimentoEditando !== null ? 'Actualizar' : 'Guardar'}
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-            {/* Base de alimentos */}
-            <div className="bg-white rounded-xl shadow-lg p-6 flex flex-col xl:col-span-1">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold text-gray-800">Base de Alimentos</h2>
-                <button
-                  onClick={() => { setNuevoAlimento(estadoInicialFormulario); setAlimentoEditando(null); setMostrarFormulario(true); }}
-                  className="bg-green-600 text-white px-3 py-1 rounded-lg flex items-center gap-2 text-sm hover:bg-green-700"
-                >
-                  <Plus size={16} />Nuevo
+      <div style={{ display: activeSubTab === 'desarrollada' ? 'block' : 'none' }}>
+        {/* Modal agregar/editar alimento */}
+        {mostrarFormulario && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4">
+            <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-xl font-bold text-gray-800">
+                  {alimentoEditando !== null ? 'Editar Alimento' : 'Agregar Nuevo Alimento'}
+                </h3>
+                <button onClick={() => { setMostrarFormulario(false); setAlimentoEditando(null); setNuevoAlimento(estadoInicialFormulario); }}>
+                  <X className="text-gray-500 hover:text-gray-800" />
                 </button>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-1 gap-3 mb-4">
-                <input
-                  type="text"
-                  placeholder="Buscar..."
-                  value={busqueda}
-                  onChange={e => setBusqueda(e.target.value)}
-                  className="px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none"
-                />
-                <select
-                  value={filtroCategoria}
-                  onChange={e => setFiltroCategoria(e.target.value)}
-                  className="px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none"
-                >
-                  <option value="">Todas las categorias</option>
-                  {categorias.map(c => <option key={c} value={c}>{c}</option>)}
-                </select>
-              </div>
-              <div className="flex-grow h-96 xl:h-[60vh] overflow-y-auto border rounded-lg divide-y">
-                {alimentosFiltrados.map((a, i) => {
-                  const indexReal = alimentos.findIndex(al => al === a);
-                  return (
-                    <div key={`${a.nombre}-${i}`} className="p-3 flex justify-between items-center hover:bg-gray-50 transition-colors">
-                      <div className="pr-2 flex-1 min-w-0">
-                        <h3 className="font-medium text-gray-800 truncate">{a.nombre}</h3>
-                        <p className="text-xs text-gray-500">{a.medida} ({a.cantidad}{a.unidad})</p>
-                      </div>
-                      <div className="flex gap-1 flex-shrink-0">
-                        {/* ✅ Botón editar alimento */}
-                        <button
-                          onClick={() => handleEditarAlimento(a, indexReal)}
-                          className="text-gray-400 hover:text-blue-600 p-1"
-                          title="Editar alimento"
-                        >
-                          <Edit2 size={14} />
-                        </button>
-                        <button
-                          onClick={() => agregarAlimentoADieta(a)}
-                          className="bg-blue-600 text-white p-2 rounded-md hover:bg-blue-700"
-                        >
-                          <Plus size={16} />
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Plan de la dieta */}
-            <div className="bg-white rounded-xl shadow-lg p-6 flex flex-col xl:col-span-2">
-              <div className="flex justify-between items-center mb-4">
-                <div>
-                  <h2 className="text-xl font-semibold text-gray-800">Plan General de la Dieta</h2>
-                  {dietaActual.length > 0 && (
-                    <p className="text-xs text-gray-400 mt-1 flex items-center gap-1">
-                      <GripVertical size={12} /> Arrastra las filas para reordenar
-                    </p>
-                  )}
-                </div>
-                <button
-                  onClick={limpiarDieta}
-                  disabled={!dietaActual.length}
-                  className="bg-red-600 text-white px-4 py-2 rounded-lg disabled:opacity-50 flex items-center gap-2 hover:bg-red-700"
-                >
-                  <Trash2 size={16} />Limpiar
-                </button>
-              </div>
-
-              <div className="overflow-x-auto">
-                {dietaActual.length === 0 ? (
-                  <div className="h-64 flex flex-col items-center justify-center text-gray-400 border-2 border-dashed rounded-xl">
-                    <Plus size={40} className="mb-2 opacity-30" />
-                    <p>Agrega alimentos desde la Base de Alimentos</p>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {Object.keys(estadoInicialFormulario).map(key => (
+                  <div key={key}>
+                    <label className="block text-sm font-medium capitalize text-gray-700">{key}</label>
+                    {key === 'origen' ? (
+                      <select name={key} value={nuevoAlimento[key]} onChange={handleNuevoAlimentoChange} className="mt-1 block w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-green-500">
+                        <option value="vegetal">Vegetal</option>
+                        <option value="animal">Animal</option>
+                      </select>
+                    ) : (
+                      <input
+                        type={typeof estadoInicialFormulario[key] === 'number' ? 'number' : 'text'}
+                        name={key}
+                        value={nuevoAlimento[key]}
+                        onChange={handleNuevoAlimentoChange}
+                        onFocus={(e) => { if (e.target.value === '0') e.target.value = ''; }}
+                        onBlur={(e) => { if (e.target.value === '') { setNuevoAlimento(prev => ({ ...prev, [key]: 0 })); } }}
+                        className="mt-1 block w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-green-500"
+                      />
+                    )}
                   </div>
-                ) : (
-                  <table className="w-full text-sm text-left">
-                    {/* ✅ Tabla mejorada con diseño más profesional */}
-                    <thead>
-                      <tr className="bg-gray-800 text-white text-xs uppercase">
-                        {tableHeaders.map(h => (
-                          <th key={h} className="px-2 py-3 whitespace-nowrap font-semibold first:rounded-tl-lg last:rounded-tr-lg">
-                            {h}
-                          </th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {dietaActual.map((item, index) => {
-                        const cantidadNum = parseFloat(item.cantidadUsada) || 0;
-                        const factor = cantidadNum > 0 && item.alimento.cantidad > 0 ? cantidadNum / item.alimento.cantidad : 0;
-                        return (
-                          <tr
-                            key={item.id}
-                            draggable
-                            onDragStart={() => handleDragStart(index)}
-                            onDragEnter={() => handleDragEnter(index)}
-                            onDragEnd={handleDragEnd}
-                            onDragOver={e => e.preventDefault()}
-                            className={`border-b transition-colors cursor-grab active:cursor-grabbing hover:bg-green-50 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}
-                          >
-                            {/* ✅ Ícono de drag */}
-                            <td className="px-2 py-2 text-gray-300 hover:text-gray-500">
-                              <GripVertical size={16} />
-                            </td>
-                            <td className="px-2 py-2 font-medium text-gray-800 whitespace-nowrap">{item.alimento.nombre}</td>
-                            <td className="px-2 py-2">
-                              {/* ✅ Fix ceros en input */}
-                              <input
-                                type="number"
-                                value={item.cantidadUsada === 0 ? '' : item.cantidadUsada}
-                                onChange={e => actualizarCantidad(item.id, e.target.value === '' ? 0 : parseFloat(e.target.value) || 0)}
-                                onFocus={e => { if (e.target.value === '0') e.target.value = ''; }}
-                                onBlur={e => { if (e.target.value === '') actualizarCantidad(item.id, 0); }}
-                                className="w-20 px-2 py-1 border rounded-md focus:ring-2 focus:ring-green-400 focus:outline-none"
-                                min="0"
-                              />
-                            </td>
-                            <td className="px-2 py-2 font-bold text-green-600">{(item.alimento.calorias * factor).toFixed(1)}</td>
-                            <td className="px-2 py-2">{(item.alimento.hc * factor).toFixed(1)}</td>
-                            <td className="px-2 py-2">{(item.alimento.proteina * factor).toFixed(1)}</td>
-                            <td className="px-2 py-2">{(item.alimento.grasa * factor).toFixed(1)}</td>
-                            <td className="px-2 py-2">{(item.alimento.agua * factor).toFixed(1)}</td>
-                            <td className="px-2 py-2">{(item.alimento.na * factor).toFixed(1)}</td>
-                            <td className="px-2 py-2">{(item.alimento.k * factor).toFixed(1)}</td>
-                            <td className="px-2 py-2">{(item.alimento.p * factor).toFixed(1)}</td>
-                            <td className="px-2 py-2">{(item.alimento.ca * factor).toFixed(1)}</td>
-                            <td className="px-2 py-2">{(item.alimento.fe * factor).toFixed(1)}</td>
-                            <td className="px-2 py-2">{(item.alimento.colesterol * factor).toFixed(1)}</td>
-                            <td className="px-2 py-2">{(item.alimento.purinas * factor).toFixed(1)}</td>
-                            <td className="px-2 py-2">{(item.alimento.fibra * factor).toFixed(1)}</td>
-                            <td className="px-2 py-2">
-                              <button onClick={() => eliminarDeDieta(item.id)} className="text-red-400 hover:text-red-600 transition-colors">
-                                <Trash2 size={18} />
-                              </button>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                    <tfoot>
-                      <tr className="bg-green-700 text-white font-bold text-sm">
-                        <td className="px-2 py-3 rounded-bl-lg"></td>
-                        <td className="px-2 py-3">TOTALES</td>
-                        <td className="px-2 py-3">{totalesNutricionales.cantidadUsada.toFixed(1)}</td>
-                        <td className="px-2 py-3">{totalesNutricionales.calorias.toFixed(1)}</td>
-                        <td className="px-2 py-3">{totalesNutricionales.hc.toFixed(1)}</td>
-                        <td className="px-2 py-3">{totalesNutricionales.proteina.toFixed(1)}</td>
-                        <td className="px-2 py-3">{totalesNutricionales.grasa.toFixed(1)}</td>
-                        <td className="px-2 py-3">{totalesNutricionales.agua.toFixed(1)}</td>
-                        <td className="px-2 py-3">{totalesNutricionales.na.toFixed(1)}</td>
-                        <td className="px-2 py-3">{totalesNutricionales.k.toFixed(1)}</td>
-                        <td className="px-2 py-3">{totalesNutricionales.p.toFixed(1)}</td>
-                        <td className="px-2 py-3">{totalesNutricionales.ca.toFixed(1)}</td>
-                        <td className="px-2 py-3">{totalesNutricionales.fe.toFixed(1)}</td>
-                        <td className="px-2 py-3">{totalesNutricionales.colesterol.toFixed(1)}</td>
-                        <td className="px-2 py-3">{totalesNutricionales.purinas.toFixed(1)}</td>
-                        <td className="px-2 py-3 rounded-br-lg">{totalesNutricionales.fibra.toFixed(1)}</td>
-                        <td></td>
-                      </tr>
-                    </tfoot>
-                  </table>
-                )}
+                ))}
+              </div>
+              <div className="mt-6 flex justify-end gap-3">
+                <button onClick={() => { setMostrarFormulario(false); setAlimentoEditando(null); setNuevoAlimento(estadoInicialFormulario); }} className="px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200">
+                  Cancelar
+                </button>
+                <button onClick={handleGuardarNuevoAlimento} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                  {alimentoEditando !== null ? 'Actualizar' : 'Guardar'}
+                </button>
               </div>
             </div>
           </div>
+        )}
+
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+          {/* Base de alimentos */}
+          <div className="bg-white rounded-xl shadow-lg p-6 flex flex-col xl:col-span-1">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold text-gray-800">Base de Alimentos</h2>
+              <button
+                onClick={() => { setNuevoAlimento(estadoInicialFormulario); setAlimentoEditando(null); setMostrarFormulario(true); }}
+                className="bg-green-600 text-white px-3 py-1 rounded-lg flex items-center gap-2 text-sm hover:bg-green-700"
+              >
+                <Plus size={16} />Nuevo
+              </button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-1 gap-3 mb-4">
+              <input type="text" placeholder="Buscar..." value={busqueda} onChange={e => setBusqueda(e.target.value)} className="px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none" />
+              <select value={filtroCategoria} onChange={e => setFiltroCategoria(e.target.value)} className="px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none">
+                <option value="">Todas las categorias</option>
+                {categorias.map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </div>
+            <div className="flex-grow h-96 xl:h-[60vh] overflow-y-auto border rounded-lg divide-y">
+              {alimentosFiltrados.map((a, i) => {
+                const indexReal = alimentos.findIndex(al => al === a);
+                return (
+                  <div key={`${a.nombre}-${i}`} className="p-3 flex justify-between items-center hover:bg-gray-50 transition-colors">
+                    <div className="pr-2 flex-1 min-w-0">
+                      <h3 className="font-medium text-gray-800 truncate">{a.nombre}</h3>
+                      <p className="text-xs text-gray-500">{a.medida} ({a.cantidad}{a.unidad})</p>
+                    </div>
+                    <div className="flex gap-1 flex-shrink-0">
+                      <button onClick={() => handleEditarAlimento(a, indexReal)} className="text-gray-400 hover:text-blue-600 p-1" title="Editar alimento">
+                        <Edit2 size={14} />
+                      </button>
+                      <button onClick={() => agregarAlimentoADieta(a)} className="bg-blue-600 text-white p-2 rounded-md hover:bg-blue-700">
+                        <Plus size={16} />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Plan de la dieta */}
+          <div className="bg-white rounded-xl shadow-lg p-6 flex flex-col xl:col-span-2">
+            <div className="flex justify-between items-center mb-4">
+              <div>
+                <h2 className="text-xl font-semibold text-gray-800">Plan General de la Dieta</h2>
+                {dietaActual.length > 0 && (
+                  <p className="text-xs text-gray-400 mt-1 flex items-center gap-1">
+                    <GripVertical size={12} /> Arrastra las filas para reordenar
+                  </p>
+                )}
+              </div>
+              <button onClick={limpiarDieta} disabled={!dietaActual.length} className="bg-red-600 text-white px-4 py-2 rounded-lg disabled:opacity-50 flex items-center gap-2 hover:bg-red-700">
+                <Trash2 size={16} />Limpiar
+              </button>
+            </div>
+
+            <div className="overflow-x-auto">
+              {dietaActual.length === 0 ? (
+                <div className="h-64 flex flex-col items-center justify-center text-gray-400 border-2 border-dashed rounded-xl">
+                  <Plus size={40} className="mb-2 opacity-30" />
+                  <p>Agrega alimentos desde la Base de Alimentos</p>
+                </div>
+              ) : (
+                <table className="w-full text-sm text-left">
+                  <thead>
+                    <tr className="bg-gray-800 text-white text-xs uppercase">
+                      {tableHeaders.map(h => (
+                        <th key={h} className="px-2 py-3 whitespace-nowrap font-semibold first:rounded-tl-lg last:rounded-tr-lg">{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {dietaActual.map((item, index) => {
+                      const cantidadNum = parseFloat(item.cantidadUsada) || 0;
+                      const factor = cantidadNum > 0 && item.alimento.cantidad > 0 ? cantidadNum / item.alimento.cantidad : 0;
+                      return (
+                        <tr key={item.id} draggable
+                          onDragStart={() => handleDragStart(index)}
+                          onDragEnter={() => handleDragEnter(index)}
+                          onDragEnd={handleDragEnd}
+                          onDragOver={e => e.preventDefault()}
+                          className={`border-b transition-colors cursor-grab active:cursor-grabbing hover:bg-green-50 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}
+                        >
+                          <td className="px-2 py-2 text-gray-300 hover:text-gray-500"><GripVertical size={16} /></td>
+                          <td className="px-2 py-2 font-medium text-gray-800 whitespace-nowrap">{item.alimento.nombre}</td>
+                          <td className="px-2 py-2">
+                            <input type="number"
+                              value={item.cantidadUsada === 0 ? '' : item.cantidadUsada}
+                              onChange={e => actualizarCantidad(item.id, e.target.value === '' ? 0 : parseFloat(e.target.value) || 0)}
+                              onFocus={e => { if (e.target.value === '0') e.target.value = ''; }}
+                              onBlur={e => { if (e.target.value === '') actualizarCantidad(item.id, 0); }}
+                              className="w-20 px-2 py-1 border rounded-md focus:ring-2 focus:ring-green-400 focus:outline-none"
+                              min="0"
+                            />
+                          </td>
+                          <td className="px-2 py-2 font-bold text-green-600">{(item.alimento.calorias * factor).toFixed(1)}</td>
+                          <td className="px-2 py-2">{(item.alimento.hc * factor).toFixed(1)}</td>
+                          <td className="px-2 py-2">{(item.alimento.proteina * factor).toFixed(1)}</td>
+                          <td className="px-2 py-2">{(item.alimento.grasa * factor).toFixed(1)}</td>
+                          <td className="px-2 py-2">{(item.alimento.agua * factor).toFixed(1)}</td>
+                          <td className="px-2 py-2">{(item.alimento.na * factor).toFixed(1)}</td>
+                          <td className="px-2 py-2">{(item.alimento.k * factor).toFixed(1)}</td>
+                          <td className="px-2 py-2">{(item.alimento.p * factor).toFixed(1)}</td>
+                          <td className="px-2 py-2">{(item.alimento.ca * factor).toFixed(1)}</td>
+                          <td className="px-2 py-2">{(item.alimento.fe * factor).toFixed(1)}</td>
+                          <td className="px-2 py-2">{(item.alimento.colesterol * factor).toFixed(1)}</td>
+                          <td className="px-2 py-2">{(item.alimento.purinas * factor).toFixed(1)}</td>
+                          <td className="px-2 py-2">{(item.alimento.fibra * factor).toFixed(1)}</td>
+                          <td className="px-2 py-2">
+                            <button onClick={() => eliminarDeDieta(item.id)} className="text-red-400 hover:text-red-600 transition-colors">
+                              <Trash2 size={18} />
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                  <tfoot>
+                    <tr className="bg-green-700 text-white font-bold text-sm">
+                      <td className="px-2 py-3 rounded-bl-lg"></td>
+                      <td className="px-2 py-3">TOTALES</td>
+                      <td className="px-2 py-3">{totalesNutricionales.cantidadUsada.toFixed(1)}</td>
+                      <td className="px-2 py-3">{totalesNutricionales.calorias.toFixed(1)}</td>
+                      <td className="px-2 py-3">{totalesNutricionales.hc.toFixed(1)}</td>
+                      <td className="px-2 py-3">{totalesNutricionales.proteina.toFixed(1)}</td>
+                      <td className="px-2 py-3">{totalesNutricionales.grasa.toFixed(1)}</td>
+                      <td className="px-2 py-3">{totalesNutricionales.agua.toFixed(1)}</td>
+                      <td className="px-2 py-3">{totalesNutricionales.na.toFixed(1)}</td>
+                      <td className="px-2 py-3">{totalesNutricionales.k.toFixed(1)}</td>
+                      <td className="px-2 py-3">{totalesNutricionales.p.toFixed(1)}</td>
+                      <td className="px-2 py-3">{totalesNutricionales.ca.toFixed(1)}</td>
+                      <td className="px-2 py-3">{totalesNutricionales.fe.toFixed(1)}</td>
+                      <td className="px-2 py-3">{totalesNutricionales.colesterol.toFixed(1)}</td>
+                      <td className="px-2 py-3">{totalesNutricionales.purinas.toFixed(1)}</td>
+                      <td className="px-2 py-3 rounded-br-lg">{totalesNutricionales.fibra.toFixed(1)}</td>
+                      <td></td>
+                    </tr>
+                  </tfoot>
+                </table>
+              )}
+            </div>
+          </div>
         </div>
-      )}
+      </div>
     </div>
   );
 };
