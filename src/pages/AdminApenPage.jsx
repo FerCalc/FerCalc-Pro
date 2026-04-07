@@ -10,7 +10,7 @@ import {
 const API = import.meta.env.VITE_API_URL || 'https://tu-backend.onrender.com/api';
 
 function AdminApenPage() {
-  const { user, signout } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
 
   const [correos, setCorreos] = useState([]);
@@ -141,8 +141,8 @@ function AdminApenPage() {
             <p className="text-green-200 text-xs">Gestión de socios habilitados para FerCalc</p>
           </div>
         </div>
-        <button onClick={signout} className="flex items-center gap-2 text-green-100 hover:text-white text-sm transition">
-          <LogOut className="h-4 w-4" /> Salir
+        <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-green-100 hover:text-white text-sm transition">
+          <LogOut className="h-4 w-4" /> Volver a la app
         </button>
       </header>
 
