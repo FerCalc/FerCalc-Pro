@@ -12,7 +12,7 @@ function HomePage() {
         <div className="bg-green-600 md:w-1/2 flex flex-col items-center justify-center p-10 text-white text-center">
           <img src={logo} alt="FerCalc Logo" className="h-24 w-auto mb-6" />
           <h1 className="text-4xl font-bold mb-2">
-            Bienvenido a <span className="text-green-200">FerCalc</span>
+            Bienvenido a <span className="text-white">FerCalc</span>
           </h1>
           <p className="text-green-100 text-lg mb-8">
             Calculadora Nutricional
