@@ -44,23 +44,19 @@ const DistribucionNutricional = ({ calorias, hc, proteinas, lipidos, color = 'bl
   );
 };
 
-// ── MODAL DE RECETARIO ──
+// ── MODAL RECETARIO ──
 const RecetarioModal = ({ mealKey, mealLabel, dayIndex, ingredientes, recetarios, setRecetarios, onClose }) => {
   const recetarioKey = `${dayIndex}_${mealKey}`;
   const [preparacion, setPreparacion] = useState(recetarios[recetarioKey]?.preparacion || '');
 
   const handleSave = () => {
-    setRecetarios(prev => ({
-      ...prev,
-      [recetarioKey]: { preparacion }
-    }));
+    setRecetarios(prev => ({ ...prev, [recetarioKey]: { preparacion } }));
     onClose();
   };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50 p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        {/* Header */}
         <div className="bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-5 rounded-t-2xl">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-3">
@@ -70,14 +66,10 @@ const RecetarioModal = ({ mealKey, mealLabel, dayIndex, ingredientes, recetarios
                 <p className="text-green-100 text-sm">{mealLabel} — Dia {dayIndex + 1}</p>
               </div>
             </div>
-            <button onClick={onClose} className="text-white hover:text-green-200 transition-colors">
-              <X size={22} />
-            </button>
+            <button onClick={onClose} className="text-white hover:text-green-200"><X size={22} /></button>
           </div>
         </div>
-
         <div className="p-6 space-y-6">
-          {/* Ingredientes */}
           <div>
             <h4 className="text-base font-bold text-gray-800 mb-3 flex items-center gap-2">
               <span className="w-6 h-6 bg-green-100 text-green-700 rounded-full flex items-center justify-center text-xs font-bold">1</span>
@@ -85,7 +77,7 @@ const RecetarioModal = ({ mealKey, mealLabel, dayIndex, ingredientes, recetarios
             </h4>
             {ingredientes.length === 0 ? (
               <div className="bg-gray-50 border border-dashed border-gray-300 rounded-xl p-4 text-center text-gray-400 text-sm">
-                Aun no hay alimentos asignados a este menu. Asigna alimentos primero para ver los ingredientes aqui.
+                Aun no hay alimentos asignados. Asigna alimentos primero para ver los ingredientes.
               </div>
             ) : (
               <div className="bg-gray-50 rounded-xl border divide-y">
@@ -93,15 +85,13 @@ const RecetarioModal = ({ mealKey, mealLabel, dayIndex, ingredientes, recetarios
                   <div key={i} className="flex justify-between items-center px-4 py-3">
                     <span className="text-sm font-medium text-gray-800">{nombre}</span>
                     <span className="text-sm font-bold text-green-700 bg-green-50 px-3 py-1 rounded-full">
-                      {cantidad.toFixed(1)} {unidad || 'g'}
+                      {typeof cantidad === 'number' ? cantidad.toFixed(1) : cantidad} {unidad || 'g'}
                     </span>
                   </div>
                 ))}
               </div>
             )}
           </div>
-
-          {/* Preparación */}
           <div>
             <h4 className="text-base font-bold text-gray-800 mb-3 flex items-center gap-2">
               <span className="w-6 h-6 bg-green-100 text-green-700 rounded-full flex items-center justify-center text-xs font-bold">2</span>
@@ -116,13 +106,9 @@ const RecetarioModal = ({ mealKey, mealLabel, dayIndex, ingredientes, recetarios
             />
             <p className="text-xs text-gray-400 mt-1 text-right">{preparacion.length} caracteres</p>
           </div>
-
-          {/* Botones */}
           <div className="flex gap-3 pt-2">
-            <button onClick={onClose} className="flex-1 px-4 py-2.5 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 font-medium transition-colors">
-              Cancelar
-            </button>
-            <button onClick={handleSave} className="flex-1 px-4 py-2.5 bg-green-600 text-white rounded-xl hover:bg-green-700 font-medium flex items-center justify-center gap-2 transition-colors">
+            <button onClick={onClose} className="flex-1 px-4 py-2.5 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 font-medium">Cancelar</button>
+            <button onClick={handleSave} className="flex-1 px-4 py-2.5 bg-green-600 text-white rounded-xl hover:bg-green-700 font-medium flex items-center justify-center gap-2">
               <Check size={16} /> Guardar Recetario
             </button>
           </div>
@@ -133,7 +119,7 @@ const RecetarioModal = ({ mealKey, mealLabel, dayIndex, ingredientes, recetarios
 };
 
 // ── MODAL NOMBRE DE MENÚ POR DÍA ──
-const MealNameModal = ({ mealKey, numberOfDays, mealNamesByDay, onSave, onClose }) => {
+const MealNameModal = ({ mealKey, numberOfDays, onSave, onClose }) => {
   const [nombre, setNombre] = useState('');
   const [applyTo, setApplyTo] = useState('all');
   const [selectedDays, setSelectedDays] = useState([]);
@@ -150,12 +136,14 @@ const MealNameModal = ({ mealKey, numberOfDays, mealNamesByDay, onSave, onClose 
         </div>
         <div className="p-5 space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Nombre para <span className="font-bold text-blue-600">{mealKey}</span></label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Nombre para <span className="font-bold text-blue-600">{mealKey}</span>
+            </label>
             <input
               type="text"
               value={nombre}
               onChange={e => setNombre(e.target.value)}
-              placeholder={`Ej: Cafe con leche, Omelet...`}
+              placeholder="Ej: Cafe con leche, Omelet..."
               className="w-full p-2.5 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm"
               autoFocus
             />
@@ -212,17 +200,19 @@ const MealNameModal = ({ mealKey, numberOfDays, mealNamesByDay, onSave, onClose 
 };
 
 // ── FRACCIONAMIENTO POR DESARROLLADA ──
-const FraccionamientoDesarrollada = ({ dietaActual, numberOfDays, mealSlots, getMealTimeForDay, distribucion, setDistribucion, showNotification }) => {
+const FraccionamientoDesarrollada = ({
+  dietaActual, numberOfDays, mealSlots, getMealTimeForDay,
+  distribucion, setDistribucion,
+  mealNamesByDay, setMealNamesByDay,
+  recetarios, setRecetarios,
+  showNotification
+}) => {
   const [assigningFood, setAssigningFood] = useState(null);
   const [editingFood, setEditingFood] = useState(null);
   const [quickAssignState, setQuickAssignState] = useState({});
   const [collapsedDays, setCollapsedDays] = useState({});
-  // ✅ Recetarios: { "dayIndex_mealKey": { preparacion } }
-  const [recetarios, setRecetarios] = useState({});
-  const [recetarioModal, setRecetarioModal] = useState(null); // { dayIndex, mealKey }
-  // ✅ Nombres de menú por día: { "dayIndex_mealKey": nombre }
-  const [mealNamesByDay, setMealNamesByDay] = useState({});
-  const [mealNameModal, setMealNameModal] = useState(null); // mealKey
+  const [recetarioModal, setRecetarioModal] = useState(null);
+  const [mealNameModal, setMealNameModal] = useState(null);
 
   const toggleDay = (dayIndex) => setCollapsedDays(prev => ({ ...prev, [dayIndex]: !prev[dayIndex] }));
 
@@ -237,36 +227,29 @@ const FraccionamientoDesarrollada = ({ dietaActual, numberOfDays, mealSlots, get
     }, { calorias: 0, hc: 0, proteinas: 0, lipidos: 0 });
   }, [dietaActual]);
 
-  // ✅ Gramos disponibles SOLO para el día actual (independiente entre días)
   const getAvailableGramsForDay = (item, dayIndex) => {
     const assignedThisDay = Object.values((distribucion[dayIndex] || {})[item.id] || {})
       .reduce((s, v) => s + (parseFloat(v) || 0), 0);
     return item.cantidadUsada - assignedThisDay;
   };
 
-  // ✅ Banco muestra gramos totales del plan (suma de todos los días) vs total disponible
   const remainingGrams = useMemo(() => {
     const r = {};
     (dietaActual || []).forEach(item => {
       const totalAsignado = Object.values(distribucion).reduce((daySum, dayData) => {
         return daySum + Object.values(dayData[item.id] || {}).reduce((s, v) => s + (parseFloat(v) || 0), 0);
       }, 0);
-      // El banco muestra cuánto queda del total × días
       r[item.id] = (item.cantidadUsada * numberOfDays) - totalAsignado;
     });
     return r;
   }, [dietaActual, distribucion, numberOfDays]);
 
-  const getMealLabel = (mealKey, dayIndex) => {
-    return mealNamesByDay[`${dayIndex}_${mealKey}`] || mealKey;
-  };
+  const getMealLabel = (mealKey, dayIndex) => mealNamesByDay[`${dayIndex}_${mealKey}`] || mealKey;
 
   const handleSaveMealName = (mealKey, nombre, days) => {
     setMealNamesByDay(prev => {
       const updated = { ...prev };
-      days.forEach(dayIndex => {
-        updated[`${dayIndex}_${mealKey}`] = nombre;
-      });
+      days.forEach(dayIndex => { updated[`${dayIndex}_${mealKey}`] = nombre; });
       return updated;
     });
     showNotification('success', `Nombre guardado para ${mealKey}`);
@@ -313,8 +296,7 @@ const FraccionamientoDesarrollada = ({ dietaActual, numberOfDays, mealSlots, get
   };
 
   const DistributionModal = ({ foodItem, dayIndex, onSave, onCancel }) => {
-    const distribucionDia = distribucion[dayIndex] || {};
-    const [local, setLocal] = useState(distribucionDia[foodItem.id] || {});
+    const [local, setLocal] = useState((distribucion[dayIndex] || {})[foodItem.id] || {});
     const total = Object.values(local).reduce((s, v) => s + (parseFloat(v) || 0), 0);
     const over = total > foodItem.cantidadUsada + 0.01;
     return (
@@ -351,11 +333,10 @@ const FraccionamientoDesarrollada = ({ dietaActual, numberOfDays, mealSlots, get
     <div>
       <DistribucionNutricional calorias={totalDieta.calorias} hc={totalDieta.hc} proteinas={totalDieta.proteinas} lipidos={totalDieta.lipidos} color="blue" />
 
-      {/* ✅ Banco corregido: muestra total × días */}
       <div className="bg-white p-6 rounded-xl shadow-sm border mb-6">
         <h3 className="text-lg font-semibold mb-1">Banco de Alimentos para Distribuir</h3>
         <p className="text-sm text-gray-500 mb-4">
-          Cada alimento puede usarse en <span className="font-semibold text-blue-600">cada dia</span> hasta su cantidad total. El banco muestra cuanto queda considerando los {numberOfDays} dia{numberOfDays > 1 ? 's' : ''} del ciclo.
+          Cada alimento puede usarse cada dia hasta su cantidad total. Banco considera los {numberOfDays} dia{numberOfDays > 1 ? 's' : ''} del ciclo.
         </p>
         {(dietaActual || []).length === 0 ? (
           <p className="text-gray-400 italic">No hay alimentos en la dieta desarrollada.</p>
@@ -421,18 +402,10 @@ const FraccionamientoDesarrollada = ({ dietaActual, numberOfDays, mealSlots, get
         <DistributionModal foodItem={editingFood.foodItem} dayIndex={editingFood.dayIndex} onSave={handleSaveDistribution} onCancel={() => setEditingFood(null)} />
       )}
 
-      {/* Modal nombre de menú */}
       {mealNameModal && (
-        <MealNameModal
-          mealKey={mealNameModal}
-          numberOfDays={numberOfDays}
-          mealNamesByDay={mealNamesByDay}
-          onSave={handleSaveMealName}
-          onClose={() => setMealNameModal(null)}
-        />
+        <MealNameModal mealKey={mealNameModal} numberOfDays={numberOfDays} onSave={handleSaveMealName} onClose={() => setMealNameModal(null)} />
       )}
 
-      {/* Modal recetario */}
       {recetarioModal && (
         <RecetarioModal
           mealKey={recetarioModal.mealKey}
@@ -442,7 +415,7 @@ const FraccionamientoDesarrollada = ({ dietaActual, numberOfDays, mealSlots, get
             const distribucionDelDia = distribucion[recetarioModal.dayIndex] || {};
             return (dietaActual || []).map(foodItem => {
               const grams = (distribucionDelDia[foodItem.id] || {})[recetarioModal.mealKey] || 0;
-              return grams > 0 ? { nombre: foodItem.alimento.nombre, cantidad: grams, unidad: foodItem.alimento.unidad } : null;
+              return grams > 0 ? { nombre: foodItem.alimento.nombre, cantidad: grams, unidad: foodItem.alimento.unidad || 'g' } : null;
             }).filter(Boolean);
           })()}
           recetarios={recetarios}
@@ -480,8 +453,7 @@ const FraccionamientoDesarrollada = ({ dietaActual, numberOfDays, mealSlots, get
             {!isCollapsed && mealSlots.map(mealKey => {
               const mealLabel = getMealLabel(mealKey, dayIndex);
               const hasCustomName = mealNamesByDay[`${dayIndex}_${mealKey}`];
-              const recetarioKey = `${dayIndex}_${mealKey}`;
-              const tieneRecetario = recetarios[recetarioKey]?.preparacion;
+              const tieneRecetario = recetarios[`${dayIndex}_${mealKey}`]?.preparacion;
 
               const mealFoods = (dietaActual || []).map(foodItem => {
                 const grams = (distribucionDelDia[foodItem.id] || {})[mealKey] || 0;
@@ -504,17 +476,10 @@ const FraccionamientoDesarrollada = ({ dietaActual, numberOfDays, mealSlots, get
                 <div key={mealKey} className="bg-white rounded-xl shadow-sm border border-l-4 border-l-blue-500 mb-3 overflow-hidden">
                   <div className="px-5 py-3 flex justify-between items-center flex-wrap gap-2 bg-gray-50 border-b">
                     <div className="flex items-center gap-2 flex-wrap">
-                      {/* ✅ Nombre del menú con botón editar */}
                       <div className="flex items-center gap-1.5">
                         <h3 className="text-base font-bold text-gray-800">{mealLabel}</h3>
-                        {hasCustomName && (
-                          <span className="text-xs text-gray-400 italic">({mealKey})</span>
-                        )}
-                        <button
-                          onClick={() => setMealNameModal(mealKey)}
-                          className="text-gray-300 hover:text-blue-500 transition-colors"
-                          title="Nombrar este menu para dias especificos"
-                        >
+                        {hasCustomName && <span className="text-xs text-gray-400 italic">({mealKey})</span>}
+                        <button onClick={() => setMealNameModal(mealKey)} className="text-gray-300 hover:text-blue-500 transition-colors" title="Nombrar este menu">
                           <Edit size={13} />
                         </button>
                       </div>
@@ -529,25 +494,17 @@ const FraccionamientoDesarrollada = ({ dietaActual, numberOfDays, mealSlots, get
                         </span>
                       )}
                     </div>
-                    {/* ✅ Botones Asignar + Recetario */}
                     <div className="flex gap-2">
-                      <button
-                        onClick={() => setRecetarioModal({ dayIndex, mealKey })}
-                        className={`px-3 py-1.5 rounded-lg text-sm flex items-center gap-1 transition-colors border ${tieneRecetario ? 'bg-emerald-50 text-emerald-700 border-emerald-300 hover:bg-emerald-100' : 'bg-white text-gray-600 border-gray-200 hover:border-green-400 hover:text-green-600'}`}
-                        title="Ver/editar recetario"
-                      >
-                        <BookOpen size={14} />
-                        {tieneRecetario ? 'Ver Receta' : 'Recetario'}
+                      <button onClick={() => setRecetarioModal({ dayIndex, mealKey })}
+                        className={`px-3 py-1.5 rounded-lg text-sm flex items-center gap-1 transition-colors border ${tieneRecetario ? 'bg-emerald-50 text-emerald-700 border-emerald-300 hover:bg-emerald-100' : 'bg-white text-gray-600 border-gray-200 hover:border-green-400 hover:text-green-600'}`}>
+                        <BookOpen size={14} />{tieneRecetario ? 'Ver Receta' : 'Recetario'}
                       </button>
-                      <button
-                        onClick={() => { setQuickAssignState({}); setAssigningFood({ dayIndex, mealKey }); }}
-                        className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm flex items-center gap-1 hover:bg-blue-700"
-                      >
+                      <button onClick={() => { setQuickAssignState({}); setAssigningFood({ dayIndex, mealKey }); }}
+                        className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm flex items-center gap-1 hover:bg-blue-700">
                         <PlusCircle size={15} /> Asignar
                       </button>
                     </div>
                   </div>
-
                   {mealFoods.length > 0 ? (
                     <div className="overflow-x-auto p-2">
                       <table className="w-full text-sm whitespace-nowrap">
@@ -617,14 +574,18 @@ const FraccionamientoDesarrollada = ({ dietaActual, numberOfDays, mealSlots, get
 };
 
 // ── FRACCIONAMIENTO POR INTERCAMBIO ──
-const FraccionamientoIntercambio = ({ planIntercambio, numberOfDays, mealSlots, getMealTimeForDay, distribucion, setDistribucion, showNotification, showNoDataWarning }) => {
+const FraccionamientoIntercambio = ({
+  planIntercambio, numberOfDays, mealSlots, getMealTimeForDay,
+  distribucion, setDistribucion,
+  mealNamesByDay, setMealNamesByDay,
+  recetarios, setRecetarios,
+  showNotification, showNoDataWarning
+}) => {
   const [editingGroup, setEditingGroup] = useState(null);
   const [assigningGroup, setAssigningGroup] = useState(null);
   const [quickAssignState, setQuickAssignState] = useState({});
   const [collapsedDays, setCollapsedDays] = useState({});
-  const [recetarios, setRecetarios] = useState({});
   const [recetarioModal, setRecetarioModal] = useState(null);
-  const [mealNamesByDay, setMealNamesByDay] = useState({});
   const [mealNameModal, setMealNameModal] = useState(null);
 
   const toggleDay = (dayIndex) => setCollapsedDays(prev => ({ ...prev, [dayIndex]: !prev[dayIndex] }));
@@ -742,7 +703,7 @@ const FraccionamientoIntercambio = ({ planIntercambio, numberOfDays, mealSlots, 
       <div className="bg-white p-6 rounded-xl shadow-sm border mb-6">
         <h3 className="text-lg font-semibold mb-1">Banco de Porciones para Distribuir</h3>
         <p className="text-sm text-gray-500 mb-4">
-          Cada grupo puede usarse en <span className="font-semibold text-green-600">cada dia</span>. El banco muestra porciones restantes para los {numberOfDays} dia{numberOfDays > 1 ? 's' : ''} del ciclo.
+          Cada grupo puede usarse cada dia. Banco considera los {numberOfDays} dia{numberOfDays > 1 ? 's' : ''} del ciclo.
         </p>
         {Object.keys(porcionesDelPlan).length === 0 ? (
           <p className="text-gray-400 italic">No hay porciones definidas.</p>
@@ -764,6 +725,7 @@ const FraccionamientoIntercambio = ({ planIntercambio, numberOfDays, mealSlots, 
         )}
       </div>
 
+      {/* Panel asignación rápida */}
       {assigningGroup && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-end z-50">
           <div className="bg-white w-full max-w-sm h-full overflow-y-auto shadow-2xl p-6 flex flex-col">
@@ -806,13 +768,7 @@ const FraccionamientoIntercambio = ({ planIntercambio, numberOfDays, mealSlots, 
       )}
 
       {mealNameModal && (
-        <MealNameModal
-          mealKey={mealNameModal}
-          numberOfDays={numberOfDays}
-          mealNamesByDay={mealNamesByDay}
-          onSave={handleSaveMealName}
-          onClose={() => setMealNameModal(null)}
-        />
+        <MealNameModal mealKey={mealNameModal} numberOfDays={numberOfDays} onSave={handleSaveMealName} onClose={() => setMealNameModal(null)} />
       )}
 
       {recetarioModal && (
@@ -834,6 +790,7 @@ const FraccionamientoIntercambio = ({ planIntercambio, numberOfDays, mealSlots, 
         />
       )}
 
+      {/* Días */}
       {Array.from({ length: numberOfDays }).map((_, dayIndex) => {
         const distribucionDelDia = distribucion[dayIndex] || {};
         const mealTimesForDay = getMealTimeForDay(dayIndex);
@@ -862,8 +819,7 @@ const FraccionamientoIntercambio = ({ planIntercambio, numberOfDays, mealSlots, 
             {!isCollapsed && mealSlots.map(mealKey => {
               const mealLabel = getMealLabel(mealKey, dayIndex);
               const hasCustomName = mealNamesByDay[`${dayIndex}_${mealKey}`];
-              const recetarioKey = `${dayIndex}_${mealKey}`;
-              const tieneRecetario = recetarios[recetarioKey]?.preparacion;
+              const tieneRecetario = recetarios[`${dayIndex}_${mealKey}`]?.preparacion;
 
               const mealGroups = Object.keys(distribucionDelDia)
                 .filter(groupName => (distribucionDelDia[groupName][mealKey] || 0) > 0)
@@ -889,7 +845,7 @@ const FraccionamientoIntercambio = ({ planIntercambio, numberOfDays, mealSlots, 
                       <div className="flex items-center gap-1.5">
                         <h3 className="text-base font-bold text-gray-800">{mealLabel}</h3>
                         {hasCustomName && <span className="text-xs text-gray-400 italic">({mealKey})</span>}
-                        <button onClick={() => setMealNameModal(mealKey)} className="text-gray-300 hover:text-green-500 transition-colors" title="Nombrar este menu">
+                        <button onClick={() => setMealNameModal(mealKey)} className="text-gray-300 hover:text-green-500 transition-colors">
                           <Edit size={13} />
                         </button>
                       </div>
@@ -905,22 +861,16 @@ const FraccionamientoIntercambio = ({ planIntercambio, numberOfDays, mealSlots, 
                       )}
                     </div>
                     <div className="flex gap-2">
-                      <button
-                        onClick={() => setRecetarioModal({ dayIndex, mealKey })}
-                        className={`px-3 py-1.5 rounded-lg text-sm flex items-center gap-1 transition-colors border ${tieneRecetario ? 'bg-emerald-50 text-emerald-700 border-emerald-300 hover:bg-emerald-100' : 'bg-white text-gray-600 border-gray-200 hover:border-green-400 hover:text-green-600'}`}
-                      >
-                        <BookOpen size={14} />
-                        {tieneRecetario ? 'Ver Receta' : 'Recetario'}
+                      <button onClick={() => setRecetarioModal({ dayIndex, mealKey })}
+                        className={`px-3 py-1.5 rounded-lg text-sm flex items-center gap-1 transition-colors border ${tieneRecetario ? 'bg-emerald-50 text-emerald-700 border-emerald-300 hover:bg-emerald-100' : 'bg-white text-gray-600 border-gray-200 hover:border-green-400 hover:text-green-600'}`}>
+                        <BookOpen size={14} />{tieneRecetario ? 'Ver Receta' : 'Recetario'}
                       </button>
-                      <button
-                        onClick={() => { setQuickAssignState({}); setAssigningGroup({ dayIndex, mealKey }); }}
-                        className="bg-green-600 text-white px-3 py-1.5 rounded-lg text-sm flex items-center gap-1 hover:bg-green-700"
-                      >
+                      <button onClick={() => { setQuickAssignState({}); setAssigningGroup({ dayIndex, mealKey }); }}
+                        className="bg-green-600 text-white px-3 py-1.5 rounded-lg text-sm flex items-center gap-1 hover:bg-green-700">
                         <PlusCircle size={15} /> Asignar
                       </button>
                     </div>
                   </div>
-
                   {mealGroups.length > 0 ? (
                     <div className="overflow-x-auto p-2">
                       <table className="w-full text-sm">
@@ -980,15 +930,22 @@ const FraccionamientoIntercambio = ({ planIntercambio, numberOfDays, mealSlots, 
 };
 
 // ── COMPONENTE PRINCIPAL ──
-const FraccionamientoTab = ({ dietaActual, planIntercambio }) => {
+// ✅ Ahora recibe todos los estados como props desde App.jsx
+const FraccionamientoTab = ({
+  dietaActual, planIntercambio,
+  mealSlots, setMealSlots,
+  mealTimes, setMealTimes,
+  mealTimesByDay, setMealTimesByDay,
+  numberOfDays, setNumberOfDays,
+  distribucionDesarrollada, setDistribucionDesarrollada,
+  distribucionIntercambio, setDistribucionIntercambio,
+  mealNamesByDayDes, setMealNamesByDayDes,
+  mealNamesByDayInt, setMealNamesByDayInt,
+  recetariosDes, setRecetariosDes,
+  recetariosInt, setRecetariosInt,
+}) => {
   const [activeSubTab, setActiveSubTab] = useState('desarrollada');
-  const [numberOfDays, setNumberOfDays] = useState(1);
-  const [mealSlots, setMealSlots] = useState(['Desayuno', 'Media manana', 'Almuerzo', 'Media tarde', 'Merienda', 'Cena']);
-  const [mealTimes, setMealTimes] = useState({});
-  const [mealTimesByDay, setMealTimesByDay] = useState({});
   const [newMealName, setNewMealName] = useState('');
-  const [distribucionDesarrollada, setDistribucionDesarrollada] = useState({});
-  const [distribucionIntercambio, setDistribucionIntercambio] = useState({});
   const [notification, setNotification] = useState(null);
   const dragMeal = useRef(null);
   const dragOverMeal = useRef(null);
@@ -1097,6 +1054,7 @@ const FraccionamientoTab = ({ dietaActual, planIntercambio }) => {
     <div className="space-y-6">
       {notification && <Notification message={notification.message} type={notification.type} onDismiss={() => setNotification(null)} />}
 
+      {/* Modal de hora */}
       {timeModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-sm">
@@ -1227,6 +1185,10 @@ const FraccionamientoTab = ({ dietaActual, planIntercambio }) => {
             getMealTimeForDay={getMealTimeForDay}
             distribucion={distribucionDesarrollada}
             setDistribucion={setDistribucionDesarrollada}
+            mealNamesByDay={mealNamesByDayDes}
+            setMealNamesByDay={setMealNamesByDayDes}
+            recetarios={recetariosDes}
+            setRecetarios={setRecetariosDes}
             showNotification={showNotification}
           />
         )}
@@ -1238,6 +1200,10 @@ const FraccionamientoTab = ({ dietaActual, planIntercambio }) => {
             getMealTimeForDay={getMealTimeForDay}
             distribucion={distribucionIntercambio}
             setDistribucion={setDistribucionIntercambio}
+            mealNamesByDay={mealNamesByDayInt}
+            setMealNamesByDay={setMealNamesByDayInt}
+            recetarios={recetariosInt}
+            setRecetarios={setRecetariosInt}
             showNotification={showNotification}
             showNoDataWarning={!isPlanIntercambioProvided}
           />

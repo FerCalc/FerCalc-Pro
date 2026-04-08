@@ -19,11 +19,10 @@ const initialState = {
   annotations: '',
 };
 
-const initialChronologicalAge = {
-  totalMonths: 0,
-  totalYears: 30,
-  text: '30 años'
-};
+const initialChronologicalAge = { totalMonths: 0, totalYears: 30, text: '30 años' };
+
+// ✅ Estados iniciales de fraccionamiento
+const INITIAL_MEAL_SLOTS = ['Desayuno', 'Media manana', 'Almuerzo', 'Media tarde', 'Merienda', 'Cena'];
 
 function App() {
   const { user } = useAuth();
@@ -36,48 +35,44 @@ function App() {
   const [planIntercambio, setPlanIntercambio] = useState(initialState.planIntercambio);
   const [annotations, setAnnotations] = useState(initialState.annotations);
   const [chronologicalAge, setChronologicalAge] = useState(initialChronologicalAge);
-  // ✅ Estado distribucion agregado para evitar error en CalculadoraTab
   const [distribucion, setDistribucion] = useState({});
+
+  // ✅ Estados de fraccionamiento elevados para que ActionToolbar pueda acceder al PDF
+  const [fracMealSlots, setFracMealSlots] = useState(INITIAL_MEAL_SLOTS);
+  const [fracMealTimes, setFracMealTimes] = useState({});
+  const [fracMealTimesByDay, setFracMealTimesByDay] = useState({});
+  const [fracNumberOfDays, setFracNumberOfDays] = useState(1);
+  const [fracDistribucionDesarrollada, setFracDistribucionDesarrollada] = useState({});
+  const [fracDistribucionIntercambio, setFracDistribucionIntercambio] = useState({});
+  const [fracMealNamesByDayDes, setFracMealNamesByDayDes] = useState({});
+  const [fracMealNamesByDayInt, setFracMealNamesByDayInt] = useState({});
+  const [fracRecetariosDes, setFracRecetariosDes] = useState({});
+  const [fracRecetariosInt, setFracRecetariosInt] = useState({});
 
   const [savedDiets, setSavedDiets] = useState(() => {
     try {
       const item = localStorage.getItem(storageKey);
       return item ? JSON.parse(item) : [];
-    } catch (error) {
-      console.error("Error al leer dietas guardadas de localStorage:", error);
-      return [];
-    }
+    } catch { return []; }
   });
 
   useEffect(() => {
-    try {
-      localStorage.setItem(storageKey, JSON.stringify(savedDiets));
-    } catch (error) {
-      console.error("Error al guardar dietas en localStorage:", error);
-    }
+    try { localStorage.setItem(storageKey, JSON.stringify(savedDiets)); }
+    catch (error) { console.error("Error al guardar dietas:", error); }
   }, [savedDiets, storageKey]);
 
-  // ✅ Advertencia al recargar o cerrar la pestaña
   useEffect(() => {
-    const handleBeforeUnload = (e) => {
-      e.preventDefault();
-      e.returnValue = '';
-    };
+    const handleBeforeUnload = (e) => { e.preventDefault(); e.returnValue = ''; };
     window.addEventListener('beforeunload', handleBeforeUnload);
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, []);
 
   const getCurrentDietState = () => ({
-    patientData,
-    dietGoals,
-    dietaActual,
-    planIntercambio,
-    annotations,
+    patientData, dietGoals, dietaActual, planIntercambio, annotations,
   });
 
   const loadDietState = (dietData) => {
-    const fullPatientData = { ...initialState.patientData, ...dietData.patientData };
-    setPatientData(fullPatientData);
+    setPatientData({ ...initialState.patientData, ...dietData.patientData });
     setDietGoals(dietData.dietGoals || initialState.dietGoals);
     setDietaActual(dietData.dietaActual || initialState.dietaActual);
     setPlanIntercambio(dietData.planIntercambio || initialState.planIntercambio);
@@ -87,9 +82,8 @@ function App() {
 
   const handlePlanIntercambioUpdate = useCallback((nuevoPlan) => {
     setPlanIntercambio(nuevoPlan);
-  }, [setPlanIntercambio]);
+  }, []);
 
-  // ✅ Sin confirm — el modal lo maneja ActionToolbar
   const handleNewDiet = () => {
     setPatientData(initialState.patientData);
     setDietGoals(initialState.dietGoals);
@@ -98,8 +92,38 @@ function App() {
     setAnnotations(initialState.annotations);
     setChronologicalAge(initialChronologicalAge);
     setDistribucion({});
+    // ✅ Reset fraccionamiento
+    setFracMealSlots(INITIAL_MEAL_SLOTS);
+    setFracMealTimes({});
+    setFracMealTimesByDay({});
+    setFracNumberOfDays(1);
+    setFracDistribucionDesarrollada({});
+    setFracDistribucionIntercambio({});
+    setFracMealNamesByDayDes({});
+    setFracMealNamesByDayInt({});
+    setFracRecetariosDes({});
+    setFracRecetariosInt({});
     toast.success('Se ha iniciado una nueva dieta.');
   };
+
+  // ✅ allData ahora incluye fraccionamientoData completo para el PDF
+  const getAllData = () => ({
+    patientData,
+    dietGoals,
+    dietaActual,
+    planIntercambio,
+    annotations,
+    fraccionamientoData: {
+      mealSlots: fracMealSlots,
+      numberOfDays: fracNumberOfDays,
+      distribucionDesarrollada: fracDistribucionDesarrollada,
+      distribucionIntercambio: fracDistribucionIntercambio,
+      mealNamesByDayDes: fracMealNamesByDayDes,
+      mealNamesByDayInt: fracMealNamesByDayInt,
+      recetariosDes: fracRecetariosDes,
+      recetariosInt: fracRecetariosInt,
+    },
+  });
 
   const TabButton = ({ tabName, icon, label }) => (
     <button
@@ -110,10 +134,7 @@ function App() {
     </button>
   );
 
-  const showGyTTab = patientData.sex === 'Femenino' &&
-                     patientData.estaEmbarazada === 'Sí' &&
-                     patientData.semanasGestacion >= 10;
-
+  const showGyTTab = patientData.sex === 'Femenino' && patientData.estaEmbarazada === 'Sí' && patientData.semanasGestacion >= 10;
   const showGrowthTab = chronologicalAge.totalYears >= 0 && chronologicalAge.totalYears <= 19;
 
   return (
@@ -124,18 +145,20 @@ function App() {
         <div className="flex items-center gap-4 mb-4 md:mb-0">
           <img src={logo} alt="Logo FerCalc" className="h-16 w-auto" />
           <div>
-            {/* ✅ Sin espacio entre Fer y Calc */}
-            <h1 className="text-2xl font-bold"><span className="text-gray-800">Fer</span><span className="text-green-600">Calc</span></h1>
+            <h1 className="text-2xl font-bold">
+              <span className="text-gray-800">Fer</span><span className="text-green-600">Calc</span>
+            </h1>
             <p className="text-gray-600">Calculadora Nutricional</p>
           </div>
         </div>
+        {/* ✅ allData ahora usa getAllData() con fraccionamiento completo */}
         <ActionToolbar
           getCurrentDietState={getCurrentDietState}
           savedDiets={savedDiets}
           setSavedDiets={setSavedDiets}
           loadDietState={loadDietState}
           handleNewDiet={handleNewDiet}
-          allData={getCurrentDietState()}
+          allData={getAllData()}
         />
       </header>
 
@@ -161,19 +184,19 @@ function App() {
             setChronologicalAge={setChronologicalAge}
           />
         </div>
+
         {showGrowthTab && activeTab === 'crecimiento' && (
-  <div>
-    <GrowthAndDevelopmentTab
-      patientData={patientData}
-      chronologicalAge={chronologicalAge}
-    />
-  </div>
-)}
+          <div>
+            <GrowthAndDevelopmentTab patientData={patientData} chronologicalAge={chronologicalAge} />
+          </div>
+        )}
+
         {showGyTTab && (
           <div style={{ display: activeTab === 'gyt' ? 'block' : 'none' }}>
             <GyTTab patientData={patientData} />
           </div>
         )}
+
         <div style={{ display: activeTab === 'calculadora' ? 'block' : 'none' }}>
           <CalculadoraTab
             dietaActual={dietaActual}
@@ -184,10 +207,33 @@ function App() {
             onPlanIntercambioUpdate={handlePlanIntercambioUpdate}
           />
         </div>
+
         <div style={{ display: activeTab === 'fraccionamiento' ? 'block' : 'none' }}>
+          {/* ✅ Todos los estados de fraccionamiento vienen de App.jsx */}
           <FraccionamientoTab
             dietaActual={dietaActual}
             planIntercambio={planIntercambio}
+            // Estados elevados
+            mealSlots={fracMealSlots}
+            setMealSlots={setFracMealSlots}
+            mealTimes={fracMealTimes}
+            setMealTimes={setFracMealTimes}
+            mealTimesByDay={fracMealTimesByDay}
+            setMealTimesByDay={setFracMealTimesByDay}
+            numberOfDays={fracNumberOfDays}
+            setNumberOfDays={setFracNumberOfDays}
+            distribucionDesarrollada={fracDistribucionDesarrollada}
+            setDistribucionDesarrollada={setFracDistribucionDesarrollada}
+            distribucionIntercambio={fracDistribucionIntercambio}
+            setDistribucionIntercambio={setFracDistribucionIntercambio}
+            mealNamesByDayDes={fracMealNamesByDayDes}
+            setMealNamesByDayDes={setFracMealNamesByDayDes}
+            mealNamesByDayInt={fracMealNamesByDayInt}
+            setMealNamesByDayInt={setFracMealNamesByDayInt}
+            recetariosDes={fracRecetariosDes}
+            setRecetariosDes={setFracRecetariosDes}
+            recetariosInt={fracRecetariosInt}
+            setRecetariosInt={setFracRecetariosInt}
           />
         </div>
       </main>

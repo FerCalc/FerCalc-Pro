@@ -406,23 +406,32 @@ const DatosPacienteTab = ({ patientData, setPatientData, dietGoals, setDietGoals
           {/* PAVB */}
 <div className="border-t pt-4">
   <h3 className="text-lg font-semibold mb-1 flex items-center gap-2">
-    <Target size={20} className="text-blue-500"/>PAVB
+    <Target size={20} className="text-blue-500" />PAVB
   </h3>
   <p className="text-sm text-gray-500">Proteinas de Alto Valor Biologico.</p>
-  {/* ✅ Gramos de PAVB agregados */}
-  <div className="flex items-end gap-4 mt-1 mb-2">
-    <div>
-      <p className="text-xs text-gray-500">Consumido</p>
-      <p className="text-2xl font-bold text-blue-600">
+  <div className="grid grid-cols-2 gap-3 mt-2 mb-3">
+    <div className="bg-blue-50 p-3 rounded-xl">
+      <p className="text-xs text-blue-600 font-medium">Consumido</p>
+      <p className="text-xl font-bold text-blue-700">
         {(totales.proteina > 0 ? (pavbPercentage / 100) * totales.proteina : 0).toFixed(1)} g
       </p>
+      <p className="text-xs text-blue-400">{pavbPercentage.toFixed(1)}% del total</p>
     </div>
-    <div>
-      <p className="text-xs text-gray-500">Objetivo %</p>
-      <p className="text-2xl font-bold text-blue-400">{dietGoals.pavbPercentage}%</p>
+    <div className="bg-indigo-50 p-3 rounded-xl">
+      <p className="text-xs text-indigo-600 font-medium">Objetivo</p>
+      <p className="text-xl font-bold text-indigo-700">{dietGoals.pavbPercentage}%</p>
+      {/* ✅ NUEVO: muestra a cuántos gramos equivale el % objetivo */}
+      <p className="text-xs text-indigo-400">
+        = {totales.proteina > 0
+          ? ((dietGoals.pavbPercentage / 100) * totales.proteina).toFixed(1)
+          : (dietGoals.pavbPercentage > 0 && dietGoals.proteina > 0
+              ? ((dietGoals.pavbPercentage / 100) * dietGoals.proteina).toFixed(1)
+              : '0.0')
+        } g de proteina
+      </p>
     </div>
   </div>
-  <ProgressBar label="PAVB" currentValue={pavbPercentage} goalValue={dietGoals.pavbPercentage} unit="%"/>
+  <ProgressBar label="PAVB" currentValue={pavbPercentage} goalValue={dietGoals.pavbPercentage} unit="%" />
 </div>
           {/* ✅ AGS — con % y gramos */}
           <div className="border-t pt-4">

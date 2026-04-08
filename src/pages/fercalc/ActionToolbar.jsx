@@ -17,7 +17,10 @@ const ActionToolbar = ({ getCurrentDietState, savedDiets, setSavedDiets, loadDie
   const [pdfSections, setPdfSections] = useState({
     datos: true,
     calculadora: true,
-    fraccionamiento: true
+    intercambio: true,
+    fraccionamientoDesarrollada: true,
+    fraccionamientoIntercambio: true,
+    recetarios: true,
   });
   const [profilePhoto, setProfilePhoto] = useState(null);
   const [showNewDietWarning, setShowNewDietWarning] = useState(false);
@@ -41,10 +44,7 @@ const ActionToolbar = ({ getCurrentDietState, savedDiets, setSavedDiets, loadDie
   };
 
   const handleSave = () => {
-    if (!dietName.trim()) {
-      toast.error('Por favor, ingresa un nombre para la dieta.');
-      return;
-    }
+    if (!dietName.trim()) { toast.error('Ingresa un nombre para la dieta.'); return; }
     const newDiet = { id: Date.now(), name: dietName.trim(), data: getCurrentDietState() };
     setSavedDiets(prev => [...prev, newDiet]);
     toast.success(`Dieta "${dietName.trim()}" guardada.`);
@@ -58,15 +58,8 @@ const ActionToolbar = ({ getCurrentDietState, savedDiets, setSavedDiets, loadDie
     toast.error('Dieta eliminada.');
   };
 
-  const handleNewDietWithWarning = () => {
-    setShowNewDietWarning(true);
-    setIsDrawerOpen(false);
-  };
-
-  const handleLoadDietWithWarning = (diet) => {
-    setShowLoadWarning(diet);
-  };
-
+  const handleNewDietWithWarning = () => { setShowNewDietWarning(true); setIsDrawerOpen(false); };
+  const handleLoadDietWithWarning = (diet) => { setShowLoadWarning(diet); };
   const confirmLoadDiet = () => {
     if (!showLoadWarning) return;
     loadDietState({ ...showLoadWarning.data, name: showLoadWarning.name });
@@ -75,13 +68,21 @@ const ActionToolbar = ({ getCurrentDietState, savedDiets, setSavedDiets, loadDie
     setIsDrawerOpen(false);
   };
 
+  // ──────────────────────────────────────────────────────────────
+  // PDF
+  // ──────────────────────────────────────────────────────────────
   const handlePdfDownload = async () => {
     if (isProcessing) return;
     setIsProcessing(true);
     toast('Generando PDF...', { icon: '📄' });
 
     try {
-      const { patientData, dietGoals, dietaActual } = allData;
+      const {
+        patientData, dietGoals, dietaActual,
+        fraccionamientoData,  // { mealSlots, numberOfDays, distribucionDesarrollada, distribucionIntercambio, mealNamesByDay, recetarios, getMealLabel }
+        planIntercambio,      // { porciones, totales, piramideData }
+      } = allData;
+
       const doc = new jsPDF();
       let lastY = 20;
       let contentAdded = false;
@@ -90,10 +91,11 @@ const ActionToolbar = ({ getCurrentDietState, savedDiets, setSavedDiets, loadDie
       const DARK = [44, 62, 80];
       const LIGHT_GRAY = [236, 240, 241];
       const WHITE = [255, 255, 255];
+      const BLUE = [41, 128, 185];
 
-      const addSectionHeader = (title) => {
-        if (lastY > 250) { doc.addPage(); lastY = 20; }
-        doc.setFillColor(...GREEN);
+      const addSectionHeader = (title, color = GREEN) => {
+        if (lastY > 255) { doc.addPage(); lastY = 20; }
+        doc.setFillColor(...color);
         doc.rect(0, lastY - 5, 220, 12, 'F');
         doc.setTextColor(...WHITE);
         doc.setFontSize(11);
@@ -104,8 +106,20 @@ const ActionToolbar = ({ getCurrentDietState, savedDiets, setSavedDiets, loadDie
         lastY += 16;
       };
 
-      const checkPageBreak = (space = 40) => {
-        if (lastY + space > 275) { doc.addPage(); lastY = 20; }
+      const addSubHeader = (title) => {
+        if (lastY > 260) { doc.addPage(); lastY = 20; }
+        doc.setFillColor(...LIGHT_GRAY);
+        doc.rect(10, lastY - 3, 190, 9, 'F');
+        doc.setTextColor(...DARK);
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'bold');
+        doc.text(title, 14, lastY + 3);
+        doc.setFont('helvetica', 'normal');
+        lastY += 13;
+      };
+
+      const checkPage = (space = 40) => {
+        if (lastY + space > 272) { doc.addPage(); lastY = 20; }
       };
 
       // ── ENCABEZADO ──
@@ -119,29 +133,22 @@ const ActionToolbar = ({ getCurrentDietState, savedDiets, setSavedDiets, loadDie
       doc.setFont('helvetica', 'normal');
       doc.text('Calculadora Nutricional', 14, 21);
       doc.setFontSize(9);
-      doc.text(
-        `Generado: ${new Date().toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' })}`,
-        130, 13
-      );
+      doc.text(`Generado: ${new Date().toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' })}`, 130, 13);
       doc.text(`Usuario: ${user?.username || 'N/A'}`, 130, 21);
       doc.setTextColor(...DARK);
       lastY = 38;
 
       // ── SECCIÓN 1: DATOS DEL PACIENTE ──
       if (pdfSections.datos) {
-        addSectionHeader('DATOS DEL PACIENTE');
+        addSectionHeader('1. DATOS DEL PACIENTE Y OBJETIVOS');
 
         const imc = patientData.height > 0 && patientData.weight > 0
-          ? (patientData.weight / ((patientData.height / 100) ** 2)).toFixed(2)
-          : 'N/A';
-
-        const imcCategoria = (val) => {
-          const v = parseFloat(val);
-          if (isNaN(v)) return 'N/A';
-          if (v < 18.5) return 'Bajo peso';
-          if (v < 25) return 'Normal';
-          if (v < 30) return 'Sobrepeso';
-          return 'Obesidad';
+          ? (patientData.weight / ((patientData.height / 100) ** 2)).toFixed(2) : 'N/A';
+        const imcCat = (v) => {
+          const n = parseFloat(v);
+          if (isNaN(n)) return 'N/A';
+          if (n < 18.5) return 'Bajo peso'; if (n < 25) return 'Normal';
+          if (n < 30) return 'Sobrepeso'; return 'Obesidad';
         };
 
         autoTable(doc, {
@@ -149,25 +156,24 @@ const ActionToolbar = ({ getCurrentDietState, savedDiets, setSavedDiets, loadDie
           head: [['Parametro', 'Valor', 'Parametro', 'Valor']],
           body: [
             ['Peso', `${patientData.weight} kg`, 'Altura', `${patientData.height} cm`],
-            ['Edad', `${patientData.age} anos`, 'Sexo', patientData.sex],
-            ['IMC', imc, 'Categoria IMC', imcCategoria(imc)],
+            ['Edad (anos)', `${parseFloat(patientData.age || 0).toFixed(1)}`, 'Sexo', patientData.sex || '-'],
+            ['IMC', imc, 'Categoria IMC', imcCat(imc)],
           ],
           theme: 'grid',
-          styles: { fontSize: 10, cellPadding: 4 },
+          styles: { fontSize: 9, cellPadding: 3 },
           headStyles: { fillColor: GREEN, textColor: 255, fontStyle: 'bold' },
           alternateRowStyles: { fillColor: [245, 250, 245] },
         });
-        lastY = doc.lastAutoTable.finalY + 10;
+        lastY = doc.lastAutoTable.finalY + 8;
 
-        checkPageBreak(40);
-        addSectionHeader('OBJETIVOS NUTRICIONALES');
+        checkPage(35);
+        addSubHeader('Objetivos Nutricionales');
 
         const goalLabels = {
-          calorias: 'Calorias', hc: 'Carbohidratos', proteina: 'Proteinas',
-          grasa: 'Grasas', na: 'Sodio (Na)', k: 'Potasio (K)',
-          p: 'Fosforo (P)', ca: 'Calcio (Ca)', fe: 'Hierro (Fe)',
-          colesterol: 'Colesterol', purinas: 'Purinas', fibra: 'Fibra',
-          agua: 'Agua', pavbPercentage: '% PAVB'
+          calorias: 'Calorias', hc: 'Carbohidratos', proteina: 'Proteinas', grasa: 'Grasas',
+          na: 'Sodio (Na)', k: 'Potasio (K)', p: 'Fosforo (P)', ca: 'Calcio (Ca)',
+          fe: 'Hierro (Fe)', colesterol: 'Colesterol', purinas: 'Purinas',
+          fibra: 'Fibra', agua: 'Agua', pavbPercentage: '% PAVB'
         };
         const goalUnits = {
           calorias: 'kcal', hc: 'g', proteina: 'g', grasa: 'g',
@@ -175,16 +181,22 @@ const ActionToolbar = ({ getCurrentDietState, savedDiets, setSavedDiets, loadDie
           colesterol: 'mg', purinas: 'mg', fibra: 'g', agua: 'ml', pavbPercentage: '%'
         };
 
-        const goalsArray = Object.entries(dietGoals).map(([key, value]) => [
-          goalLabels[key] || key,
-          `${value} ${goalUnits[key] || ''}`
-        ]);
+        // ✅ Incluye gramos equivalentes del % PAVB
+        const pavbGramos = dietGoals.pavbPercentage > 0 && dietGoals.proteina > 0
+          ? `${((dietGoals.pavbPercentage / 100) * dietGoals.proteina).toFixed(1)} g`
+          : '-';
 
-        const half = Math.ceil(goalsArray.length / 2);
-        const paired = goalsArray.slice(0, half).map((row, i) => [
+        const goalsArr = Object.entries(dietGoals).map(([key, value]) => {
+          let displayVal = `${value} ${goalUnits[key] || ''}`;
+          if (key === 'pavbPercentage') displayVal = `${value}% (= ${pavbGramos})`;
+          return [goalLabels[key] || key, displayVal];
+        });
+
+        const half = Math.ceil(goalsArr.length / 2);
+        const paired = goalsArr.slice(0, half).map((row, i) => [
           row[0], row[1],
-          goalsArray[half + i]?.[0] || '',
-          goalsArray[half + i]?.[1] || ''
+          goalsArr[half + i]?.[0] || '',
+          goalsArr[half + i]?.[1] || ''
         ]);
 
         autoTable(doc, {
@@ -192,7 +204,7 @@ const ActionToolbar = ({ getCurrentDietState, savedDiets, setSavedDiets, loadDie
           head: [['Nutriente', 'Objetivo', 'Nutriente', 'Objetivo']],
           body: paired,
           theme: 'striped',
-          styles: { fontSize: 10, cellPadding: 3 },
+          styles: { fontSize: 9, cellPadding: 3 },
           headStyles: { fillColor: GREEN, textColor: 255, fontStyle: 'bold' },
           alternateRowStyles: { fillColor: [245, 250, 245] },
         });
@@ -200,16 +212,16 @@ const ActionToolbar = ({ getCurrentDietState, savedDiets, setSavedDiets, loadDie
         contentAdded = true;
       }
 
-      // ── SECCIÓN 2: PLAN DE ALIMENTOS ──
+      // ── SECCIÓN 2: PLAN GENERAL DE ALIMENTOS ──
       if (pdfSections.calculadora && dietaActual?.length > 0) {
-        checkPageBreak(40);
-        addSectionHeader('PLAN GENERAL DE ALIMENTOS');
+        checkPage(40);
+        addSectionHeader('2. PLAN GENERAL DE ALIMENTOS');
 
         const planBody = dietaActual.map(item => {
-          const factor = item.cantidadUsada / (item.alimento.cantidad || 1);
+          const factor = (item.cantidadUsada || 0) / (item.alimento.cantidad || 1);
           return [
             item.alimento.nombre,
-            `${item.cantidadUsada.toFixed(1)} g`,
+            `${parseFloat(item.cantidadUsada || 0).toFixed(1)} g`,
             (item.alimento.calorias * factor).toFixed(1),
             (item.alimento.hc * factor).toFixed(1),
             (item.alimento.proteina * factor).toFixed(1),
@@ -218,7 +230,7 @@ const ActionToolbar = ({ getCurrentDietState, savedDiets, setSavedDiets, loadDie
         });
 
         const totales = dietaActual.reduce((acc, item) => {
-          const factor = item.cantidadUsada / (item.alimento.cantidad || 1);
+          const factor = (item.cantidadUsada || 0) / (item.alimento.cantidad || 1);
           acc.calorias += item.alimento.calorias * factor;
           acc.hc += item.alimento.hc * factor;
           acc.proteina += item.alimento.proteina * factor;
@@ -230,15 +242,9 @@ const ActionToolbar = ({ getCurrentDietState, savedDiets, setSavedDiets, loadDie
           startY: lastY,
           head: [['Alimento', 'Gramos', 'Kcal', 'HC (g)', 'Prot. (g)', 'Grasa (g)']],
           body: planBody,
-          foot: [[
-            'TOTALES', '',
-            totales.calorias.toFixed(1),
-            totales.hc.toFixed(1),
-            totales.proteina.toFixed(1),
-            totales.grasa.toFixed(1)
-          ]],
+          foot: [['TOTALES', '', totales.calorias.toFixed(1), totales.hc.toFixed(1), totales.proteina.toFixed(1), totales.grasa.toFixed(1)]],
           theme: 'grid',
-          styles: { fontSize: 9, cellPadding: 3 },
+          styles: { fontSize: 8, cellPadding: 2.5 },
           headStyles: { fillColor: GREEN, textColor: 255, fontStyle: 'bold' },
           footStyles: { fillColor: LIGHT_GRAY, textColor: DARK, fontStyle: 'bold' },
           alternateRowStyles: { fillColor: [245, 250, 245] },
@@ -247,7 +253,259 @@ const ActionToolbar = ({ getCurrentDietState, savedDiets, setSavedDiets, loadDie
         contentAdded = true;
       }
 
-      // ── PIE DE PAGINA ──
+      // ── SECCIÓN 3: CALCULADORA POR INTERCAMBIO ──
+      if (pdfSections.intercambio && planIntercambio?.porciones && Object.keys(planIntercambio.porciones).length > 0) {
+        checkPage(40);
+        addSectionHeader('3. CALCULADORA POR INTERCAMBIO', BLUE);
+
+        const { porciones, totales: totInt, piramideData } = planIntercambio;
+
+        // Totales del plan
+        const intercambioBody = Object.entries(porciones).map(([grupo, porc]) => {
+          const gd = piramideData?.[grupo] || {};
+          const p = parseFloat(porc) || 0;
+          return [
+            grupo,
+            p.toString(),
+            ((gd.calorias || 0) * p).toFixed(1),
+            ((gd.hc || 0) * p).toFixed(1),
+            ((gd.proteinas || 0) * p).toFixed(1),
+            ((gd.lipidos || 0) * p).toFixed(1),
+          ];
+        });
+
+        autoTable(doc, {
+          startY: lastY,
+          head: [['Grupo', 'Porciones', 'Kcal', 'HC (g)', 'Prot. (g)', 'Lip. (g)']],
+          body: intercambioBody,
+          foot: [[
+            'TOTALES', '',
+            (totInt?.calorias || 0).toFixed(1),
+            (totInt?.hc || 0).toFixed(1),
+            (totInt?.proteinas || 0).toFixed(1),
+            (totInt?.lipidos || 0).toFixed(1),
+          ]],
+          theme: 'grid',
+          styles: { fontSize: 8, cellPadding: 2.5 },
+          headStyles: { fillColor: BLUE, textColor: 255, fontStyle: 'bold' },
+          footStyles: { fillColor: LIGHT_GRAY, textColor: DARK, fontStyle: 'bold' },
+          alternateRowStyles: { fillColor: [240, 248, 255] },
+        });
+        lastY = doc.lastAutoTable.finalY + 10;
+        contentAdded = true;
+      }
+
+      // ── SECCIÓN 4: FRACCIONAMIENTO POR DESARROLLADA ──
+      if (pdfSections.fraccionamientoDesarrollada && fraccionamientoData && dietaActual?.length > 0) {
+        const { mealSlots, numberOfDays, distribucionDesarrollada, mealNamesByDayDes, recetariosDes } = fraccionamientoData;
+        if (distribucionDesarrollada && Object.keys(distribucionDesarrollada).length > 0) {
+          checkPage(40);
+          addSectionHeader('4. FRACCIONAMIENTO POR DESARROLLADA');
+
+          for (let dayIndex = 0; dayIndex < numberOfDays; dayIndex++) {
+            const distribucionDelDia = distribucionDesarrollada[dayIndex] || {};
+            const hasData = mealSlots.some(mealKey =>
+              (dietaActual || []).some(fi => ((distribucionDelDia[fi.id] || {})[mealKey] || 0) > 0)
+            );
+            if (!hasData) continue;
+
+            checkPage(20);
+            addSubHeader(`Dia ${dayIndex + 1}`);
+
+            // Total kcal del día para % VCT
+            let totalKcalDia = 0;
+            mealSlots.forEach(mealKey => {
+              (dietaActual || []).forEach(foodItem => {
+                const grams = (distribucionDelDia[foodItem.id] || {})[mealKey] || 0;
+                const factor = grams > 0 && foodItem.alimento.cantidad > 0 ? grams / foodItem.alimento.cantidad : 0;
+                totalKcalDia += (foodItem.alimento.calorias || 0) * factor;
+              });
+            });
+
+            for (const mealKey of mealSlots) {
+              const mealLabel = (mealNamesByDayDes || {})[`${dayIndex}_${mealKey}`] || mealKey;
+              const mealFoods = (dietaActual || []).map(foodItem => {
+                const grams = (distribucionDelDia[foodItem.id] || {})[mealKey] || 0;
+                return grams > 0 ? { foodItem, assignedGrams: grams } : null;
+              }).filter(Boolean);
+
+              if (mealFoods.length === 0) continue;
+
+              let mealKcal = 0;
+              const mealBody = mealFoods.map(({ foodItem, assignedGrams }) => {
+                const factor = assignedGrams > 0 && foodItem.alimento.cantidad > 0 ? assignedGrams / foodItem.alimento.cantidad : 0;
+                const kcal = (foodItem.alimento.calorias || 0) * factor;
+                mealKcal += kcal;
+                return [
+                  foodItem.alimento.nombre,
+                  `${assignedGrams.toFixed(1)} g`,
+                  kcal.toFixed(1),
+                  ((foodItem.alimento.hc || 0) * factor).toFixed(1),
+                  ((foodItem.alimento.proteina || 0) * factor).toFixed(1),
+                  ((foodItem.alimento.grasa || 0) * factor).toFixed(1),
+                ];
+              });
+
+              const pctVCT = totalKcalDia > 0 ? ((mealKcal / totalKcalDia) * 100).toFixed(1) : '0.0';
+
+              checkPage(mealBody.length * 7 + 20);
+
+              // Título del menú con % VCT
+              doc.setFontSize(9);
+              doc.setFont('helvetica', 'bold');
+              doc.setTextColor(...DARK);
+              doc.text(`  ${mealLabel}`, 14, lastY);
+              doc.setFont('helvetica', 'normal');
+              doc.setTextColor(39, 174, 96);
+              doc.text(`${pctVCT}% VCT — ${mealKcal.toFixed(0)} kcal`, 100, lastY);
+              doc.setTextColor(...DARK);
+              lastY += 5;
+
+              autoTable(doc, {
+                startY: lastY,
+                head: [['Alimento', 'g', 'Kcal', 'HC', 'Prot', 'Grasa']],
+                body: mealBody,
+                theme: 'grid',
+                styles: { fontSize: 7.5, cellPadding: 2 },
+                headStyles: { fillColor: [41, 128, 185], textColor: 255, fontStyle: 'bold', fontSize: 7.5 },
+                alternateRowStyles: { fillColor: [245, 250, 245] },
+                margin: { left: 14, right: 14 },
+              });
+              lastY = doc.lastAutoTable.finalY + 5;
+
+              // ✅ Recetario del menú si existe
+              if (pdfSections.recetarios) {
+                const recetarioKey = `${dayIndex}_${mealKey}`;
+                const recetario = (recetariosDes || {})[recetarioKey];
+                if (recetario?.preparacion) {
+                  checkPage(20);
+                  doc.setFontSize(8);
+                  doc.setFont('helvetica', 'bolditalic');
+                  doc.setTextColor(80, 80, 80);
+                  doc.text('Preparacion:', 14, lastY);
+                  doc.setFont('helvetica', 'normal');
+                  lastY += 5;
+                  const lines = doc.splitTextToSize(recetario.preparacion, 182);
+                  lines.forEach(line => {
+                    checkPage(6);
+                    doc.text(line, 14, lastY);
+                    lastY += 5;
+                  });
+                  lastY += 3;
+                }
+              }
+            }
+            lastY += 4;
+          }
+          contentAdded = true;
+        }
+      }
+
+      // ── SECCIÓN 5: FRACCIONAMIENTO POR INTERCAMBIO ──
+      if (pdfSections.fraccionamientoIntercambio && fraccionamientoData && planIntercambio?.porciones && Object.keys(planIntercambio.porciones).length > 0) {
+        const { mealSlots, numberOfDays, distribucionIntercambio, mealNamesByDayInt, recetariosInt } = fraccionamientoData;
+        const piramideData = planIntercambio?.piramideData || {};
+
+        if (distribucionIntercambio && Object.keys(distribucionIntercambio).length > 0) {
+          checkPage(40);
+          addSectionHeader('5. FRACCIONAMIENTO POR INTERCAMBIO', [46, 125, 50]);
+
+          for (let dayIndex = 0; dayIndex < numberOfDays; dayIndex++) {
+            const distribucionDelDia = distribucionIntercambio[dayIndex] || {};
+            const hasData = mealSlots.some(mealKey =>
+              Object.keys(distribucionDelDia).some(gn => ((distribucionDelDia[gn] || {})[mealKey] || 0) > 0)
+            );
+            if (!hasData) continue;
+
+            checkPage(20);
+            addSubHeader(`Dia ${dayIndex + 1}`);
+
+            let totalKcalDia = 0;
+            mealSlots.forEach(mealKey => {
+              Object.keys(distribucionDelDia).forEach(groupName => {
+                const portions = (distribucionDelDia[groupName] || {})[mealKey] || 0;
+                const gd = piramideData[groupName];
+                if (gd) totalKcalDia += (gd.calorias || 0) * portions;
+              });
+            });
+
+            for (const mealKey of mealSlots) {
+              const mealLabel = (mealNamesByDayInt || {})[`${dayIndex}_${mealKey}`] || mealKey;
+              const mealGroups = Object.keys(distribucionDelDia)
+                .filter(gn => ((distribucionDelDia[gn] || {})[mealKey] || 0) > 0)
+                .map(gn => ({ groupName: gn, assignedPortions: distribucionDelDia[gn][mealKey] }));
+
+              if (mealGroups.length === 0) continue;
+
+              let mealKcal = 0;
+              const mealBody = mealGroups.map(({ groupName, assignedPortions }) => {
+                const gd = piramideData[groupName] || {};
+                const kcal = (gd.calorias || 0) * assignedPortions;
+                mealKcal += kcal;
+                return [
+                  groupName,
+                  assignedPortions.toString(),
+                  kcal.toFixed(1),
+                  ((gd.hc || 0) * assignedPortions).toFixed(1),
+                  ((gd.proteinas || 0) * assignedPortions).toFixed(1),
+                  ((gd.lipidos || 0) * assignedPortions).toFixed(1),
+                ];
+              });
+
+              const pctVCT = totalKcalDia > 0 ? ((mealKcal / totalKcalDia) * 100).toFixed(1) : '0.0';
+
+              checkPage(mealBody.length * 7 + 20);
+              doc.setFontSize(9);
+              doc.setFont('helvetica', 'bold');
+              doc.setTextColor(...DARK);
+              doc.text(`  ${mealLabel}`, 14, lastY);
+              doc.setFont('helvetica', 'normal');
+              doc.setTextColor(46, 125, 50);
+              doc.text(`${pctVCT}% VCT — ${mealKcal.toFixed(0)} kcal`, 100, lastY);
+              doc.setTextColor(...DARK);
+              lastY += 5;
+
+              autoTable(doc, {
+                startY: lastY,
+                head: [['Grupo', 'Porciones', 'Kcal', 'HC', 'Prot', 'Lip']],
+                body: mealBody,
+                theme: 'grid',
+                styles: { fontSize: 7.5, cellPadding: 2 },
+                headStyles: { fillColor: [46, 125, 50], textColor: 255, fontStyle: 'bold', fontSize: 7.5 },
+                alternateRowStyles: { fillColor: [240, 255, 240] },
+                margin: { left: 14, right: 14 },
+              });
+              lastY = doc.lastAutoTable.finalY + 5;
+
+              // ✅ Recetario del menú intercambio
+              if (pdfSections.recetarios) {
+                const recetarioKey = `${dayIndex}_${mealKey}`;
+                const recetario = (recetariosInt || {})[recetarioKey];
+                if (recetario?.preparacion) {
+                  checkPage(20);
+                  doc.setFontSize(8);
+                  doc.setFont('helvetica', 'bolditalic');
+                  doc.setTextColor(80, 80, 80);
+                  doc.text('Preparacion:', 14, lastY);
+                  doc.setFont('helvetica', 'normal');
+                  lastY += 5;
+                  const lines = doc.splitTextToSize(recetario.preparacion, 182);
+                  lines.forEach(line => {
+                    checkPage(6);
+                    doc.text(line, 14, lastY);
+                    lastY += 5;
+                  });
+                  lastY += 3;
+                }
+              }
+            }
+            lastY += 4;
+          }
+          contentAdded = true;
+        }
+      }
+
+      // ── PIE DE PÁGINA ──
       const pageCount = doc.internal.getNumberOfPages();
       for (let i = 1; i <= pageCount; i++) {
         doc.setPage(i);
@@ -283,169 +541,97 @@ const ActionToolbar = ({ getCurrentDietState, savedDiets, setSavedDiets, loadDie
 
   return (
     <>
-      {/* Botón menú hamburguesa */}
-      <button
-        onClick={() => setIsDrawerOpen(true)}
-        className="flex items-center gap-2 px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition-colors"
-      >
+      <button onClick={() => setIsDrawerOpen(true)} className="flex items-center gap-2 px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition-colors">
         <Menu size={20} />
         <span className="font-medium">Menu</span>
       </button>
 
-      {/* Overlay */}
-      {isDrawerOpen && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40"
-          onClick={() => setIsDrawerOpen(false)}
-        />
-      )}
+      {isDrawerOpen && <div className="fixed inset-0 bg-black bg-opacity-50 z-40" onClick={() => setIsDrawerOpen(false)} />}
 
-      {/* Drawer lateral izquierdo */}
       <div className={`fixed top-0 left-0 h-full w-72 bg-gray-900 text-white z-50 transform transition-transform duration-300 ease-in-out flex flex-col ${isDrawerOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-
-        {/* Header — perfil */}
         <div className="bg-gray-800 p-6 flex flex-col items-center border-b border-gray-700 relative">
-          <button
-            onClick={() => setIsDrawerOpen(false)}
-            className="absolute top-4 right-4 text-gray-400 hover:text-white"
-          >
-            <X size={20} />
-          </button>
-
+          <button onClick={() => setIsDrawerOpen(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white"><X size={20} /></button>
           <div className="relative mb-3">
             {profilePhoto ? (
-              <img
-                src={profilePhoto}
-                alt="Foto de perfil"
-                className="w-20 h-20 rounded-full object-cover border-4 border-green-500"
-              />
+              <img src={profilePhoto} alt="Foto de perfil" className="w-20 h-20 rounded-full object-cover border-4 border-green-500" />
             ) : (
-              <div className="w-20 h-20 rounded-full bg-green-600 flex items-center justify-center text-3xl font-bold border-4 border-green-400">
-                {userInitial}
-              </div>
+              <div className="w-20 h-20 rounded-full bg-green-600 flex items-center justify-center text-3xl font-bold border-4 border-green-400">{userInitial}</div>
             )}
             <label className="absolute bottom-0 right-0 bg-gray-600 hover:bg-gray-500 rounded-full p-1 cursor-pointer" title="Cambiar foto">
               <User size={12} />
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handlePhotoUpload}
-                className="hidden"
-              />
+              <input type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" />
             </label>
           </div>
-
           <p className="font-bold text-lg">{user?.username}</p>
           <p className="text-gray-400 text-sm">{user?.email}</p>
-
-          {/* Badge admin */}
           {isAdmin && (
             <span className="mt-2 inline-flex items-center gap-1 bg-green-700 text-green-200 text-xs font-semibold px-3 py-1 rounded-full">
-              <ShieldCheck size={12} />
-              Administrador
+              <ShieldCheck size={12} />Administrador
             </span>
           )}
         </div>
 
-        {/* Opciones */}
         <nav className="flex-1 overflow-y-auto py-4">
-
-          {/* ── Sección Admin — solo visible para admins ── */}
           {isAdmin && (
             <>
-              <p className="text-gray-500 text-xs uppercase font-semibold px-6 mb-2 tracking-wider">
-                Administración
-              </p>
-              <MenuItem
-                icon={<ShieldCheck size={18} />}
-                label="Panel APEN"
-                onClick={() => { setIsDrawerOpen(false); navigate('/admin'); }}
-                color="text-green-400"
-              />
+              <p className="text-gray-500 text-xs uppercase font-semibold px-6 mb-2 tracking-wider">Administracion</p>
+              <MenuItem icon={<ShieldCheck size={18} />} label="Panel APEN" onClick={() => { setIsDrawerOpen(false); navigate('/admin'); }} color="text-green-400" />
               <div className="border-t border-gray-700 my-4" />
             </>
           )}
-
-          <p className="text-gray-500 text-xs uppercase font-semibold px-6 mb-2 tracking-wider">
-            Gestion de Dietas
-          </p>
+          <p className="text-gray-500 text-xs uppercase font-semibold px-6 mb-2 tracking-wider">Gestion de Dietas</p>
           <MenuItem icon={<FilePlus size={18} />} label="Nueva Dieta" onClick={handleNewDietWithWarning} color="text-green-400" />
           <MenuItem icon={<Save size={18} />} label="Guardar Dieta Actual" onClick={() => { setModal('save'); setIsDrawerOpen(false); }} color="text-blue-400" />
           <MenuItem icon={<FolderOpen size={18} />} label="Cargar Dieta Guardada" onClick={() => { setModal('load'); setIsDrawerOpen(false); }} color="text-yellow-400" />
-
           <div className="border-t border-gray-700 my-4" />
-          <p className="text-gray-500 text-xs uppercase font-semibold px-6 mb-2 tracking-wider">
-            Exportar
-          </p>
+          <p className="text-gray-500 text-xs uppercase font-semibold px-6 mb-2 tracking-wider">Exportar</p>
           <MenuItem icon={<Download size={18} />} label="Descargar PDF" onClick={() => { setModal('pdf'); setIsDrawerOpen(false); }} color="text-red-400" />
         </nav>
 
-        {/* Cerrar sesión */}
         <div className="border-t border-gray-700 p-4">
-          <button
-            onClick={logout}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-red-400 hover:bg-gray-800 transition-colors"
-          >
+          <button onClick={logout} className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-red-400 hover:bg-gray-800 transition-colors">
             <LogOut size={18} />
             <span className="font-medium">Cerrar Sesion</span>
           </button>
         </div>
       </div>
 
-      {/* ── MODAL ADVERTENCIA NUEVA DIETA ── */}
+      {/* Modal advertencia nueva dieta */}
       {showNewDietWarning && (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-md">
             <div className="flex items-center gap-3 mb-4">
-              <div className="bg-yellow-100 p-3 rounded-full">
-                <AlertTriangle className="w-6 h-6 text-yellow-600" />
-              </div>
+              <div className="bg-yellow-100 p-3 rounded-full"><AlertTriangle className="w-6 h-6 text-yellow-600" /></div>
               <h3 className="text-lg font-bold text-gray-800">Nueva Dieta</h3>
             </div>
-            <p className="text-gray-600 mb-6">
-              Los datos actuales que no hayas guardado se perderan permanentemente. Esta accion no se puede deshacer.
-            </p>
+            <p className="text-gray-600 mb-6">Los datos actuales no guardados se perderan permanentemente.</p>
             <div className="flex justify-end gap-3">
-              <button onClick={() => setShowNewDietWarning(false)} className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium">
-                Cancelar
-              </button>
-              <button onClick={() => { handleNewDiet(); setShowNewDietWarning(false); }} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium">
-                Continuar
-              </button>
+              <button onClick={() => setShowNewDietWarning(false)} className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium">Cancelar</button>
+              <button onClick={() => { handleNewDiet(); setShowNewDietWarning(false); }} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium">Continuar</button>
             </div>
           </div>
         </div>
       )}
 
-      {/* ── MODAL ADVERTENCIA CARGAR DIETA ── */}
+      {/* Modal advertencia cargar dieta */}
       {showLoadWarning && (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-md">
             <div className="flex items-center gap-3 mb-4">
-              <div className="bg-yellow-100 p-3 rounded-full">
-                <AlertTriangle className="w-6 h-6 text-yellow-600" />
-              </div>
+              <div className="bg-yellow-100 p-3 rounded-full"><AlertTriangle className="w-6 h-6 text-yellow-600" /></div>
               <h3 className="text-lg font-bold text-gray-800">Cargar Dieta</h3>
             </div>
-            <p className="text-gray-600 mb-2">
-              Vas a cargar: <span className="font-semibold text-green-700">"{showLoadWarning.name}"</span>
-            </p>
-            <p className="text-gray-600 mb-6">
-              Los datos actuales no guardados se perderan. Esta accion no se puede deshacer.
-            </p>
+            <p className="text-gray-600 mb-2">Vas a cargar: <span className="font-semibold text-green-700">"{showLoadWarning.name}"</span></p>
+            <p className="text-gray-600 mb-6">Los datos actuales no guardados se perderan.</p>
             <div className="flex justify-end gap-3">
-              <button onClick={() => setShowLoadWarning(null)} className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium">
-                Cancelar
-              </button>
-              <button onClick={confirmLoadDiet} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium">
-                Cargar de todas formas
-              </button>
+              <button onClick={() => setShowLoadWarning(null)} className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium">Cancelar</button>
+              <button onClick={confirmLoadDiet} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium">Cargar de todas formas</button>
             </div>
           </div>
         </div>
       )}
 
-      {/* ── MODALES PRINCIPALES ── */}
+      {/* Modales principales */}
       {modal && (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
@@ -458,18 +644,13 @@ const ActionToolbar = ({ getCurrentDietState, savedDiets, setSavedDiets, loadDie
               <button onClick={() => setModal(null)} className="text-gray-400 hover:text-gray-700"><X /></button>
             </div>
 
-            {/* Guardar */}
             {modal === 'save' && (
               <div className="space-y-4">
                 <label className="block text-sm font-medium text-gray-700">Nombre de la Dieta</label>
-                <input
-                  type="text"
-                  value={dietName}
-                  onChange={e => setDietName(e.target.value)}
+                <input type="text" value={dietName} onChange={e => setDietName(e.target.value)}
                   placeholder="Ej: Plan Volumen - Semana 1"
                   className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none"
-                  onKeyDown={e => e.key === 'Enter' && handleSave()}
-                />
+                  onKeyDown={e => e.key === 'Enter' && handleSave()} />
                 <div className="flex justify-end gap-3">
                   <button onClick={() => setModal(null)} className="px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200">Cancelar</button>
                   <button onClick={handleSave} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">Guardar</button>
@@ -477,44 +658,37 @@ const ActionToolbar = ({ getCurrentDietState, savedDiets, setSavedDiets, loadDie
               </div>
             )}
 
-            {/* Cargar */}
             {modal === 'load' && (
               <div className="space-y-3">
                 {savedDiets.length > 0 ? savedDiets.map(diet => (
                   <div key={diet.id} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg border">
-                    <span className="font-medium flex items-center gap-2 text-gray-800">
-                      <FileText size={16} className="text-green-600" />
-                      {diet.name}
-                    </span>
+                    <span className="font-medium flex items-center gap-2 text-gray-800"><FileText size={16} className="text-green-600" />{diet.name}</span>
                     <div className="flex gap-2">
                       <button onClick={() => handleLoadDietWithWarning(diet)} className="bg-green-500 text-white px-3 py-1 rounded-lg hover:bg-green-600 text-sm">Cargar</button>
                       <button onClick={() => handleDelete(diet.id)} className="bg-red-500 text-white p-1 rounded-lg hover:bg-red-600"><Trash2 size={16} /></button>
                     </div>
                   </div>
-                )) : (
-                  <p className="text-gray-500 text-center py-8">No hay dietas guardadas.</p>
-                )}
+                )) : <p className="text-gray-500 text-center py-8">No hay dietas guardadas.</p>}
               </div>
             )}
 
-            {/* PDF */}
             {modal === 'pdf' && (
               <div className="space-y-4">
-                <p className="text-gray-600 text-sm">Selecciona las secciones que queres incluir en el PDF:</p>
+                <p className="text-gray-600 text-sm">Selecciona las secciones a incluir en el PDF:</p>
                 <div className="space-y-2">
                   {[
-                    { key: 'datos', label: 'Datos del paciente y objetivos nutricionales' },
-                    { key: 'calculadora', label: 'Plan general de alimentos' },
-                    { key: 'fraccionamiento', label: 'Fraccionamiento de la dieta' },
+                    { key: 'datos', label: 'Datos del paciente y objetivos' },
+                    { key: 'calculadora', label: 'Plan general de alimentos (Desarrollada)' },
+                    { key: 'intercambio', label: 'Calculadora por Intercambio' },
+                    { key: 'fraccionamientoDesarrollada', label: 'Fraccionamiento por Desarrollada' },
+                    { key: 'fraccionamientoIntercambio', label: 'Fraccionamiento por Intercambio' },
+                    { key: 'recetarios', label: 'Incluir recetarios en el fraccionamiento' },
                   ].map(({ key, label }) => (
                     <label key={key} className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer border">
-                      <input
-                        type="checkbox"
-                        checked={pdfSections[key]}
+                      <input type="checkbox" checked={pdfSections[key]}
                         onChange={e => setPdfSections(p => ({ ...p, [key]: e.target.checked }))}
-                        className="w-4 h-4 accent-green-600"
-                      />
-                      <span className="text-gray-700">{label}</span>
+                        className="w-4 h-4 accent-green-600" />
+                      <span className="text-gray-700 text-sm">{label}</span>
                     </label>
                   ))}
                 </div>
@@ -534,10 +708,7 @@ const ActionToolbar = ({ getCurrentDietState, savedDiets, setSavedDiets, loadDie
 };
 
 const MenuItem = ({ icon, label, onClick, color = 'text-white' }) => (
-  <button
-    onClick={onClick}
-    className="w-full flex items-center justify-between px-6 py-3 hover:bg-gray-800 transition-colors group"
-  >
+  <button onClick={onClick} className="w-full flex items-center justify-between px-6 py-3 hover:bg-gray-800 transition-colors group">
     <div className="flex items-center gap-3">
       <span className={color}>{icon}</span>
       <span className="text-gray-200 group-hover:text-white text-sm font-medium">{label}</span>
