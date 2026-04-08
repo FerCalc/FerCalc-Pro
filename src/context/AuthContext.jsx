@@ -1,3 +1,4 @@
+// src/context/AuthContext.jsx
 import { createContext, useState, useContext, useEffect } from "react";
 import { registerRequest, loginRequest, verifyTokenRequest, logoutRequest } from "../api/auth.js";
 import Cookies from "js-cookie";
@@ -7,9 +8,7 @@ export const AuthContext = createContext();
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
+  if (!context) throw new Error("useAuth must be used within an AuthProvider");
   return context;
 };
 
@@ -18,9 +17,10 @@ export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [errors, setErrors]                   = useState([]);
   const [loading, setLoading]                 = useState(true);
+  const [sessionMessage, setSessionMessage]   = useState(null); // para aviso de sesión cerrada
   const navigate = useNavigate();
 
-  // ── CORRECCIÓN: lee data.errors (array) antes que data.message ──
+  // ── Lee data.errors (array) antes que data.message ──
   const handleError = (error) => {
     if (!error.response) {
       return setErrors(['No se pudo conectar con el servidor. Intentá de nuevo más tarde.']);
@@ -53,18 +53,18 @@ export const AuthProvider = ({ children }) => {
       const res = await loginRequest(userData);
       setUser(res.data);
       setIsAuthenticated(true);
+      setSessionMessage(null);
       navigate('/app');
     } catch (error) {
       handleError(error);
     }
   };
 
-  // ── logout exportado también como "signout" para compatibilidad con AdminApenPage ──
   const logout = async () => {
     try {
       await logoutRequest();
     } catch (error) {
-      console.error("Fallo en la petición de logout al servidor:", error);
+      console.error("Fallo en logout:", error);
     } finally {
       Cookies.remove('token');
       setUser(null);
@@ -73,7 +73,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const signout = logout; // alias
+  const signout = logout;
 
   useEffect(() => {
     if (errors.length > 0) {
@@ -101,6 +101,12 @@ export const AuthProvider = ({ children }) => {
         setIsAuthenticated(true);
         setUser(res.data);
       } catch (error) {
+        // ── Si la sesión fue reemplazada por otro dispositivo ──
+        const code = error?.response?.data?.code;
+        if (code === 'SESSION_REPLACED') {
+          setSessionMessage('Tu sesión fue cerrada porque iniciaste sesión en otro dispositivo.');
+        }
+        Cookies.remove('token');
         setIsAuthenticated(false);
         setUser(null);
       } finally {
@@ -115,11 +121,13 @@ export const AuthProvider = ({ children }) => {
       signup,
       signin,
       logout,
-      signout,   // ← alias para AdminApenPage
+      signout,
       loading,
       user,
       isAuthenticated,
-      errors
+      errors,
+      sessionMessage,
+      setSessionMessage,
     }}>
       {children}
     </AuthContext.Provider>
