@@ -150,8 +150,11 @@ const ActionToolbar = ({ getCurrentDietState, savedDiets, setSavedDiets, loadDie
               <ShieldCheck size={12} /> Administrador
             </span>
           )}
-          <button onClick={() => { setIsDrawerOpen(false); setIsProfileOpen(true); }}
-            className="mt-3 text-xs text-gray-400 hover:text-green-400 transition underline underline-offset-2">
+          <button
+            onClick={() => { setIsDrawerOpen(false); setIsProfileOpen(true); }}
+            className="mt-3 flex items-center gap-2 bg-gray-700 hover:bg-green-700 text-gray-200 hover:text-white text-xs font-semibold px-4 py-2 rounded-xl transition-all duration-200 border border-gray-600 hover:border-green-500"
+          >
+            <User size={13} />
             Editar perfil
           </button>
         </div>
