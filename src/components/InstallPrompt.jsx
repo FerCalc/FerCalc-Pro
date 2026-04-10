@@ -1,104 +1,103 @@
 // src/components/InstallPrompt.jsx
 import React, { useState, useEffect } from 'react';
-import { Download, X, Smartphone, Monitor, Zap, WifiOff, Bell } from 'lucide-react';
+import { Download, X, Zap, WifiOff, Monitor } from 'lucide-react';
 import logo from '../pages/fercalc/logo.png';
+
+const PROMPT_VERSION = '2';
 
 export default function InstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [showPrompt, setShowPrompt] = useState(false);
   const [installing, setInstalling] = useState(false);
-  const [installed, setInstalled] = useState(false);
+  const [progress, setProgress] = useState(0);
 
   useEffect(() => {
-    // Capturar el evento nativo antes de que el navegador lo muestre
+    // Limpiar dismiss si hay nueva versión del prompt
+    const dismissedVersion = localStorage.getItem('pwa_dismissed_version');
+    if (dismissedVersion !== PROMPT_VERSION) {
+      localStorage.removeItem('pwa_dismissed');
+    }
+    if (localStorage.getItem('pwa_installed') === 'true') return;
+
     const handler = (e) => {
       e.preventDefault();
       setDeferredPrompt(e);
-
-      // Mostrar solo si el usuario no lo descartó antes
       const dismissed = localStorage.getItem('pwa_dismissed');
-      if (!dismissed) {
-        // Esperar 3 segundos para no interrumpir la carga
-        setTimeout(() => setShowPrompt(true), 3000);
-      }
+      if (!dismissed) setTimeout(() => setShowPrompt(true), 2500);
     };
 
     window.addEventListener('beforeinstallprompt', handler);
-
-    // Detectar si ya está instalada
     window.addEventListener('appinstalled', () => {
       setShowPrompt(false);
-      setInstalled(true);
       localStorage.setItem('pwa_installed', 'true');
     });
-
     return () => window.removeEventListener('beforeinstallprompt', handler);
   }, []);
 
   const handleInstall = async () => {
     if (!deferredPrompt) return;
     setInstalling(true);
-
-    // Pequeña animación antes de lanzar el prompt nativo
-    await new Promise(r => setTimeout(r, 800));
+    let p = 0;
+    const interval = setInterval(() => {
+      p += Math.random() * 15;
+      if (p >= 85) { clearInterval(interval); p = 85; }
+      setProgress(Math.min(p, 85));
+    }, 150);
 
     deferredPrompt.prompt();
     const { outcome } = await deferredPrompt.userChoice;
+    clearInterval(interval);
 
     if (outcome === 'accepted') {
-      setInstalled(true);
-      setShowPrompt(false);
+      setProgress(100);
+      setTimeout(() => { setShowPrompt(false); localStorage.setItem('pwa_installed', 'true'); }, 800);
+    } else {
+      setProgress(0); setInstalling(false);
     }
-    setInstalling(false);
     setDeferredPrompt(null);
   };
 
   const handleDismiss = () => {
     setShowPrompt(false);
     localStorage.setItem('pwa_dismissed', 'true');
+    localStorage.setItem('pwa_dismissed_version', PROMPT_VERSION);
   };
 
   if (!showPrompt) return null;
 
   const beneficios = [
-    { icon: Zap,     texto: 'Acceso instantáneo desde tu pantalla de inicio' },
-    { icon: WifiOff, texto: 'Funciona sin necesidad de abrir el navegador' },
+    { icon: Zap,     texto: 'Acceso directo desde tu pantalla de inicio' },
+    { icon: WifiOff, texto: 'Sin necesidad de abrir el navegador' },
     { icon: Monitor, texto: 'Experiencia de app nativa en cualquier dispositivo' },
   ];
 
   return (
     <>
-      {/* Overlay */}
-      <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end sm:items-center justify-center p-4"
+      <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end sm:items-center justify-center"
         onClick={handleDismiss}>
-
-        {/* Card */}
         <div
-          className="bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden"
+          className="bg-white w-full sm:max-w-sm sm:mx-4 overflow-hidden shadow-2xl"
+          style={{ borderRadius: '20px 20px 0 0', animation: 'slideUpInstall 0.4s cubic-bezier(0.34, 1.4, 0.64, 1)' }}
           onClick={e => e.stopPropagation()}
-          style={{ animation: 'slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)' }}
         >
-          {/* Header verde */}
-          <div className="bg-green-600 px-6 pt-8 pb-6 text-center relative">
+          {/* Header */}
+          <div className="bg-green-600 px-6 pt-7 pb-5 text-center relative">
             <button onClick={handleDismiss}
-              className="absolute top-4 right-4 text-green-200 hover:text-white transition">
-              <X className="h-5 w-5" />
+              className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-green-500 hover:bg-green-400 text-white transition">
+              <X className="h-4 w-4" />
             </button>
-
-            {/* Logo */}
-            <div className="flex justify-center mb-4">
-              <img src={logo} alt="FerCalc" className="h-20 w-20 rounded-2xl shadow-lg border-2 border-green-400" />
+            <div className="flex justify-center mb-3">
+              <img src={logo} alt="FerCalc" className="h-16 w-16 rounded-2xl shadow-lg border-2 border-green-400 object-cover" />
             </div>
-
-            <h2 className="text-2xl font-bold text-white">Instalá FerCalc</h2>
-            <p className="text-green-100 text-sm mt-1">Calculadora Nutricional — APEN</p>
+            <h2 className="text-xl font-bold text-white">Instalá FerCalc</h2>
+            <p className="text-green-200 text-xs mt-0.5">Calculadora Nutricional · Socios APEN</p>
           </div>
 
           {/* Beneficios */}
-          <div className="px-6 py-5 space-y-3">
+          <div className="px-5 py-4 space-y-3">
             {beneficios.map(({ icon: Icon, texto }) => (
               <div key={texto} className="flex items-center gap-3">
-                <div className="w-9 h-9 bg-green-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
                   <Icon className="h-4 w-4 text-green-600" />
                 </div>
                 <p className="text-sm text-gray-600">{texto}</p>
@@ -106,55 +105,42 @@ export default function InstallPrompt() {
             ))}
           </div>
 
-          {/* Barra de progreso (solo durante instalación) */}
+          {/* Barra de progreso */}
           {installing && (
-            <div className="px-6 pb-2">
+            <div className="px-5 pb-1">
               <div className="flex items-center justify-between mb-1.5">
-                <span className="text-xs font-medium text-green-700">Instalando...</span>
-                <span className="text-xs text-gray-400">Por favor esperá</span>
+                <span className="text-xs font-semibold text-green-700">{progress < 100 ? 'Instalando...' : '¡Instalado!'}</span>
+                <span className="text-xs text-gray-400">{Math.round(progress)}%</span>
               </div>
               <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
-                <div className="bg-green-500 h-2 rounded-full animate-pulse"
-                  style={{ width: '75%', transition: 'width 0.8s ease' }} />
+                <div className="bg-green-500 h-2 rounded-full transition-all duration-300" style={{ width: `${progress}%` }} />
               </div>
             </div>
           )}
 
           {/* Botones */}
-          <div className="px-6 pb-6 pt-3 space-y-3">
-            <button
-              onClick={handleInstall}
-              disabled={installing}
-              className="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white font-bold py-3.5 rounded-2xl transition-all duration-200 shadow-md hover:shadow-lg active:scale-95"
-            >
+          <div className="px-5 pb-6 pt-4 space-y-2.5">
+            <button onClick={handleInstall} disabled={installing}
+              className="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 disabled:bg-green-500 text-white font-bold py-3.5 rounded-2xl transition-all active:scale-95 shadow-md">
               {installing ? (
-                <>
-                  <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24" fill="none">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
-                  </svg>
-                  Instalando...
-                </>
+                <><svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>Instalando...</>
               ) : (
-                <>
-                  <Download className="h-5 w-5" />
-                  Instalar ahora
-                </>
+                <><Download className="h-4 w-4" />Instalar ahora — es gratis</>
               )}
             </button>
-
-            <button onClick={handleDismiss}
-              className="w-full text-gray-400 hover:text-gray-600 text-sm font-medium py-2 transition">
+            <button onClick={handleDismiss} className="w-full text-gray-400 hover:text-gray-600 text-sm py-2 transition font-medium">
               Ahora no
             </button>
           </div>
         </div>
       </div>
-
       <style>{`
-        @keyframes slideUp {
-          from { opacity: 0; transform: translateY(40px) scale(0.95); }
-          to   { opacity: 1; transform: translateY(0)   scale(1); }
+        @keyframes slideUpInstall {
+          from { opacity: 0; transform: translateY(30px) scale(0.97); }
+          to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @media (min-width: 640px) {
+          .pwa-card { border-radius: 24px !important; }
         }
       `}</style>
     </>
