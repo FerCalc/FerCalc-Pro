@@ -1,4 +1,4 @@
-// src/App.jsx
+// mi-app-frontend/src/App.jsx
 import { Routes, Route } from 'react-router-dom';
 import RegisterPage from './pages/RegisterPage';
 import LoginPage from './pages/LoginPage';
@@ -9,13 +9,19 @@ import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import ProtectedRoute from './ProtectedRoute';
 import InstallPrompt from './components/InstallPrompt';
+import PatientsPage from './pages/PatientsPage.jsx';
+import { useFerCalc } from './context/FerCalcContext.jsx';
+
+// ✅ Wrapper para pasar getAllData al PatientsPage desde el contexto
+const PatientsPageWrapper = () => {
+  const { getAllData } = useFerCalc();
+  return <PatientsPage getAllData={getAllData} />;
+};
 
 function App() {
   return (
     <main>
-      {/* Prompt de instalación PWA — aparece globalmente */}
       <InstallPrompt />
-
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
@@ -25,9 +31,7 @@ function App() {
 
         <Route element={<ProtectedRoute />}>
           <Route path="/app" element={<FerCalcPage />} />
-        </Route>
-
-        <Route element={<ProtectedRoute />}>
+          <Route path="/pacientes" element={<PatientsPageWrapper />} />
           <Route path="/admin" element={<AdminApenPage />} />
         </Route>
       </Routes>

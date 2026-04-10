@@ -6,49 +6,43 @@ import FraccionamientoTab from './FraccionamientoTab.jsx';
 import GyTTab from './GyTTab.jsx';
 import GrowthAndDevelopmentTab from './GrowthAndDevelopmentTab.jsx';
 import ActionToolbar from './ActionToolbar.jsx';
-import { User, Activity, PieChart, Baby, TrendingUp } from 'lucide-react';
+import { User, Activity, PieChart, Baby, TrendingUp, Users } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 import logo from './logo.png';
 import { useAuth } from '../../context/AuthContext.jsx';
-
-const initialState = {
-  patientData: { weight: 70, height: 175, age: 30, sex: 'Masculino', estaEmbarazada: 'No', semanasGestacion: 0, pesoPreGestacional: 70, headCircumference: '' },
-  dietGoals: { calorias: 2000, hc: 275, proteina: 75, grasa: 67, na: 2300, k: 3500, p: 700, ca: 1000, fe: 8, colesterol: 300, purinas: 400, fibra: 30, agua: 2000, pavbPercentage: 70 },
-  dietaActual: [],
-  planIntercambio: {},
-  annotations: '',
-};
-
-const initialChronologicalAge = { totalMonths: 0, totalYears: 30, text: '30 años' };
-
-// ✅ Estados iniciales de fraccionamiento
-const INITIAL_MEAL_SLOTS = ['Desayuno', 'Media manana', 'Almuerzo', 'Media tarde', 'Merienda', 'Cena'];
+import { useFerCalc } from '../../context/FerCalcContext.jsx';
+import { useNavigate } from 'react-router-dom';
 
 function App() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const storageKey = `savedDiets_${user?.id || 'guest'}`;
 
+  // ✅ Todo el estado viene del contexto global
+  const {
+    patientData, setPatientData,
+    dietGoals, setDietGoals,
+    dietaActual, setDietaActual,
+    planIntercambio, setPlanIntercambio,
+    annotations, setAnnotations,
+    chronologicalAge, setChronologicalAge,
+    distribucion, setDistribucion,
+    fracMealSlots, setFracMealSlots,
+    fracMealTimes, setFracMealTimes,
+    fracMealTimesByDay, setFracMealTimesByDay,
+    fracNumberOfDays, setFracNumberOfDays,
+    fracDistribucionDesarrollada, setFracDistribucionDesarrollada,
+    fracDistribucionIntercambio, setFracDistribucionIntercambio,
+    fracMealNamesByDayDes, setFracMealNamesByDayDes,
+    fracMealNamesByDayInt, setFracMealNamesByDayInt,
+    fracRecetariosDes, setFracRecetariosDes,
+    fracRecetariosInt, setFracRecetariosInt,
+    getAllData,
+    loadDietState,
+    resetAll,
+  } = useFerCalc();
+
   const [activeTab, setActiveTab] = useState('paciente');
-  const [patientData, setPatientData] = useState(initialState.patientData);
-  const [dietGoals, setDietGoals] = useState(initialState.dietGoals);
-  const [dietaActual, setDietaActual] = useState(initialState.dietaActual);
-  const [planIntercambio, setPlanIntercambio] = useState(initialState.planIntercambio);
-  const [annotations, setAnnotations] = useState(initialState.annotations);
-  const [chronologicalAge, setChronologicalAge] = useState(initialChronologicalAge);
-  const [distribucion, setDistribucion] = useState({});
-
-  // ✅ Estados de fraccionamiento elevados para que ActionToolbar pueda acceder al PDF
-  const [fracMealSlots, setFracMealSlots] = useState(INITIAL_MEAL_SLOTS);
-  const [fracMealTimes, setFracMealTimes] = useState({});
-  const [fracMealTimesByDay, setFracMealTimesByDay] = useState({});
-  const [fracNumberOfDays, setFracNumberOfDays] = useState(1);
-  const [fracDistribucionDesarrollada, setFracDistribucionDesarrollada] = useState({});
-  const [fracDistribucionIntercambio, setFracDistribucionIntercambio] = useState({});
-  const [fracMealNamesByDayDes, setFracMealNamesByDayDes] = useState({});
-  const [fracMealNamesByDayInt, setFracMealNamesByDayInt] = useState({});
-  const [fracRecetariosDes, setFracRecetariosDes] = useState({});
-  const [fracRecetariosInt, setFracRecetariosInt] = useState({});
-
   const [savedDiets, setSavedDiets] = useState(() => {
     try {
       const item = localStorage.getItem(storageKey);
@@ -58,7 +52,7 @@ function App() {
 
   useEffect(() => {
     try { localStorage.setItem(storageKey, JSON.stringify(savedDiets)); }
-    catch (error) { console.error("Error al guardar dietas:", error); }
+    catch (error) { console.error('Error al guardar dietas:', error); }
   }, [savedDiets, storageKey]);
 
   useEffect(() => {
@@ -71,59 +65,19 @@ function App() {
     patientData, dietGoals, dietaActual, planIntercambio, annotations,
   });
 
-  const loadDietState = (dietData) => {
-    setPatientData({ ...initialState.patientData, ...dietData.patientData });
-    setDietGoals(dietData.dietGoals || initialState.dietGoals);
-    setDietaActual(dietData.dietaActual || initialState.dietaActual);
-    setPlanIntercambio(dietData.planIntercambio || initialState.planIntercambio);
-    setAnnotations(dietData.annotations || initialState.annotations);
+  const handleLoadDietState = useCallback((dietData) => {
+    loadDietState(dietData);
     toast.success(`Dieta "${dietData.name}" cargada.`);
-  };
+  }, [loadDietState]);
 
   const handlePlanIntercambioUpdate = useCallback((nuevoPlan) => {
     setPlanIntercambio(nuevoPlan);
-  }, []);
+  }, [setPlanIntercambio]);
 
   const handleNewDiet = () => {
-    setPatientData(initialState.patientData);
-    setDietGoals(initialState.dietGoals);
-    setDietaActual(initialState.dietaActual);
-    setPlanIntercambio(initialState.planIntercambio);
-    setAnnotations(initialState.annotations);
-    setChronologicalAge(initialChronologicalAge);
-    setDistribucion({});
-    // ✅ Reset fraccionamiento
-    setFracMealSlots(INITIAL_MEAL_SLOTS);
-    setFracMealTimes({});
-    setFracMealTimesByDay({});
-    setFracNumberOfDays(1);
-    setFracDistribucionDesarrollada({});
-    setFracDistribucionIntercambio({});
-    setFracMealNamesByDayDes({});
-    setFracMealNamesByDayInt({});
-    setFracRecetariosDes({});
-    setFracRecetariosInt({});
+    resetAll();
     toast.success('Se ha iniciado una nueva dieta.');
   };
-
-  // ✅ allData ahora incluye fraccionamientoData completo para el PDF
-  const getAllData = () => ({
-    patientData,
-    dietGoals,
-    dietaActual,
-    planIntercambio,
-    annotations,
-    fraccionamientoData: {
-      mealSlots: fracMealSlots,
-      numberOfDays: fracNumberOfDays,
-      distribucionDesarrollada: fracDistribucionDesarrollada,
-      distribucionIntercambio: fracDistribucionIntercambio,
-      mealNamesByDayDes: fracMealNamesByDayDes,
-      mealNamesByDayInt: fracMealNamesByDayInt,
-      recetariosDes: fracRecetariosDes,
-      recetariosInt: fracRecetariosInt,
-    },
-  });
 
   const TabButton = ({ tabName, icon, label }) => (
     <button
@@ -141,8 +95,8 @@ function App() {
     <div className="max-w-screen-2xl mx-auto p-4 sm:p-6 bg-gray-50 min-h-screen font-sans">
       <Toaster position="top-center" reverseOrder={false} />
 
-      <header className="bg-white rounded-lg shadow-lg p-6 mb-6 flex justify-between items-center flex-wrap">
-        <div className="flex items-center gap-4 mb-4 md:mb-0">
+      <header className="bg-white rounded-lg shadow-lg p-6 mb-6 flex justify-between items-center flex-wrap gap-4">
+        <div className="flex items-center gap-4">
           <img src={logo} alt="Logo FerCalc" className="h-16 w-auto" />
           <div>
             <h1 className="text-2xl font-bold">
@@ -151,15 +105,23 @@ function App() {
             <p className="text-gray-600">Calculadora Nutricional</p>
           </div>
         </div>
-        {/* ✅ allData ahora usa getAllData() con fraccionamiento completo */}
-        <ActionToolbar
-          getCurrentDietState={getCurrentDietState}
-          savedDiets={savedDiets}
-          setSavedDiets={setSavedDiets}
-          loadDietState={loadDietState}
-          handleNewDiet={handleNewDiet}
-          allData={getAllData()}
-        />
+        <div className="flex items-center gap-3">
+          {/* ✅ Botón acceso directo a pacientes */}
+          <button
+            onClick={() => navigate('/pacientes')}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+          >
+            <Users size={18} /> Mis Pacientes
+          </button>
+          <ActionToolbar
+            getCurrentDietState={getCurrentDietState}
+            savedDiets={savedDiets}
+            setSavedDiets={setSavedDiets}
+            loadDietState={handleLoadDietState}
+            handleNewDiet={handleNewDiet}
+            allData={getAllData()}
+          />
+        </div>
       </header>
 
       <nav className="flex flex-wrap gap-2 mb-6 p-2 bg-gray-100 rounded-lg">
@@ -186,9 +148,7 @@ function App() {
         </div>
 
         {showGrowthTab && activeTab === 'crecimiento' && (
-          <div>
-            <GrowthAndDevelopmentTab patientData={patientData} chronologicalAge={chronologicalAge} />
-          </div>
+          <GrowthAndDevelopmentTab patientData={patientData} chronologicalAge={chronologicalAge} />
         )}
 
         {showGyTTab && (
@@ -209,11 +169,9 @@ function App() {
         </div>
 
         <div style={{ display: activeTab === 'fraccionamiento' ? 'block' : 'none' }}>
-          {/* ✅ Todos los estados de fraccionamiento vienen de App.jsx */}
           <FraccionamientoTab
             dietaActual={dietaActual}
             planIntercambio={planIntercambio}
-            // Estados elevados
             mealSlots={fracMealSlots}
             setMealSlots={setFracMealSlots}
             mealTimes={fracMealTimes}
