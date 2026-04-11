@@ -5,6 +5,7 @@ import App from './App.jsx';
 import { AuthProvider } from './context/AuthContext.jsx';
 import { TaskProvider } from './context/TaskContext.jsx';
 import { FerCalcProvider } from './context/FerCalcContext.jsx';
+import { ThemeProvider } from './context/ThemeContext.jsx';
 import { BrowserRouter } from 'react-router-dom';
 import './index.css';
 
@@ -13,9 +14,11 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <BrowserRouter>
       <AuthProvider>
         <TaskProvider>
-          <FerCalcProvider>
-            <App />
-          </FerCalcProvider>
+          <ThemeProvider>
+            <FerCalcProvider>
+              <App />
+            </FerCalcProvider>
+          </ThemeProvider>
         </TaskProvider>
       </AuthProvider>
     </BrowserRouter>

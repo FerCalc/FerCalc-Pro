@@ -14,6 +14,8 @@ import ProfileModal from '../../components/ProfileModal.jsx';
 import {
   getPatientsAPI, createPatientAPI, getRecordsAPI, createRecordAPI
 } from '../../api/patients.js';
+import { useTheme } from '../../context/ThemeContext.jsx';
+import { Moon, Sun } from 'lucide-react';
 
 // ─── Modal genérico ───
 const Modal = ({ title, subtitle, onClose, children, maxWidth = 'max-w-lg' }) => (
@@ -42,6 +44,7 @@ const ActionToolbar = ({ getCurrentDietState, savedDiets, setSavedDiets, loadDie
   const [isProcessing, setIsProcessing] = useState(false);
   const [profilePhoto, setProfilePhoto] = useState(null);
   const [showNewDietWarning, setShowNewDietWarning] = useState(false);
+const { isDark, toggle: toggleTheme } = useTheme();
 
   // ── Estados para guardar paciente ──
   const [saveStep, setSaveStep] = useState(1); // 1: elegir nuevo/existente, 2: nuevo paciente form, 3: elegir paciente existente
@@ -482,146 +485,148 @@ const ActionToolbar = ({ getCurrentDietState, savedDiets, setSavedDiets, loadDie
           maxWidth="max-w-lg"
         >
           {/* Paso 1: elegir nuevo o existente */}
-          {saveStep === 1 && (
-            <div className="space-y-3">
-              {/* Nombre de consulta siempre visible */}
-              <div className="mb-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Nombre de la consulta *</label>
-                <input
-                  value={consultaName}
-                  onChange={e => setConsultaName(e.target.value)}
-                  placeholder="Ej: Primera consulta, Control mes 3..."
-                  className="w-full p-2.5 border rounded-xl focus:ring-2 focus:ring-green-500 focus:outline-none text-sm"
-                />
-              </div>
-              <p className="text-sm text-gray-500 font-medium pt-2">¿Para quién es esta consulta?</p>
-              <button onClick={() => setSaveStep(2)}
-                className="w-full flex items-center gap-4 p-4 bg-green-50 border-2 border-green-200 rounded-xl hover:border-green-500 hover:bg-green-100 transition-all text-left">
-                <div className="w-10 h-10 bg-green-600 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <UserPlus size={20} className="text-white" />
-                </div>
-                <div>
-                  <p className="font-bold text-gray-800">Paciente nuevo</p>
-                  <p className="text-xs text-gray-500">Crear una ficha nueva con los datos actuales</p>
-                </div>
-                <ChevronRight size={18} className="ml-auto text-gray-400" />
-              </button>
-              <button onClick={goToExistingPatient}
-                className="w-full flex items-center gap-4 p-4 bg-blue-50 border-2 border-blue-200 rounded-xl hover:border-blue-500 hover:bg-blue-100 transition-all text-left">
-                <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <Users size={20} className="text-white" />
-                </div>
-                <div>
-                  <p className="font-bold text-gray-800">Paciente existente</p>
-                  <p className="text-xs text-gray-500">Agregar como seguimiento a un paciente ya registrado</p>
-                </div>
-                <ChevronRight size={18} className="ml-auto text-gray-400" />
-              </button>
-            </div>
-          )}
+{saveStep === 1 && (
+  <div className="space-y-3">
+    <p className="text-sm text-gray-500 font-medium">¿Para quién es esta consulta?</p>
+    <button onClick={() => setSaveStep(2)}
+      className="w-full flex items-center gap-4 p-4 bg-green-50 border-2 border-green-200 rounded-xl hover:border-green-500 hover:bg-green-100 transition-all text-left">
+      <div className="w-10 h-10 bg-green-600 rounded-xl flex items-center justify-center flex-shrink-0">
+        <UserPlus size={20} className="text-white" />
+      </div>
+      <div>
+        <p className="font-bold text-gray-800">Paciente nuevo</p>
+        <p className="text-xs text-gray-500">Crear una ficha nueva con los datos actuales</p>
+      </div>
+      <ChevronRight size={18} className="ml-auto text-gray-400" />
+    </button>
+    <button onClick={goToExistingPatient}
+      className="w-full flex items-center gap-4 p-4 bg-blue-50 border-2 border-blue-200 rounded-xl hover:border-blue-500 hover:bg-blue-100 transition-all text-left">
+      <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center flex-shrink-0">
+        <Users size={20} className="text-white" />
+      </div>
+      <div>
+        <p className="font-bold text-gray-800">Paciente existente</p>
+        <p className="text-xs text-gray-500">Agregar como seguimiento a un paciente ya registrado</p>
+      </div>
+      <ChevronRight size={18} className="ml-auto text-gray-400" />
+    </button>
+  </div>
+)}
+
 
           {/* Paso 2: formulario nuevo paciente */}
-          {saveStep === 2 && (
-            <div className="space-y-4">
-              <button onClick={() => setSaveStep(1)} className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 mb-2">
-                <ArrowLeft size={16} /> Volver
-              </button>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">Nombre *</label>
-                  <input value={newPatientForm.nombre} onChange={e => setNewPatientForm(p => ({ ...p, nombre: e.target.value }))}
-                    placeholder="Juan" className="w-full p-2 border rounded-xl text-sm focus:ring-2 focus:ring-green-500 focus:outline-none" />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">Apellido</label>
-                  <input value={newPatientForm.apellido} onChange={e => setNewPatientForm(p => ({ ...p, apellido: e.target.value }))}
-                    placeholder="Pérez" className="w-full p-2 border rounded-xl text-sm focus:ring-2 focus:ring-green-500 focus:outline-none" />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">Email</label>
-                  <input type="email" value={newPatientForm.email} onChange={e => setNewPatientForm(p => ({ ...p, email: e.target.value }))}
-                    placeholder="correo@ejemplo.com" className="w-full p-2 border rounded-xl text-sm focus:ring-2 focus:ring-green-500 focus:outline-none" />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">Teléfono</label>
-                  <input value={newPatientForm.telefono} onChange={e => setNewPatientForm(p => ({ ...p, telefono: e.target.value }))}
-                    placeholder="+595 999 000 000" className="w-full p-2 border rounded-xl text-sm focus:ring-2 focus:ring-green-500 focus:outline-none" />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">Sexo</label>
-                  <select value={newPatientForm.sexo} onChange={e => setNewPatientForm(p => ({ ...p, sexo: e.target.value }))}
-                    className="w-full p-2 border rounded-xl text-sm focus:ring-2 focus:ring-green-500 focus:outline-none">
-                    <option>Masculino</option><option>Femenino</option><option>Otro</option>
-                  </select>
-                </div>
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Notas</label>
-                <textarea value={newPatientForm.notas} onChange={e => setNewPatientForm(p => ({ ...p, notas: e.target.value }))}
-                  rows={2} placeholder="Diagnósticos, alergias..." className="w-full p-2 border rounded-xl text-sm focus:ring-2 focus:ring-green-500 focus:outline-none resize-none" />
-              </div>
-              {/* Resumen de lo que se va a guardar */}
-              <div className="bg-gray-50 rounded-xl p-3 text-xs text-gray-600">
-                <p className="font-semibold mb-1">Se guardará con el nombre: <span className="text-green-700">"{consultaName || '(sin nombre)'}"</span></p>
-                <p>Peso: {allData?.patientData?.weight} kg · Altura: {allData?.patientData?.height} cm · {allData?.dietaActual?.length || 0} alimentos en la dieta</p>
-              </div>
-              <div className="flex gap-3">
-                <button onClick={() => setSaveStep(1)} className="flex-1 px-4 py-2.5 bg-gray-100 rounded-xl hover:bg-gray-200 font-medium text-sm">Cancelar</button>
-                <button onClick={handleSaveAsNewPatient} disabled={savingPatient || !newPatientForm.nombre.trim() || !consultaName.trim()}
-                  className="flex-1 px-4 py-2.5 bg-green-600 text-white rounded-xl hover:bg-green-700 font-medium text-sm disabled:opacity-50 flex items-center justify-center gap-2">
-                  {savingPatient ? 'Guardando...' : <><Check size={16} /> Guardar</>}
-                </button>
-              </div>
-            </div>
-          )}
+{saveStep === 2 && (
+  <div className="space-y-4">
+    <button onClick={() => setSaveStep(1)} className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 mb-2">
+      <ArrowLeft size={16} /> Volver
+    </button>
+    <div className="grid grid-cols-2 gap-3">
+      <div>
+        <label className="block text-xs font-medium text-gray-700 mb-1">Nombre *</label>
+        <input value={newPatientForm.nombre} onChange={e => setNewPatientForm(p => ({ ...p, nombre: e.target.value }))}
+          placeholder="Juan" className="w-full p-2 border rounded-xl text-sm focus:ring-2 focus:ring-green-500 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
+      </div>
+      <div>
+        <label className="block text-xs font-medium text-gray-700 mb-1">Apellido</label>
+        <input value={newPatientForm.apellido} onChange={e => setNewPatientForm(p => ({ ...p, apellido: e.target.value }))}
+          placeholder="Pérez" className="w-full p-2 border rounded-xl text-sm focus:ring-2 focus:ring-green-500 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
+      </div>
+      <div>
+        <label className="block text-xs font-medium text-gray-700 mb-1">Email</label>
+        <input type="email" value={newPatientForm.email} onChange={e => setNewPatientForm(p => ({ ...p, email: e.target.value }))}
+          placeholder="correo@ejemplo.com" className="w-full p-2 border rounded-xl text-sm focus:ring-2 focus:ring-green-500 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
+      </div>
+      <div>
+        <label className="block text-xs font-medium text-gray-700 mb-1">Teléfono</label>
+        <input value={newPatientForm.telefono} onChange={e => setNewPatientForm(p => ({ ...p, telefono: e.target.value }))}
+          placeholder="+595 999 000 000" className="w-full p-2 border rounded-xl text-sm focus:ring-2 focus:ring-green-500 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
+      </div>
+      <div>
+        <label className="block text-xs font-medium text-gray-700 mb-1">Sexo</label>
+        <select value={newPatientForm.sexo} onChange={e => setNewPatientForm(p => ({ ...p, sexo: e.target.value }))}
+          className="w-full p-2 border rounded-xl text-sm focus:ring-2 focus:ring-green-500 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+          <option>Masculino</option><option>Femenino</option><option>Otro</option>
+        </select>
+      </div>
+    </div>
+    <div>
+      <label className="block text-xs font-medium text-gray-700 mb-1">Notas</label>
+      <textarea value={newPatientForm.notas} onChange={e => setNewPatientForm(p => ({ ...p, notas: e.target.value }))}
+        rows={2} placeholder="Diagnósticos, alergias..." className="w-full p-2 border rounded-xl text-sm focus:ring-2 focus:ring-green-500 focus:outline-none resize-none dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
+    </div>
+    {/* ✅ Campo de consulta movido aquí */}
+    <div className="border-t pt-3">
+      <label className="block text-xs font-medium text-gray-700 mb-1">Nombre de la consulta *</label>
+      <input value={consultaName} onChange={e => setConsultaName(e.target.value)}
+        placeholder="Ej: Primera consulta, Control mes 3..."
+        className="w-full p-2 border rounded-xl text-sm focus:ring-2 focus:ring-green-500 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
+    </div>
+    <div className="bg-gray-50 rounded-xl p-3 text-xs text-gray-600">
+      <p>Peso: {allData?.patientData?.weight} kg · Altura: {allData?.patientData?.height} cm · {allData?.dietaActual?.length || 0} alimentos en la dieta</p>
+    </div>
+    <div className="flex gap-3">
+      <button onClick={() => setSaveStep(1)} className="flex-1 px-4 py-2.5 bg-gray-100 rounded-xl hover:bg-gray-200 font-medium text-sm">Cancelar</button>
+      <button onClick={handleSaveAsNewPatient} disabled={savingPatient || !newPatientForm.nombre.trim() || !consultaName.trim()}
+        className="flex-1 px-4 py-2.5 bg-green-600 text-white rounded-xl hover:bg-green-700 font-medium text-sm disabled:opacity-50 flex items-center justify-center gap-2">
+        {savingPatient ? 'Guardando...' : <><Check size={16} /> Guardar</>}
+      </button>
+    </div>
+  </div>
+)}
 
           {/* Paso 3: seleccionar paciente existente */}
-          {saveStep === 3 && (
-            <div className="space-y-3">
-              <button onClick={() => setSaveStep(1)} className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700">
-                <ArrowLeft size={16} /> Volver
-              </button>
-              <div className="relative">
-                <Search size={16} className="absolute left-3 top-3 text-gray-400" />
-                <input value={patientSearch} onChange={e => setPatientSearch(e.target.value)}
-                  placeholder="Buscar paciente..." className="w-full pl-9 p-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" />
-              </div>
-              <div className="max-h-52 overflow-y-auto space-y-2 pr-1">
-                {loadingPatients ? (
-                  <div className="text-center py-6 text-gray-400 text-sm">Cargando...</div>
-                ) : filteredPatientsForSave.length === 0 ? (
-                  <div className="text-center py-6 text-gray-400 text-sm">No hay pacientes.</div>
-                ) : filteredPatientsForSave.map(p => (
-                  <button key={p._id} onClick={() => setSelectedExistingPatient(p)}
-                    className={`w-full flex items-center gap-3 p-3 rounded-xl border text-left transition-all ${selectedExistingPatient?._id === p._id ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'}`}>
-                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
-                      {`${p.nombre?.[0] || ''}${p.apellido?.[0] || ''}`.toUpperCase() || '?'}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-gray-800 text-sm truncate">{p.nombre} {p.apellido}</p>
-                      <p className="text-xs text-gray-500">{p.consultaCount || 0} consulta{p.consultaCount !== 1 ? 's' : ''}</p>
-                    </div>
-                    {selectedExistingPatient?._id === p._id && <Check size={18} className="text-blue-600 flex-shrink-0" />}
-                  </button>
-                ))}
-              </div>
-              {selectedExistingPatient && (
-                <div className="bg-blue-50 rounded-xl p-3 text-xs text-blue-700">
-                  <p className="font-semibold">Guardando como seguimiento de: <span className="text-blue-800">{selectedExistingPatient.nombre} {selectedExistingPatient.apellido}</span></p>
-                  <p className="mt-0.5">Consulta: "{consultaName || '(sin nombre)'}" · {allData?.dietaActual?.length || 0} alimentos</p>
-                </div>
-              )}
-              <div className="flex gap-3">
-                <button onClick={() => setSaveStep(1)} className="flex-1 px-4 py-2.5 bg-gray-100 rounded-xl hover:bg-gray-200 font-medium text-sm">Cancelar</button>
-                <button onClick={handleSaveAsFollowUp} disabled={savingPatient || !selectedExistingPatient || !consultaName.trim()}
-                  className="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 font-medium text-sm disabled:opacity-50 flex items-center justify-center gap-2">
-                  {savingPatient ? 'Guardando...' : <><Check size={16} /> Guardar Seguimiento</>}
-                </button>
-              </div>
-            </div>
-          )}
-        </Modal>
-      )}
+{saveStep === 3 && (
+  <div className="space-y-3">
+    <button onClick={() => setSaveStep(1)} className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700">
+      <ArrowLeft size={16} /> Volver
+    </button>
+    {/* ✅ Campo de nombre de consulta movido aquí */}
+    <div>
+      <label className="block text-xs font-medium text-gray-700 mb-1">Nombre de la consulta *</label>
+      <input value={consultaName} onChange={e => setConsultaName(e.target.value)}
+        placeholder="Ej: Primera consulta, Control mes 3..."
+        className="w-full p-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" />
+    </div>
+    <div className="relative">
+      <Search size={16} className="absolute left-3 top-3 text-gray-400" />
+      <input value={patientSearch} onChange={e => setPatientSearch(e.target.value)}
+        placeholder="Buscar paciente..." className="w-full pl-9 p-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" />
+    </div>
+    <div className="max-h-48 overflow-y-auto space-y-2 pr-1">
+      {loadingPatients ? (
+        <div className="text-center py-6 text-gray-400 text-sm">Cargando...</div>
+      ) : filteredPatientsForSave.length === 0 ? (
+        <div className="text-center py-6 text-gray-400 text-sm">No hay pacientes.</div>
+      ) : filteredPatientsForSave.map(p => (
+        <button key={p._id} onClick={() => setSelectedExistingPatient(p)}
+          className={`w-full flex items-center gap-3 p-3 rounded-xl border text-left transition-all ${selectedExistingPatient?._id === p._id ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'}`}>
+          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+            {`${p.nombre?.[0] || ''}${p.apellido?.[0] || ''}`.toUpperCase() || '?'}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="font-semibold text-gray-800 text-sm truncate">{p.nombre} {p.apellido}</p>
+            <p className="text-xs text-gray-500">{p.consultaCount || 0} consulta{p.consultaCount !== 1 ? 's' : ''}</p>
+          </div>
+          {selectedExistingPatient?._id === p._id && <Check size={18} className="text-blue-600 flex-shrink-0" />}
+        </button>
+      ))}
+    </div>
+    {selectedExistingPatient && (
+      <div className="bg-blue-50 rounded-xl p-3 text-xs text-blue-700">
+        <p className="font-semibold">Guardando como seguimiento de: <span className="text-blue-800">{selectedExistingPatient.nombre} {selectedExistingPatient.apellido}</span></p>
+        <p className="mt-0.5">{allData?.dietaActual?.length || 0} alimentos · Peso: {allData?.patientData?.weight} kg</p>
+      </div>
+    )}
+    <div className="flex gap-3">
+      <button onClick={() => setSaveStep(1)} className="flex-1 px-4 py-2.5 bg-gray-100 rounded-xl hover:bg-gray-200 font-medium text-sm">Cancelar</button>
+      <button onClick={handleSaveAsFollowUp}
+        disabled={savingPatient || !selectedExistingPatient || !consultaName.trim()}
+        className="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 font-medium text-sm disabled:opacity-50 flex items-center justify-center gap-2">
+        {savingPatient ? 'Guardando...' : <><Check size={16} /> Guardar Seguimiento</>}
+      </button>
+    </div>
+  </div>
+)}
 
       {/* ── MODAL CARGAR DATOS DEL PACIENTE ── */}
       {modal === 'loadPatient' && (
@@ -731,6 +736,26 @@ const ActionToolbar = ({ getCurrentDietState, savedDiets, setSavedDiets, loadDie
     </>
   );
 };
+
+<div className="border-t border-gray-700 px-4 py-3">
+  <button
+    onClick={toggleTheme}
+    className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-gray-800 hover:bg-gray-700 transition-colors"
+  >
+    <div className="flex items-center gap-3">
+      {isDark
+        ? <Sun size={18} className="text-yellow-400" />
+        : <Moon size={18} className="text-blue-400" />
+      }
+      <span className="text-gray-200 text-sm font-medium">
+        {isDark ? 'Modo claro' : 'Modo oscuro'}
+      </span>
+    </div>
+    <div className={`w-11 h-6 rounded-full transition-colors relative ${isDark ? 'bg-yellow-400' : 'bg-gray-600'}`}>
+      <div className={`w-5 h-5 bg-white rounded-full absolute top-0.5 transition-transform ${isDark ? 'translate-x-5' : 'translate-x-0.5'}`} />
+    </div>
+  </button>
+</div>
 
 const MenuItem = ({ icon, label, onClick, color = 'text-white' }) => (
   <button onClick={onClick} className="w-full flex items-center justify-between px-6 py-3 hover:bg-gray-800 transition-colors group">
