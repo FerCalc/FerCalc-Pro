@@ -60,28 +60,31 @@ const PatientForm = ({ initial, onSave, onCancel, loading }) => {
 
   return (
     <div className="space-y-4">
+      <p className="text-sm text-gray-500 bg-blue-50 border border-blue-100 rounded-xl p-3">
+        Los datos clínicos (peso, altura, dieta) se guardan automáticamente desde FerCalc al usar <span className="font-semibold text-blue-700">"Guardar Datos del Paciente"</span> en el menú.
+      </p>
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Nombre *</label>
           <input value={form.nombre} onChange={e => setForm(p => ({ ...p, nombre: e.target.value }))}
-            className="w-full p-2.5 border rounded-xl focus:ring-2 focus:ring-green-500 focus:outline-none text-sm" placeholder="Juan" />
+            className="w-full p-2.5 border rounded-xl focus:ring-2 focus:ring-green-500 focus:outline-none text-sm" />
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Apellido</label>
           <input value={form.apellido} onChange={e => setForm(p => ({ ...p, apellido: e.target.value }))}
-            className="w-full p-2.5 border rounded-xl focus:ring-2 focus:ring-green-500 focus:outline-none text-sm" placeholder="Pérez" />
+            className="w-full p-2.5 border rounded-xl focus:ring-2 focus:ring-green-500 focus:outline-none text-sm" />
         </div>
       </div>
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
           <input type="email" value={form.email} onChange={e => setForm(p => ({ ...p, email: e.target.value }))}
-            className="w-full p-2.5 border rounded-xl focus:ring-2 focus:ring-green-500 focus:outline-none text-sm" placeholder="correo@ejemplo.com" />
+            className="w-full p-2.5 border rounded-xl focus:ring-2 focus:ring-green-500 focus:outline-none text-sm" />
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
           <input value={form.telefono} onChange={e => setForm(p => ({ ...p, telefono: e.target.value }))}
-            className="w-full p-2.5 border rounded-xl focus:ring-2 focus:ring-green-500 focus:outline-none text-sm" placeholder="+595 999 000 000" />
+            className="w-full p-2.5 border rounded-xl focus:ring-2 focus:ring-green-500 focus:outline-none text-sm" />
         </div>
       </div>
       <div className="grid grid-cols-2 gap-4">
