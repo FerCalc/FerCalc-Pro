@@ -4,24 +4,23 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <!-- ── Título y descripción ── -->
     <title>FerCalc — Calculadora Nutricional</title>
     <meta name="description" content="FerCalc es la herramienta profesional para planificación nutricional y dietética. Exclusivo para socios APEN." />
     <meta name="theme-color" content="#16a34a" />
 
-    <!-- ── Favicon ── -->
+    <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
 
-    <!-- ── PWA (hace la app instalable) ── -->
+    <!-- PWA -->
     <link rel="manifest" href="/manifest.json" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="FerCalc" />
 
-    <!-- ── Open Graph (preview al compartir el link) ── -->
+    <!-- Open Graph -->
     <meta property="og:title" content="FerCalc — Calculadora Nutricional" />
     <meta property="og:description" content="Herramienta profesional para planificación nutricional. Exclusivo para socios APEN." />
     <meta property="og:image" content="/icon-512.png" />
@@ -30,5 +29,20 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+
+    <!-- Registro del Service Worker (requerido por Chrome para habilitar instalación PWA) -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then((reg) => {
+              console.log('Service Worker registrado:', reg.scope);
+            })
+            .catch((err) => {
+              console.warn('Service Worker no pudo registrarse:', err);
+            });
+        });
+      }
+    </script>
   </body>
 </html>
