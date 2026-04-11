@@ -4,13 +4,14 @@ import { Download, X, Zap, WifiOff, Monitor, Smartphone, ArrowDownToLine } from 
 import logo from '../pages/fercalc/logo.png';
 
 export default function InstallPrompt() {
-  const [showBanner, setShowBanner]       = useState(false);
-  const [showModal, setShowModal]         = useState(false); // modal del botón fijo
-  const [modalMode, setModalMode]         = useState('install'); // 'install' | 'installed'
-  const [installing, setInstalling]       = useState(false);
-  const [progress, setProgress]           = useState(0);
-  const [canInstall, setCanInstall]       = useState(false); // Chrome confirmó instalación
-  const deferredPromptRef                 = useRef(null);
+  const [showBanner, setShowBanner]   = useState(false);
+  const [showModal, setShowModal]     = useState(false);
+  const [modalMode, setModalMode]     = useState('install'); // 'install' | 'installed'
+  const [installing, setInstalling]   = useState(false);
+  const [progress, setProgress]       = useState(0);
+  const [progressStatus, setProgressStatus] = useState('installing'); // 'installing' | 'success' | 'error'
+  const deferredPromptRef             = useRef(null);
+  const isInstalledRef                = useRef(localStorage.getItem('pwa_installed') === 'true');
 
   useEffect(() => {
     // Si ya corre como app standalone → no mostrar nada
@@ -19,13 +20,12 @@ export default function InstallPrompt() {
       window.navigator.standalone === true;
     if (isStandalone) return;
 
+    // Capturar evento de instalación
     const handler = (e) => {
       e.preventDefault();
       deferredPromptRef.current = e;
-      setCanInstall(true);
-      // Mostrar banner automático solo cuando Chrome confirma
-      const dismissed = sessionStorage.getItem('pwa_banner_dismissed');
-      if (!dismissed) {
+      // Mostrar banner automático solo si no fue descartado en esta sesión
+      if (!sessionStorage.getItem('pwa_banner_dismissed')) {
         setTimeout(() => setShowBanner(true), 3000);
       }
     };
@@ -33,64 +33,97 @@ export default function InstallPrompt() {
     window.addEventListener('beforeinstallprompt', handler);
     window.addEventListener('appinstalled', () => {
       localStorage.setItem('pwa_installed', 'true');
-      setCanInstall(false);
-      setShowBanner(false);
+      isInstalledRef.current = true;
       deferredPromptRef.current = null;
+      setShowBanner(false);
     });
 
     return () => window.removeEventListener('beforeinstallprompt', handler);
   }, []);
 
-  // ── Lanzar instalación (banner o modal) ──
-  const doInstall = async (onDone) => {
-    if (!deferredPromptRef.current) return;
+  // ── Proceso de instalación con barra de progreso realista ──
+  const doInstall = async (onSuccess, onClose) => {
+    const prompt = deferredPromptRef.current;
+    if (!prompt) return;
+
     setInstalling(true);
     setProgress(0);
+    setProgressStatus('installing');
 
-    // Barra de progreso animada mientras el sistema instala
+    // Fase 1: progreso rápido hasta 30%
     let p = 0;
-    const interval = setInterval(() => {
-      p += Math.random() * 20;
-      if (p >= 80) { clearInterval(interval); p = 80; }
-      setProgress(Math.min(p, 80));
-    }, 120);
+    const phase1 = setInterval(() => {
+      p += Math.random() * 8 + 3;
+      if (p >= 30) { clearInterval(phase1); p = 30; startPhase2(); }
+      setProgress(Math.round(p));
+    }, 100);
 
-    deferredPromptRef.current.prompt();
-    const { outcome } = await deferredPromptRef.current.userChoice;
-    clearInterval(interval);
+    // Fase 2: progreso más lento hasta 75% (mientras esperamos confirmación)
+    const startPhase2 = () => {
+      const phase2 = setInterval(() => {
+        p += Math.random() * 4 + 1;
+        if (p >= 75) { clearInterval(phase2); p = 75; }
+        setProgress(Math.round(p));
+      }, 200);
+    };
+
+    // Lanzar el prompt nativo del navegador
+    prompt.prompt();
+    const { outcome } = await prompt.userChoice;
+    deferredPromptRef.current = null;
 
     if (outcome === 'accepted') {
-      setProgress(100);
-      localStorage.setItem('pwa_installed', 'true');
+      // Fase 3: completar rápido al 100%
+      const phase3 = setInterval(() => {
+        p += Math.random() * 10 + 5;
+        if (p >= 100) {
+          clearInterval(phase3);
+          setProgress(100);
+          setProgressStatus('success');
+          localStorage.setItem('pwa_installed', 'true');
+          isInstalledRef.current = true;
+          setTimeout(() => {
+            setInstalling(false);
+            onSuccess?.();
+          }, 1500);
+        } else {
+          setProgress(Math.round(p));
+        }
+      }, 80);
+    } else {
+      // Usuario canceló
+      setProgressStatus('error');
+      setProgress(p);
       setTimeout(() => {
         setInstalling(false);
-        onDone?.();
-      }, 1200);
-    } else {
-      setProgress(0);
-      setInstalling(false);
+        setProgress(0);
+        setProgressStatus('installing');
+      }, 1500);
     }
-    deferredPromptRef.current = null;
-    setCanInstall(false);
   };
 
-  const handleBannerInstall = () => doInstall(() => setShowBanner(false));
+  const handleBannerInstall = () =>
+    doInstall(() => setTimeout(() => setShowBanner(false), 800));
+
+  const handleModalInstall = () =>
+    doInstall(() => setTimeout(() => setShowModal(false), 800));
 
   const handleFixedButtonClick = () => {
-    const isInstalled = localStorage.getItem('pwa_installed') === 'true';
-    setModalMode(isInstalled ? 'installed' : 'install');
+    const installed = localStorage.getItem('pwa_installed') === 'true';
+    setModalMode(installed ? 'installed' : 'install');
+    setInstalling(false);
+    setProgress(0);
+    setProgressStatus('installing');
     setShowModal(true);
   };
-
-  const handleModalInstall = () => doInstall(() => setTimeout(() => setShowModal(false), 600));
 
   const dismissBanner = () => {
     setShowBanner(false);
     sessionStorage.setItem('pwa_banner_dismissed', 'true');
   };
 
-  const isInstalled = localStorage.getItem('pwa_installed') === 'true';
   const isMobile = /android|iphone|ipad|ipod/i.test(navigator.userAgent);
+  const hasPrompt = !!deferredPromptRef.current;
 
   const beneficios = [
     { icon: Zap,     texto: 'Acceso directo desde tu pantalla de inicio' },
@@ -98,133 +131,120 @@ export default function InstallPrompt() {
     { icon: Monitor, texto: 'Funciona como app nativa en tu dispositivo' },
   ];
 
-  return (
-    <>
-      {/* ══════════════════════════════════════
-          BANNER AUTOMÁTICO (solo cuando Chrome
-          confirma que se puede instalar)
-      ══════════════════════════════════════ */}
-      {showBanner && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end sm:items-center justify-center"
-          onClick={dismissBanner}
-        >
+  // ── Barra de progreso con estados ──
+  const ProgressBar = () => {
+    const barColor =
+      progressStatus === 'success' ? 'bg-green-500' :
+      progressStatus === 'error'   ? 'bg-red-500'   : 'bg-blue-500';
+    const statusText =
+      progressStatus === 'success' ? '¡Instalación exitosa!' :
+      progressStatus === 'error'   ? 'Instalación cancelada' : 'Instalando...';
+    const statusColor =
+      progressStatus === 'success' ? 'text-green-600' :
+      progressStatus === 'error'   ? 'text-red-500'   : 'text-blue-600';
+
+    return (
+      <div className="px-5 pb-3 pt-1">
+        <div className="flex items-center justify-between mb-2">
+          <span className={`text-xs font-bold ${statusColor}`}>{statusText}</span>
+          <span className="text-xs font-semibold text-gray-500">{progress}%</span>
+        </div>
+        <div className="w-full bg-gray-100 rounded-full h-3 overflow-hidden shadow-inner">
           <div
-            className="bg-white w-full sm:max-w-sm sm:mx-4 sm:rounded-3xl overflow-hidden shadow-2xl"
-            style={{ borderRadius: '20px 20px 0 0', animation: 'slideUpPWA 0.4s cubic-bezier(0.34, 1.4, 0.64, 1)' }}
-            onClick={e => e.stopPropagation()}
+            className={`${barColor} h-3 rounded-full transition-all duration-200 relative overflow-hidden`}
+            style={{ width: `${progress}%` }}
           >
-            {/* Header */}
-            <div className="bg-green-600 px-6 pt-7 pb-5 text-center relative">
-              <button onClick={dismissBanner}
-                className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-green-500 hover:bg-green-400 text-white transition">
-                <X className="h-4 w-4" />
-              </button>
-              <div className="flex justify-center mb-3">
-                <img src={logo} alt="FerCalc" className="h-16 w-16 rounded-2xl shadow-lg border-2 border-green-400 object-cover" />
-              </div>
-              <h2 className="text-xl font-bold text-white">Instalá FerCalc</h2>
-              <p className="text-green-200 text-xs mt-0.5">Calculadora Nutricional · Socios APEN</p>
-            </div>
-
-            {/* Beneficios */}
-            <div className="px-5 py-4 space-y-3">
-              {beneficios.map(({ icon: Icon, texto }) => (
-                <div key={texto} className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <Icon className="h-4 w-4 text-green-600" />
-                  </div>
-                  <p className="text-sm text-gray-600">{texto}</p>
-                </div>
-              ))}
-            </div>
-
-            {/* Barra progreso */}
-            {installing && (
-              <div className="px-5 pb-2">
-                <div className="flex justify-between mb-1.5">
-                  <span className="text-xs font-semibold text-green-700">{progress < 100 ? 'Instalando...' : '¡Listo!'}</span>
-                  <span className="text-xs text-gray-400">{Math.round(progress)}%</span>
-                </div>
-                <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
-                  <div className="bg-green-500 h-2 rounded-full transition-all duration-300" style={{ width: `${progress}%` }} />
-                </div>
-              </div>
+            {/* Efecto de brillo animado */}
+            {progressStatus === 'installing' && (
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+                style={{ animation: 'shimmer 1.5s infinite' }} />
             )}
-
-            {/* Botones */}
-            <div className="px-5 pb-7 pt-3 space-y-2.5">
-              <button onClick={handleBannerInstall} disabled={installing}
-                className="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 disabled:bg-green-500 text-white font-bold py-3.5 rounded-2xl transition-all active:scale-95 shadow-md">
-                {installing ? (
-                  <><svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>Instalando...</>
-                ) : (
-                  <><Download className="h-4 w-4" />Instalar ahora — es gratis</>
-                )}
-              </button>
-              <button onClick={dismissBanner} className="w-full text-gray-400 hover:text-gray-600 text-sm py-1.5 transition font-medium">
-                Ahora no
-              </button>
-            </div>
           </div>
+        </div>
+        {progressStatus === 'success' && (
+          <p className="text-xs text-green-600 mt-1.5 text-center font-medium">✓ La instalación se realizó satisfactoriamente</p>
+        )}
+        {progressStatus === 'error' && (
+          <p className="text-xs text-red-500 mt-1.5 text-center">La instalación fue cancelada por el usuario</p>
+        )}
+      </div>
+    );
+  };
+
+  // ── Contenido del modal de instalar ──
+  const InstallContent = ({ onInstall }) => (
+    <>
+      {!installing && (
+        <div className="px-5 py-4 space-y-3">
+          {beneficios.map(({ icon: Icon, texto }) => (
+            <div key={texto} className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                <Icon className="h-4 w-4 text-green-600" />
+              </div>
+              <p className="text-sm text-gray-600">{texto}</p>
+            </div>
+          ))}
         </div>
       )}
 
-      {/* ══════════════════════════════════════
-          BOTÓN FIJO DISCRETO (siempre visible,
-          no aparece si está en modo standalone)
-      ══════════════════════════════════════ */}
+      {installing && <ProgressBar />}
+
+      <div className="px-5 pb-7 pt-2 space-y-2.5">
+        {!installing && (
+          <button onClick={onInstall} disabled={!hasPrompt}
+            className={`w-full flex items-center justify-center gap-2 font-bold py-3.5 rounded-2xl transition-all active:scale-95 shadow-md text-white
+              ${hasPrompt ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-400 cursor-not-allowed'}`}>
+            <Download className="h-4 w-4" />
+            {hasPrompt ? 'Instalar ahora — es gratis' : 'Instalación no disponible en este navegador'}
+          </button>
+        )}
+        {!installing && !hasPrompt && (
+          <p className="text-xs text-gray-400 text-center px-2">
+            {isMobile
+              ? 'Usá el menú del navegador → "Agregar a pantalla de inicio"'
+              : 'Usá Chrome o Edge y buscá el ícono de instalación en la barra de direcciones'}
+          </p>
+        )}
+        {!installing && (
+          <button onClick={() => { setShowBanner(false); setShowModal(false); sessionStorage.setItem('pwa_banner_dismissed', 'true'); }}
+            className="w-full text-gray-400 hover:text-gray-600 text-sm py-1.5 transition font-medium">
+            Ahora no
+          </button>
+        )}
+      </div>
+    </>
+  );
+
+  return (
+    <>
+      {/* ══ BANNER AUTOMÁTICO ══ */}
+      {showBanner && (
+        <Overlay onClose={dismissBanner}>
+          <Header onClose={dismissBanner} title="Instalá FerCalc" subtitle="Calculadora Nutricional · Socios APEN" />
+          <InstallContent onInstall={handleBannerInstall} />
+        </Overlay>
+      )}
+
+      {/* ══ BOTÓN FIJO ══ */}
       {!showBanner && !showModal && (
-        <button
-          onClick={handleFixedButtonClick}
-          title={isInstalled ? 'FerCalc instalado' : 'Instalar FerCalc'}
+        <button onClick={handleFixedButtonClick}
+          title={isInstalledRef.current ? 'FerCalc instalado' : 'Instalar FerCalc'}
           className="fixed bottom-5 right-5 z-40 flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white text-xs font-semibold px-4 py-2.5 rounded-full shadow-lg transition-all hover:shadow-xl active:scale-95 border border-green-500"
-          style={{ animation: 'fadeInBtn 0.5s ease 1s both' }}
-        >
-          {isInstalled
+          style={{ animation: 'fadeInBtn 0.5s ease 1s both' }}>
+          {isInstalledRef.current
             ? <><Smartphone className="h-4 w-4" /><span className="hidden sm:inline">App instalada</span></>
-            : <><ArrowDownToLine className="h-4 w-4" /><span className="hidden sm:inline">Instalar app</span></>
-          }
+            : <><ArrowDownToLine className="h-4 w-4" /><span className="hidden sm:inline">Instalar app</span></>}
         </button>
       )}
 
-      {/* ══════════════════════════════════════
-          MODAL DEL BOTÓN FIJO
-      ══════════════════════════════════════ */}
+      {/* ══ MODAL DEL BOTÓN FIJO ══ */}
       {showModal && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end sm:items-center justify-center"
-          onClick={() => setShowModal(false)}
-        >
-          <div
-            className="bg-white w-full sm:max-w-sm sm:mx-4 sm:rounded-3xl overflow-hidden shadow-2xl"
-            style={{ borderRadius: '20px 20px 0 0', animation: 'slideUpPWA 0.35s cubic-bezier(0.34, 1.4, 0.64, 1)' }}
-            onClick={e => e.stopPropagation()}
-          >
-            {/* Header */}
-            <div className="bg-green-600 px-6 pt-7 pb-5 text-center relative">
-              <button onClick={() => setShowModal(false)}
-                className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-green-500 hover:bg-green-400 text-white transition">
-                <X className="h-4 w-4" />
-              </button>
-              <div className="flex justify-center mb-3">
-                <img src={logo} alt="FerCalc" className="h-16 w-16 rounded-2xl shadow-lg border-2 border-green-400 object-cover" />
-              </div>
-              {modalMode === 'installed' ? (
-                <>
-                  <h2 className="text-xl font-bold text-white">Ya tenés FerCalc instalado</h2>
-                  <p className="text-green-200 text-xs mt-0.5">Podés abrirlo desde tu {isMobile ? 'pantalla de inicio' : 'escritorio'}</p>
-                </>
-              ) : (
-                <>
-                  <h2 className="text-xl font-bold text-white">Instalá FerCalc</h2>
-                  <p className="text-green-200 text-xs mt-0.5">Calculadora Nutricional · Socios APEN</p>
-                </>
-              )}
-            </div>
-
-            {/* Contenido según modo */}
-            {modalMode === 'installed' ? (
+        <Overlay onClose={() => setShowModal(false)}>
+          {modalMode === 'installed' ? (
+            <>
+              <Header onClose={() => setShowModal(false)}
+                title="Ya tenés FerCalc instalado"
+                subtitle={`Podés abrirlo desde tu ${isMobile ? 'pantalla de inicio' : 'escritorio'}`} />
               <div className="px-5 py-5">
                 <div className="flex items-start gap-3 p-4 bg-green-50 border border-green-200 rounded-2xl">
                   <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center flex-shrink-0">
@@ -233,56 +253,25 @@ export default function InstallPrompt() {
                   <div>
                     <p className="text-sm font-semibold text-green-800">FerCalc está en tu dispositivo</p>
                     <p className="text-xs text-green-600 mt-1 leading-relaxed">
-                      Buscá el ícono de FerCalc en tu {isMobile ? 'pantalla de inicio' : 'escritorio o barra de tareas'} para abrirlo como app y tener la mejor experiencia.
+                      Buscá el ícono de FerCalc en tu {isMobile ? 'pantalla de inicio' : 'escritorio o barra de tareas'} para abrirlo como app.
                     </p>
                   </div>
                 </div>
               </div>
-            ) : (
-              <>
-                <div className="px-5 py-4 space-y-3">
-                  {beneficios.map(({ icon: Icon, texto }) => (
-                    <div key={texto} className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <Icon className="h-4 w-4 text-green-600" />
-                      </div>
-                      <p className="text-sm text-gray-600">{texto}</p>
-                    </div>
-                  ))}
-                </div>
-                {installing && (
-                  <div className="px-5 pb-2">
-                    <div className="flex justify-between mb-1.5">
-                      <span className="text-xs font-semibold text-green-700">{progress < 100 ? 'Instalando...' : '¡Listo!'}</span>
-                      <span className="text-xs text-gray-400">{Math.round(progress)}%</span>
-                    </div>
-                    <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
-                      <div className="bg-green-500 h-2 rounded-full transition-all duration-300" style={{ width: `${progress}%` }} />
-                    </div>
-                  </div>
-                )}
-              </>
-            )}
-
-            {/* Botones modal */}
-            <div className="px-5 pb-7 pt-3 space-y-2.5">
-              {modalMode === 'install' && canInstall && (
-                <button onClick={handleModalInstall} disabled={installing}
-                  className="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 disabled:bg-green-500 text-white font-bold py-3.5 rounded-2xl transition-all active:scale-95 shadow-md">
-                  {installing ? (
-                    <><svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>Instalando...</>
-                  ) : (
-                    <><Download className="h-4 w-4" />Instalar ahora — es gratis</>
-                  )}
+              <div className="px-5 pb-7 pt-1">
+                <button onClick={() => setShowModal(false)}
+                  className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3.5 rounded-2xl transition-all active:scale-95 shadow-md">
+                  Entendido
                 </button>
-              )}
-              <button onClick={() => setShowModal(false)}
-                className={`w-full font-bold py-3.5 rounded-2xl transition-all active:scale-95 shadow-md flex items-center justify-center gap-2 ${modalMode === 'installed' || !canInstall ? 'bg-green-600 hover:bg-green-700 text-white' : 'text-gray-400 hover:text-gray-600 text-sm'}`}>
-                {modalMode === 'installed' ? 'Entendido' : canInstall ? 'Ahora no' : 'Cerrar'}
-              </button>
-            </div>
-          </div>
-        </div>
+              </div>
+            </>
+          ) : (
+            <>
+              <Header onClose={() => setShowModal(false)} title="Instalá FerCalc" subtitle="Calculadora Nutricional · Socios APEN" />
+              <InstallContent onInstall={handleModalInstall} />
+            </>
+          )}
+        </Overlay>
       )}
 
       <style>{`
@@ -294,7 +283,41 @@ export default function InstallPrompt() {
           from { opacity: 0; transform: translateY(10px); }
           to   { opacity: 1; transform: translateY(0); }
         }
+        @keyframes shimmer {
+          0%   { transform: translateX(-100%); }
+          100% { transform: translateX(200%); }
+        }
       `}</style>
     </>
+  );
+}
+
+// ── Subcomponentes ──
+function Overlay({ children, onClose }) {
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end sm:items-center justify-center"
+      onClick={onClose}>
+      <div className="bg-white w-full sm:max-w-sm sm:mx-4 sm:rounded-3xl overflow-hidden shadow-2xl"
+        style={{ borderRadius: '20px 20px 0 0', animation: 'slideUpPWA 0.4s cubic-bezier(0.34, 1.4, 0.64, 1)' }}
+        onClick={e => e.stopPropagation()}>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function Header({ onClose, title, subtitle }) {
+  return (
+    <div className="bg-green-600 px-6 pt-7 pb-5 text-center relative">
+      <button onClick={onClose}
+        className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-green-500 hover:bg-green-400 text-white transition">
+        <X className="h-4 w-4" />
+      </button>
+      <div className="flex justify-center mb-3">
+        <img src={logo} alt="FerCalc" className="h-16 w-16 rounded-2xl shadow-lg border-2 border-green-400 object-cover" />
+      </div>
+      <h2 className="text-xl font-bold text-white">{title}</h2>
+      <p className="text-green-200 text-xs mt-0.5">{subtitle}</p>
+    </div>
   );
 }
