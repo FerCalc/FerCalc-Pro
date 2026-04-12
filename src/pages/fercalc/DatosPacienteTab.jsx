@@ -64,35 +64,51 @@ const MacroCalculator = ({ patientWeight, setDietGoals }) => {
   };
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow">
-      <h3 className="text-lg font-semibold p-3 bg-gray-100 rounded-t-lg -m-6 mb-4 flex items-center gap-2">
+    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow dark:shadow-gray-900">
+      <h3 className="text-lg font-semibold p-3 bg-gray-100 dark:bg-gray-700 rounded-t-lg -m-6 mb-4 flex items-center gap-2 text-gray-800 dark:text-white">
         <Calculator size={20} />Cálculo de Macros
       </h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-3">
-          <div><label className="block text-sm font-medium">Calorías Totales</label><input type="number" name="calories" value={calcState.calories} onChange={handleCalcChange} className="mt-1 w-full p-2 border rounded"/></div>
-          <div><label className="block text-sm font-medium">% Carbohidratos</label><input type="number" name="hc" value={calcState.hc} onChange={handleCalcChange} className="mt-1 w-full p-2 border rounded"/></div>
-          <div><label className="block text-sm font-medium">% Proteínas</label><input type="number" name="protein" value={calcState.protein} onChange={handleCalcChange} className="mt-1 w-full p-2 border rounded"/></div>
-          <div><label className="block text-sm font-medium">% Grasas</label><input type="number" name="fat" value={calcState.fat} onChange={handleCalcChange} className="mt-1 w-full p-2 border rounded"/></div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Calorías Totales</label>
+            <input type="number" name="calories" value={calcState.calories} onChange={handleCalcChange}
+              className="mt-1 w-full p-2 border dark:border-gray-600 rounded dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-green-500 focus:outline-none" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">% Carbohidratos</label>
+            <input type="number" name="hc" value={calcState.hc} onChange={handleCalcChange}
+              className="mt-1 w-full p-2 border dark:border-gray-600 rounded dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-green-500 focus:outline-none" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">% Proteínas</label>
+            <input type="number" name="protein" value={calcState.protein} onChange={handleCalcChange}
+              className="mt-1 w-full p-2 border dark:border-gray-600 rounded dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-green-500 focus:outline-none" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">% Grasas</label>
+            <input type="number" name="fat" value={calcState.fat} onChange={handleCalcChange}
+              className="mt-1 w-full p-2 border dark:border-gray-600 rounded dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-green-500 focus:outline-none" />
+          </div>
         </div>
-        <div className="bg-gray-50 p-4 rounded-lg space-y-3">
+        <div className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg space-y-3">
           <table className="w-full text-left">
             <thead>
-              <tr className="border-b">
-                <th className="pb-2 text-sm font-medium text-gray-600">Macronutrientes</th>
-                <th className="pb-2 text-sm font-medium text-gray-600 text-right">Gramos</th>
-                <th className="pb-2 text-sm font-medium text-gray-600 text-right">Kcal</th>
+              <tr className="border-b dark:border-gray-600">
+                <th className="pb-2 text-sm font-medium text-gray-600 dark:text-gray-300">Macronutrientes</th>
+                <th className="pb-2 text-sm font-medium text-gray-600 dark:text-gray-300 text-right">Gramos</th>
+                <th className="pb-2 text-sm font-medium text-gray-600 dark:text-gray-300 text-right">Kcal</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="dark:text-gray-200">
               <tr><td className="py-1">Carbohidratos</td><td className="text-lg font-bold text-right">{results.hcGrams.toFixed(1)}</td><td className="text-lg font-bold text-right">{results.hcCalories.toFixed(0)}</td></tr>
               <tr><td className="py-1">Proteínas</td><td className="text-lg font-bold text-right">{results.proteinGrams.toFixed(1)}</td><td className="text-lg font-bold text-right">{results.proteinCalories.toFixed(0)}</td></tr>
               <tr><td className="py-1">Grasas</td><td className="text-lg font-bold text-right">{results.fatGrams.toFixed(1)}</td><td className="text-lg font-bold text-right">{results.fatCalories.toFixed(0)}</td></tr>
             </tbody>
           </table>
-          <div className="border-t pt-3">
-            <p className="text-sm font-medium text-gray-600">Proteína / Kg Peso</p>
-            <p className="text-lg font-bold">{results.proteinPerKg.toFixed(2)} g/kg</p>
+          <div className="border-t dark:border-gray-600 pt-3">
+            <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Proteína / Kg Peso</p>
+            <p className="text-lg font-bold dark:text-white">{results.proteinPerKg.toFixed(2)} g/kg</p>
           </div>
         </div>
       </div>
@@ -103,7 +119,7 @@ const MacroCalculator = ({ patientWeight, setDietGoals }) => {
         <button
           onClick={applyToGoals}
           disabled={totalPercent !== 100}
-          className="mt-2 w-full bg-blue-600 text-white font-bold py-2 px-4 rounded hover:bg-blue-700 disabled:bg-gray-400"
+          className="mt-2 w-full bg-blue-600 text-white font-bold py-2 px-4 rounded hover:bg-blue-700 disabled:bg-gray-400 dark:disabled:bg-gray-600"
         >
           Aplicar a Objetivos
         </button>
@@ -185,9 +201,9 @@ const DatosPacienteTab = ({ patientData, setPatientData, dietGoals, setDietGoals
       macroPercentages: { hc: 0, proteina: 0, grasa: 0 },
       pavbPercentage: 0,
       agsPercentage: 0,
-      agsGramos: 0,           // ✅ NUEVO
+      agsGramos: 0,
       hcSimplesPercentage: 0,
-      hcSimplesGramos: 0,     // ✅ NUEVO
+      hcSimplesGramos: 0,
     };
     try {
       if (!dietaActual || dietaActual.length === 0) return safeDefaults;
@@ -215,26 +231,14 @@ const DatosPacienteTab = ({ patientData, setPatientData, dietGoals, setDietGoals
       const pavbPercentage = totales.proteina > 0 ? (proteinasAnimales / totales.proteina) * 100 : 0;
       const agsPercentage = totales.calorias > 0 ? (grasasAnimales * 9 * 100) / totales.calorias : 0;
       const hcSimplesPercentage = totales.calorias > 0 ? (hcSimples * 4 * 100) / totales.calorias : 0;
-      return {
-        totales,
-        macroPercentages,
-        pavbPercentage,
-        agsPercentage,
-        agsGramos: grasasAnimales,           // ✅ NUEVO
-        hcSimplesPercentage,
-        hcSimplesGramos: hcSimples,          // ✅ NUEVO
-      };
+      return { totales, macroPercentages, pavbPercentage, agsPercentage, agsGramos: grasasAnimales, hcSimplesPercentage, hcSimplesGramos: hcSimples };
     } catch (error) {
       console.error("Error en análisis de dieta:", error);
       return safeDefaults;
     }
   }, [dietaActual, dietGoals.pavbPercentage]);
 
-  const {
-    totales, macroPercentages, pavbPercentage,
-    agsPercentage, agsGramos,
-    hcSimplesPercentage, hcSimplesGramos
-  } = analisisDieta;
+  const { totales, macroPercentages, pavbPercentage, agsPercentage, agsGramos, hcSimplesPercentage, hcSimplesGramos } = analisisDieta;
 
   const goalUnits = {
     calorias: 'kcal', hc: 'g', proteina: 'g', grasa: 'g',
@@ -256,24 +260,30 @@ const DatosPacienteTab = ({ patientData, setPatientData, dietGoals, setDietGoals
     return (
       <div>
         <div className="flex justify-between mb-1 text-sm">
-          <span className="font-medium text-gray-700">{label}</span>
-          <span className="text-gray-500">{current.toFixed(1)} / {goal} {unit}</span>
+          <span className="font-medium text-gray-700 dark:text-gray-200">{label}</span>
+          <span className="text-gray-500 dark:text-gray-400">{current.toFixed(1)} / {goal} {unit}</span>
         </div>
-        <div className="w-full bg-gray-200 rounded-full h-2.5">
+        <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2.5">
           <div className={`${color} h-2.5 rounded-full`} style={{ width: `${Math.min(percentage, 100)}%` }}></div>
         </div>
       </div>
     );
   };
 
-  // ✅ Determinar color del colesterol según objetivo
   const colesterolColor = () => {
-    if (!dietGoals.colesterol || dietGoals.colesterol === 0) return 'text-gray-600';
+    if (!dietGoals.colesterol || dietGoals.colesterol === 0) return 'text-gray-600 dark:text-gray-300';
     const pct = (totales.colesterol / dietGoals.colesterol) * 100;
     if (pct > 100) return 'text-red-600';
     if (pct > 80) return 'text-yellow-600';
     return 'text-green-600';
   };
+
+  // Clase base reutilizable para inputs
+  const inputClass = "mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-green-500 focus:outline-none";
+  const selectClass = "mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-green-500 focus:outline-none";
+  const labelClass = "block text-sm font-medium text-gray-700 dark:text-gray-200";
+  const cardClass = "bg-white dark:bg-gray-800 p-6 rounded-lg shadow dark:shadow-gray-900";
+  const sectionHeaderClass = "text-lg font-semibold p-3 bg-gray-100 dark:bg-gray-700 rounded-t-lg -m-6 mb-4 text-gray-800 dark:text-white";
 
   return (
     <div id="datos-tab-content" className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -281,50 +291,50 @@ const DatosPacienteTab = ({ patientData, setPatientData, dietGoals, setDietGoals
       <div className="lg:col-span-1 space-y-6">
 
         {/* Datos del paciente */}
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-lg font-semibold p-3 bg-gray-100 rounded-t-lg -m-6 mb-4">Datos del Paciente</h3>
+        <div className={cardClass}>
+          <h3 className={sectionHeaderClass}>Datos del Paciente</h3>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium">Peso Actual (kg)</label>
-              <input type="number" name="weight" value={patientData.weight} onChange={handlePatientChange} className="mt-1 block w-full px-3 py-2 border rounded-md"/>
+              <label className={labelClass}>Peso Actual (kg)</label>
+              <input type="number" name="weight" value={patientData.weight} onChange={handlePatientChange} className={inputClass} />
             </div>
             <div>
-              <label className="block text-sm font-medium">Altura (cm)</label>
-              <input type="number" name="height" value={patientData.height} onChange={handlePatientChange} className="mt-1 block w-full px-3 py-2 border rounded-md"/>
+              <label className={labelClass}>Altura (cm)</label>
+              <input type="number" name="height" value={patientData.height} onChange={handlePatientChange} className={inputClass} />
             </div>
 
             <div>
-              <label className="block text-sm font-medium">Edad</label>
+              <label className={labelClass}>Edad</label>
               <div className="mt-2 grid grid-cols-3 gap-4">
                 <div>
-                  <label htmlFor="ageYears" className="block text-xs text-gray-500">Años</label>
-                  <input type="number" id="ageYears" value={ageYears} onChange={e => setAgeYears(e.target.value)} className="mt-1 block w-full px-3 py-2 border rounded-md" placeholder="p. ej., 1"/>
+                  <label htmlFor="ageYears" className="block text-xs text-gray-500 dark:text-gray-400">Años</label>
+                  <input type="number" id="ageYears" value={ageYears} onChange={e => setAgeYears(e.target.value)} className={inputClass} placeholder="p. ej., 1" />
                 </div>
                 <div>
-                  <label htmlFor="ageMonths" className="block text-xs text-gray-500">Meses</label>
-                  <input type="number" id="ageMonths" value={ageMonths} onChange={e => setAgeMonths(e.target.value)} className="mt-1 block w-full px-3 py-2 border rounded-md" placeholder="p. ej., 6"/>
+                  <label htmlFor="ageMonths" className="block text-xs text-gray-500 dark:text-gray-400">Meses</label>
+                  <input type="number" id="ageMonths" value={ageMonths} onChange={e => setAgeMonths(e.target.value)} className={inputClass} placeholder="p. ej., 6" />
                 </div>
                 <div>
-                  <label htmlFor="ageDays" className="block text-xs text-gray-500">Días</label>
-                  <input type="number" id="ageDays" value={ageDays} onChange={e => setAgeDays(e.target.value)} className="mt-1 block w-full px-3 py-2 border rounded-md" placeholder="p. ej., 15"/>
+                  <label htmlFor="ageDays" className="block text-xs text-gray-500 dark:text-gray-400">Días</label>
+                  <input type="number" id="ageDays" value={ageDays} onChange={e => setAgeDays(e.target.value)} className={inputClass} placeholder="p. ej., 15" />
                 </div>
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium">Sexo</label>
-              <select name="sex" value={patientData.sex} onChange={handlePatientChange} className="mt-1 block w-full px-3 py-2 border rounded-md">
+              <label className={labelClass}>Sexo</label>
+              <select name="sex" value={patientData.sex} onChange={handlePatientChange} className={selectClass}>
                 <option>Masculino</option>
                 <option>Femenino</option>
               </select>
             </div>
 
             {patientData.sex === 'Femenino' && chronologicalAge.totalYears >= 12 && (
-              <div className="border-t-2 border-green-200 pt-4 mt-4 space-y-4">
-                <h4 className="font-semibold text-md text-green-800">Datos del Embarazo</h4>
+              <div className="border-t-2 border-green-200 dark:border-green-700 pt-4 mt-4 space-y-4">
+                <h4 className="font-semibold text-md text-green-800 dark:text-green-400">Datos del Embarazo</h4>
                 <div>
-                  <label className="block text-sm font-medium">¿Está embarazada?</label>
-                  <select name="estaEmbarazada" value={patientData.estaEmbarazada} onChange={handlePatientChange} className="mt-1 block w-full px-3 py-2 border rounded-md">
+                  <label className={labelClass}>¿Está embarazada?</label>
+                  <select name="estaEmbarazada" value={patientData.estaEmbarazada} onChange={handlePatientChange} className={selectClass}>
                     <option value="No">No</option>
                     <option value="Sí">Sí</option>
                   </select>
@@ -332,12 +342,12 @@ const DatosPacienteTab = ({ patientData, setPatientData, dietGoals, setDietGoals
                 {patientData.estaEmbarazada === 'Sí' && (
                   <>
                     <div>
-                      <label className="block text-sm font-medium">Peso Pre-Gestacional (kg)</label>
-                      <input type="number" name="pesoPreGestacional" value={patientData.pesoPreGestacional} onChange={handlePatientChange} className="mt-1 block w-full px-3 py-2 border rounded-md"/>
+                      <label className={labelClass}>Peso Pre-Gestacional (kg)</label>
+                      <input type="number" name="pesoPreGestacional" value={patientData.pesoPreGestacional} onChange={handlePatientChange} className={inputClass} />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium">Semanas de Gestación</label>
-                      <input type="number" name="semanasGestacion" value={patientData.semanasGestacion} onChange={handlePatientChange} className="mt-1 block w-full px-3 py-2 border rounded-md"/>
+                      <label className={labelClass}>Semanas de Gestación</label>
+                      <input type="number" name="semanasGestacion" value={patientData.semanasGestacion} onChange={handlePatientChange} className={inputClass} />
                     </div>
                   </>
                 )}
@@ -346,44 +356,44 @@ const DatosPacienteTab = ({ patientData, setPatientData, dietGoals, setDietGoals
 
             {showGestationalAgeInput && (
               <div className="mt-4">
-                <label htmlFor="gestationalAge" className="block text-sm font-medium">Edad Gestacional al Nacer (semanas)</label>
-                <input type="number" id="gestationalAge" value={gestationalAgeWeeks} onChange={e => setGestationalAgeWeeks(e.target.value)} className="mt-1 block w-full px-3 py-2 border rounded-md" placeholder="Ej: 32"/>
+                <label htmlFor="gestationalAge" className={labelClass}>Edad Gestacional al Nacer (semanas)</label>
+                <input type="number" id="gestationalAge" value={gestationalAgeWeeks} onChange={e => setGestationalAgeWeeks(e.target.value)} className={inputClass} placeholder="Ej: 32" />
                 {gestationalAgeCategory && <p className={`mt-1 text-sm font-semibold ${gestationalAgeCategory.color}`}>{gestationalAgeCategory.text}</p>}
               </div>
             )}
 
             {showBirthWeightInput && (
               <div className="mt-4">
-                <label htmlFor="birthWeight" className="block text-sm font-medium">Peso de Nacimiento (gramos)</label>
-                <input type="number" id="birthWeight" value={birthWeightGrams} onChange={e => setBirthWeightGrams(e.target.value)} className="mt-1 block w-full px-3 py-2 border rounded-md" placeholder="Ej: 1800"/>
+                <label htmlFor="birthWeight" className={labelClass}>Peso de Nacimiento (gramos)</label>
+                <input type="number" id="birthWeight" value={birthWeightGrams} onChange={e => setBirthWeightGrams(e.target.value)} className={inputClass} placeholder="Ej: 1800" />
                 {birthWeightCategory && <p className={`mt-1 text-sm font-semibold ${birthWeightCategory.color}`}>{birthWeightCategory.text}</p>}
               </div>
             )}
 
-            <div className="mt-6 border-t border-gray-200 pt-4 space-y-3">
+            <div className="mt-6 border-t border-gray-200 dark:border-gray-700 pt-4 space-y-3">
               <div className="flex items-start">
-                <CalendarDays className="h-5 w-5 text-gray-500 mr-3 mt-0.5 flex-shrink-0"/>
+                <CalendarDays className="h-5 w-5 text-gray-500 dark:text-gray-400 mr-3 mt-0.5 flex-shrink-0" />
                 <div>
-                  <p className="font-medium text-gray-800">Edad Cronológica</p>
-                  <p className="text-gray-600">{chronologicalAge.text}</p>
+                  <p className="font-medium text-gray-800 dark:text-white">Edad Cronológica</p>
+                  <p className="text-gray-600 dark:text-gray-300">{chronologicalAge.text}</p>
                 </div>
               </div>
               {correctedAgeResult && (
                 <div>
                   {correctedAgeResult.applicable ? (
-                    <div className="flex items-start p-3 bg-indigo-50 rounded-lg mt-2">
-                      <Baby className="h-5 w-5 text-indigo-600 mr-3 mt-0.5 flex-shrink-0"/>
+                    <div className="flex items-start p-3 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg mt-2">
+                      <Baby className="h-5 w-5 text-indigo-600 dark:text-indigo-400 mr-3 mt-0.5 flex-shrink-0" />
                       <div>
-                        <p className="font-semibold text-indigo-800">Edad Corregida (para curvas)</p>
-                        <p className="text-indigo-700 text-base font-bold">{correctedAgeResult.formatted}</p>
+                        <p className="font-semibold text-indigo-800 dark:text-indigo-300">Edad Corregida (para curvas)</p>
+                        <p className="text-indigo-700 dark:text-indigo-400 text-base font-bold">{correctedAgeResult.formatted}</p>
                       </div>
                     </div>
                   ) : (
-                    <div className="flex items-start p-3 bg-yellow-50 rounded-lg mt-2">
-                      <AlertCircle className="h-5 w-5 text-yellow-600 mr-3 mt-0.5 flex-shrink-0"/>
+                    <div className="flex items-start p-3 bg-yellow-50 dark:bg-yellow-900/30 rounded-lg mt-2">
+                      <AlertCircle className="h-5 w-5 text-yellow-600 dark:text-yellow-400 mr-3 mt-0.5 flex-shrink-0" />
                       <div>
-                        <p className="font-semibold text-yellow-800">Edad Corregida</p>
-                        <p className="text-yellow-700 text-sm">{correctedAgeResult.message}</p>
+                        <p className="font-semibold text-yellow-800 dark:text-yellow-300">Edad Corregida</p>
+                        <p className="text-yellow-700 dark:text-yellow-400 text-sm">{correctedAgeResult.message}</p>
                       </div>
                     </div>
                   )}
@@ -394,112 +404,105 @@ const DatosPacienteTab = ({ patientData, setPatientData, dietGoals, setDietGoals
         </div>
 
         {/* IMC + PAVB + AGS + HC Simples + Colesterol */}
-        <div className="bg-white p-6 rounded-lg shadow space-y-4">
+        <div className={`${cardClass} space-y-4`}>
 
           {/* IMC */}
           <div>
-            <h3 className="text-lg font-semibold mb-1">Índice de Masa Corporal (IMC)</h3>
+            <h3 className="text-lg font-semibold mb-1 text-gray-800 dark:text-white">Índice de Masa Corporal (IMC)</h3>
             <p className="text-3xl font-bold text-green-600">{imc}</p>
-            <p className="text-md text-gray-600">{imcCategory}</p>
+            <p className="text-md text-gray-600 dark:text-gray-300">{imcCategory}</p>
           </div>
 
           {/* PAVB */}
-<div className="border-t pt-4">
-  <h3 className="text-lg font-semibold mb-1 flex items-center gap-2">
-    <Target size={20} className="text-blue-500" />PAVB
-  </h3>
-  <p className="text-sm text-gray-500">Proteinas de Alto Valor Biologico.</p>
-  <div className="grid grid-cols-2 gap-3 mt-2 mb-3">
-    <div className="bg-blue-50 p-3 rounded-xl">
-      <p className="text-xs text-blue-600 font-medium">Consumido</p>
-      <p className="text-xl font-bold text-blue-700">
-        {(totales.proteina > 0 ? (pavbPercentage / 100) * totales.proteina : 0).toFixed(1)} g
-      </p>
-      <p className="text-xs text-blue-400">{pavbPercentage.toFixed(1)}% del total</p>
-    </div>
-    <div className="bg-indigo-50 p-3 rounded-xl">
-      <p className="text-xs text-indigo-600 font-medium">Objetivo</p>
-      <p className="text-xl font-bold text-indigo-700">{dietGoals.pavbPercentage}%</p>
-      {/* ✅ NUEVO: muestra a cuántos gramos equivale el % objetivo */}
-      <p className="text-xs text-indigo-400">
-        = {totales.proteina > 0
-          ? ((dietGoals.pavbPercentage / 100) * totales.proteina).toFixed(1)
-          : (dietGoals.pavbPercentage > 0 && dietGoals.proteina > 0
-              ? ((dietGoals.pavbPercentage / 100) * dietGoals.proteina).toFixed(1)
-              : '0.0')
-        } g de proteina
-      </p>
-    </div>
-  </div>
-  <ProgressBar label="PAVB" currentValue={pavbPercentage} goalValue={dietGoals.pavbPercentage} unit="%" />
-</div>
-          {/* ✅ AGS — con % y gramos */}
-          <div className="border-t pt-4">
-            <h3 className="text-lg font-semibold mb-1 flex items-center gap-2">
-              <Droplets size={20} className="text-orange-500"/>AGS
+          <div className="border-t dark:border-gray-700 pt-4">
+            <h3 className="text-lg font-semibold mb-1 flex items-center gap-2 text-gray-800 dark:text-white">
+              <Target size={20} className="text-blue-500" />PAVB
             </h3>
-            <p className="text-sm text-gray-500">Ácidos Grasos Saturados de la dieta actual.</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Proteinas de Alto Valor Biologico.</p>
+            <div className="grid grid-cols-2 gap-3 mt-2 mb-3">
+              <div className="bg-blue-50 dark:bg-blue-900/30 p-3 rounded-xl">
+                <p className="text-xs text-blue-600 dark:text-blue-400 font-medium">Consumido</p>
+                <p className="text-xl font-bold text-blue-700 dark:text-blue-300">
+                  {(totales.proteina > 0 ? (pavbPercentage / 100) * totales.proteina : 0).toFixed(1)} g
+                </p>
+                <p className="text-xs text-blue-400 dark:text-blue-500">{pavbPercentage.toFixed(1)}% del total</p>
+              </div>
+              <div className="bg-indigo-50 dark:bg-indigo-900/30 p-3 rounded-xl">
+                <p className="text-xs text-indigo-600 dark:text-indigo-400 font-medium">Objetivo</p>
+                <p className="text-xl font-bold text-indigo-700 dark:text-indigo-300">{dietGoals.pavbPercentage}%</p>
+                <p className="text-xs text-indigo-400 dark:text-indigo-500">
+                  = {totales.proteina > 0
+                    ? ((dietGoals.pavbPercentage / 100) * totales.proteina).toFixed(1)
+                    : (dietGoals.pavbPercentage > 0 && dietGoals.proteina > 0
+                        ? ((dietGoals.pavbPercentage / 100) * dietGoals.proteina).toFixed(1)
+                        : '0.0')
+                  } g de proteina
+                </p>
+              </div>
+            </div>
+            <ProgressBar label="PAVB" currentValue={pavbPercentage} goalValue={dietGoals.pavbPercentage} unit="%" />
+          </div>
+
+          {/* AGS */}
+          <div className="border-t dark:border-gray-700 pt-4">
+            <h3 className="text-lg font-semibold mb-1 flex items-center gap-2 text-gray-800 dark:text-white">
+              <Droplets size={20} className="text-orange-500" />AGS
+            </h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Ácidos Grasos Saturados de la dieta actual.</p>
             <div className="flex items-end gap-4 mt-1">
               <div>
-                <p className="text-xs text-gray-500">Porcentaje calórico</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Porcentaje calórico</p>
                 <p className="text-2xl font-bold text-orange-600">{agsPercentage.toFixed(1)}%</p>
               </div>
               <div>
-                <p className="text-xs text-gray-500">Gramos</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Gramos</p>
                 <p className="text-2xl font-bold text-orange-400">{agsGramos.toFixed(1)} g</p>
               </div>
             </div>
           </div>
 
-          {/* ✅ HC Simples — con % y gramos */}
-          <div className="border-t pt-4">
-            <h3 className="text-lg font-semibold mb-1 flex items-center gap-2">
-              <UtensilsCrossed size={20} className="text-purple-500"/>HC Simples
+          {/* HC Simples */}
+          <div className="border-t dark:border-gray-700 pt-4">
+            <h3 className="text-lg font-semibold mb-1 flex items-center gap-2 text-gray-800 dark:text-white">
+              <UtensilsCrossed size={20} className="text-purple-500" />HC Simples
             </h3>
-            <p className="text-sm text-gray-500">Carbohidratos Simples de la dieta actual.</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Carbohidratos Simples de la dieta actual.</p>
             <div className="flex items-end gap-4 mt-1">
               <div>
-                <p className="text-xs text-gray-500">Porcentaje calórico</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Porcentaje calórico</p>
                 <p className="text-2xl font-bold text-purple-600">{hcSimplesPercentage.toFixed(1)}%</p>
               </div>
               <div>
-                <p className="text-xs text-gray-500">Gramos</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Gramos</p>
                 <p className="text-2xl font-bold text-purple-400">{hcSimplesGramos.toFixed(1)} g</p>
               </div>
             </div>
           </div>
 
-          {/* ✅ COLESTEROL — nuevo */}
-          <div className="border-t pt-4">
-            <h3 className="text-lg font-semibold mb-1 flex items-center gap-2">
-              <Heart size={20} className="text-red-500"/>Colesterol
+          {/* Colesterol */}
+          <div className="border-t dark:border-gray-700 pt-4">
+            <h3 className="text-lg font-semibold mb-1 flex items-center gap-2 text-gray-800 dark:text-white">
+              <Heart size={20} className="text-red-500" />Colesterol
             </h3>
-            <p className="text-sm text-gray-500">Colesterol calculado de la dieta actual.</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Colesterol calculado de la dieta actual.</p>
             <div className="flex items-end gap-4 mt-1">
               <div>
-                <p className="text-xs text-gray-500">Consumido</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Consumido</p>
                 <p className={`text-2xl font-bold ${colesterolColor()}`}>
                   {totales.colesterol.toFixed(1)} mg
                 </p>
               </div>
               <div>
-                <p className="text-xs text-gray-500">Objetivo</p>
-                <p className="text-2xl font-bold text-gray-500">
+                <p className="text-xs text-gray-500 dark:text-gray-400">Objetivo</p>
+                <p className="text-2xl font-bold text-gray-500 dark:text-gray-400">
                   {dietGoals.colesterol} mg
                 </p>
               </div>
             </div>
-            {/* Barra de progreso colesterol */}
             <div className="mt-2">
-              <ProgressBar
-                label="Colesterol"
-                currentValue={totales.colesterol}
-                goalValue={dietGoals.colesterol}
-                unit="mg"
-              />
+              <ProgressBar label="Colesterol" currentValue={totales.colesterol} goalValue={dietGoals.colesterol} unit="mg" />
             </div>
           </div>
-
         </div>
       </div>
 
@@ -507,20 +510,20 @@ const DatosPacienteTab = ({ patientData, setPatientData, dietGoals, setDietGoals
       <div className="lg:col-span-2 space-y-6">
         <MacroCalculator patientWeight={patientData.weight} setDietGoals={setDietGoals} />
 
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-lg font-semibold p-3 bg-gray-100 rounded-t-lg -m-6 mb-4">Objetivos Nutricionales</h3>
+        <div className={cardClass}>
+          <h3 className={sectionHeaderClass}>Objetivos Nutricionales</h3>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {Object.keys(goalLabels).map(key => (
               <div key={key}>
-                <label className="block text-sm font-medium capitalize">{goalLabels[key]} ({goalUnits[key]})</label>
-                <input type="number" name={key} value={dietGoals[key]} onChange={handleGoalChange} className="mt-1 block w-full px-3 py-2 border rounded-md"/>
+                <label className={labelClass}>{goalLabels[key]} ({goalUnits[key]})</label>
+                <input type="number" name={key} value={dietGoals[key]} onChange={handleGoalChange} className={inputClass} />
               </div>
             ))}
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-lg font-semibold p-3 bg-gray-100 rounded-t-lg -m-6 mb-4">Resumen de Progreso de la Dieta</h3>
+        <div className={cardClass}>
+          <h3 className={sectionHeaderClass}>Resumen de Progreso de la Dieta</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {Object.keys(goalLabels).filter(key => key !== 'pavbPercentage').map(key => (
               <ProgressBar
@@ -532,32 +535,32 @@ const DatosPacienteTab = ({ patientData, setPatientData, dietGoals, setDietGoals
               />
             ))}
           </div>
-          <div className="mt-4 pt-4 border-t grid grid-cols-3 gap-4 text-center">
+          <div className="mt-4 pt-4 border-t dark:border-gray-700 grid grid-cols-3 gap-4 text-center">
             <div>
-              <div className="text-sm font-medium text-gray-500">% HC</div>
-              <div className="text-xl font-bold">{macroPercentages.hc.toFixed(1)}%</div>
+              <div className="text-sm font-medium text-gray-500 dark:text-gray-400">% HC</div>
+              <div className="text-xl font-bold dark:text-white">{macroPercentages.hc.toFixed(1)}%</div>
             </div>
             <div>
-              <div className="text-sm font-medium text-gray-500">% Proteínas</div>
-              <div className="text-xl font-bold">{macroPercentages.proteina.toFixed(1)}%</div>
+              <div className="text-sm font-medium text-gray-500 dark:text-gray-400">% Proteínas</div>
+              <div className="text-xl font-bold dark:text-white">{macroPercentages.proteina.toFixed(1)}%</div>
             </div>
             <div>
-              <div className="text-sm font-medium text-gray-500">% Grasas</div>
-              <div className="text-xl font-bold">{macroPercentages.grasa.toFixed(1)}%</div>
+              <div className="text-sm font-medium text-gray-500 dark:text-gray-400">% Grasas</div>
+              <div className="text-xl font-bold dark:text-white">{macroPercentages.grasa.toFixed(1)}%</div>
             </div>
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-lg font-semibold p-3 bg-gray-100 rounded-t-lg -m-6 mb-4 flex items-center gap-2">
-            <BookOpen size={20}/>Anotaciones
+        <div className={cardClass}>
+          <h3 className={`${sectionHeaderClass} flex items-center gap-2`}>
+            <BookOpen size={20} />Anotaciones
           </h3>
           <textarea
             value={annotations}
             onChange={e => setAnnotations(e.target.value)}
             placeholder="Escribe tus notas aquí..."
-            className="w-full h-32 p-2 border rounded-md mt-2"
-          ></textarea>
+            className="w-full h-32 p-2 border border-gray-300 dark:border-gray-600 rounded-md mt-2 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 focus:ring-2 focus:ring-green-500 focus:outline-none resize-none"
+          />
         </div>
       </div>
     </div>

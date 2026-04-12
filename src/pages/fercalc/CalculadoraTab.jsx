@@ -7,7 +7,7 @@ import IntercambioSubTab from './IntercambioSubTab.jsx';
 const CalculadoraTab = ({ dietaActual, setDietaActual, setDistribucion, patientData, dietGoals, onPlanIntercambioUpdate }) => {
 
   const alimentosIniciales = [
-    { nombre: "Leche condensada", medida: "1 cucharada", cantidad: 10, unidad: "g", hc: 5.6, proteina: 0.8, grasa: 0.8, na: 9.0, k: 0, p: 23.0, ca: 28.4, fe: 0, colesterol: 2.9, purinas: 0.0, fibra: 0, agua: 2.7, calorias: 32.8, categoria: "LÁCTEOS", origen: "animal" },
+  { nombre: "Leche condensada", medida: "1 cucharada", cantidad: 10, unidad: "g", hc: 5.6, proteina: 0.8, grasa: 0.8, na: 9.0, k: 0, p: 23.0, ca: 28.4, fe: 0, colesterol: 2.9, purinas: 0.0, fibra: 0, agua: 2.7, calorias: 32.8, categoria: "LÁCTEOS", origen: "animal" },
     { nombre: "Leche descremada fluida Trébol", medida: "1 taza", cantidad: 200, unidad: "ml", hc: 10.8, proteina: 7.4, grasa: 1.0, na: 104.0, k: 310.0, p: 176.0, ca: 230.0, fe: 0, colesterol: 6.0, purinas: 0.0, fibra: 0, agua: 178.0, calorias: 81.8, categoria: "LÁCTEOS", origen: "animal" },
     { nombre: "Leche descremada Mólico en polvo", medida: "1 cucharada", cantidad: 5, unidad: "g", hc: 2.6, proteina: 1.8, grasa: 0.1, na: 0, k: 0, p: 51.5, ca: 64.5, fe: 0.1, colesterol: 0.1, purinas: 0.0, fibra: 0, agua: 0.2, calorias: 18.5, categoria: "LÁCTEOS", origen: "animal" },
     { nombre: "Leche entera fluida", medida: "1 taza", cantidad: 200, unidad: "ml", hc: 9.6, proteina: 6.6, grasa: 6.0, na: 64.0, k: 286.0, p: 160.0, ca: 220.0, fe: 0, colesterol: 24.6, purinas: 0.0, fibra: 0, agua: 178.0, calorias: 118.8, categoria: "LÁCTEOS", origen: "animal" },
@@ -176,7 +176,6 @@ const CalculadoraTab = ({ dietaActual, setDietaActual, setDistribucion, patientD
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [alimentoEditando, setAlimentoEditando] = useState(null);
 
-  // ✅ CLAVE: Estado de porciones DENTRO del componente para que persista entre tabs
   const [porcionesIntercambio, setPorcionesIntercambio] = useState({
     'Cereales': '', 'Verduras en gral': '', 'Verduras LC': '', 'Frutas': '',
     'Carnes Altas en grasas': '', 'Carnes Bajas en grasas': '', 'Leguminosas': '',
@@ -298,22 +297,29 @@ const CalculadoraTab = ({ dietaActual, setDietaActual, setDistribucion, patientD
   const SubTabButton = ({ tabId, label, icon }) => (
     <button
       onClick={() => setActiveSubTab(tabId)}
-      className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-colors ${activeSubTab === tabId ? 'bg-green-600 text-white' : 'text-gray-600 hover:bg-gray-200'}`}
+      className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+        activeSubTab === tabId
+          ? 'bg-green-600 text-white'
+          : 'text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+      }`}
     >
       {icon} {label}
     </button>
   );
 
+  const inputClass = "mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-green-500 focus:outline-none";
+
   return (
     <div id="calculadora-tab-content">
       <Toaster position="top-center" reverseOrder={false} />
 
-      <div className="flex flex-wrap gap-2 mb-6 p-2 bg-gray-100 rounded-lg">
+      {/* Sub-tab nav */}
+      <div className="flex flex-wrap gap-2 mb-6 p-2 bg-gray-100 dark:bg-gray-800 rounded-lg">
         <SubTabButton tabId="intercambio" label="Intercambio" icon={<BarChart2 size={16} />} />
         <SubTabButton tabId="desarrollada" label="Desarrollada" icon={<BookOpen size={16} />} />
       </div>
 
-      {/* ✅ CLAVE: display:none en vez de condicional para que el estado persista */}
+      {/* Tab Intercambio */}
       <div style={{ display: activeSubTab === 'intercambio' ? 'block' : 'none' }}>
         <IntercambioSubTab
           patientData={patientData}
@@ -324,25 +330,28 @@ const CalculadoraTab = ({ dietaActual, setDietaActual, setDistribucion, patientD
         />
       </div>
 
+      {/* Tab Desarrollada */}
       <div style={{ display: activeSubTab === 'desarrollada' ? 'block' : 'none' }}>
+
         {/* Modal agregar/editar alimento */}
         {mostrarFormulario && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4">
-            <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl font-bold text-gray-800">
+                <h3 className="text-xl font-bold text-gray-800 dark:text-white">
                   {alimentoEditando !== null ? 'Editar Alimento' : 'Agregar Nuevo Alimento'}
                 </h3>
                 <button onClick={() => { setMostrarFormulario(false); setAlimentoEditando(null); setNuevoAlimento(estadoInicialFormulario); }}>
-                  <X className="text-gray-500 hover:text-gray-800" />
+                  <X className="text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white" />
                 </button>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {Object.keys(estadoInicialFormulario).map(key => (
                   <div key={key}>
-                    <label className="block text-sm font-medium capitalize text-gray-700">{key}</label>
+                    <label className="block text-sm font-medium capitalize text-gray-700 dark:text-gray-200">{key}</label>
                     {key === 'origen' ? (
-                      <select name={key} value={nuevoAlimento[key]} onChange={handleNuevoAlimentoChange} className="mt-1 block w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-green-500">
+                      <select name={key} value={nuevoAlimento[key]} onChange={handleNuevoAlimentoChange}
+                        className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-green-500 focus:outline-none">
                         <option value="vegetal">Vegetal</option>
                         <option value="animal">Animal</option>
                       </select>
@@ -354,14 +363,15 @@ const CalculadoraTab = ({ dietaActual, setDietaActual, setDistribucion, patientD
                         onChange={handleNuevoAlimentoChange}
                         onFocus={(e) => { if (e.target.value === '0') e.target.value = ''; }}
                         onBlur={(e) => { if (e.target.value === '') { setNuevoAlimento(prev => ({ ...prev, [key]: 0 })); } }}
-                        className="mt-1 block w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-green-500"
+                        className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-green-500 focus:outline-none"
                       />
                     )}
                   </div>
                 ))}
               </div>
               <div className="mt-6 flex justify-end gap-3">
-                <button onClick={() => { setMostrarFormulario(false); setAlimentoEditando(null); setNuevoAlimento(estadoInicialFormulario); }} className="px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200">
+                <button onClick={() => { setMostrarFormulario(false); setAlimentoEditando(null); setNuevoAlimento(estadoInicialFormulario); }}
+                  className="px-4 py-2 bg-gray-100 dark:bg-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600">
                   Cancelar
                 </button>
                 <button onClick={handleGuardarNuevoAlimento} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
@@ -374,9 +384,9 @@ const CalculadoraTab = ({ dietaActual, setDietaActual, setDistribucion, patientD
 
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
           {/* Base de alimentos */}
-          <div className="bg-white rounded-xl shadow-lg p-6 flex flex-col xl:col-span-1">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 flex flex-col xl:col-span-1">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold text-gray-800">Base de Alimentos</h2>
+              <h2 className="text-xl font-semibold text-gray-800 dark:text-white">Base de Alimentos</h2>
               <button
                 onClick={() => { setNuevoAlimento(estadoInicialFormulario); setAlimentoEditando(null); setMostrarFormulario(true); }}
                 className="bg-green-600 text-white px-3 py-1 rounded-lg flex items-center gap-2 text-sm hover:bg-green-700"
@@ -385,20 +395,30 @@ const CalculadoraTab = ({ dietaActual, setDietaActual, setDistribucion, patientD
               </button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-1 gap-3 mb-4">
-              <input type="text" placeholder="Buscar..." value={busqueda} onChange={e => setBusqueda(e.target.value)} className="px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none" />
-              <select value={filtroCategoria} onChange={e => setFiltroCategoria(e.target.value)} className="px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none">
+              <input
+                type="text"
+                placeholder="Buscar..."
+                value={busqueda}
+                onChange={e => setBusqueda(e.target.value)}
+                className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 focus:ring-2 focus:ring-green-500 focus:outline-none"
+              />
+              <select
+                value={filtroCategoria}
+                onChange={e => setFiltroCategoria(e.target.value)}
+                className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-green-500 focus:outline-none"
+              >
                 <option value="">Todas las categorias</option>
                 {categorias.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
             </div>
-            <div className="flex-grow h-96 xl:h-[60vh] overflow-y-auto border rounded-lg divide-y">
+            <div className="flex-grow h-96 xl:h-[60vh] overflow-y-auto border dark:border-gray-700 rounded-lg divide-y dark:divide-gray-700">
               {alimentosFiltrados.map((a, i) => {
                 const indexReal = alimentos.findIndex(al => al === a);
                 return (
-                  <div key={`${a.nombre}-${i}`} className="p-3 flex justify-between items-center hover:bg-gray-50 transition-colors">
+                  <div key={`${a.nombre}-${i}`} className="p-3 flex justify-between items-center hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                     <div className="pr-2 flex-1 min-w-0">
-                      <h3 className="font-medium text-gray-800 truncate">{a.nombre}</h3>
-                      <p className="text-xs text-gray-500">{a.medida} ({a.cantidad}{a.unidad})</p>
+                      <h3 className="font-medium text-gray-800 dark:text-white truncate">{a.nombre}</h3>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">{a.medida} ({a.cantidad}{a.unidad})</p>
                     </div>
                     <div className="flex gap-1 flex-shrink-0">
                       <button onClick={() => handleEditarAlimento(a, indexReal)} className="text-gray-400 hover:text-blue-600 p-1" title="Editar alimento">
@@ -415,12 +435,12 @@ const CalculadoraTab = ({ dietaActual, setDietaActual, setDistribucion, patientD
           </div>
 
           {/* Plan de la dieta */}
-          <div className="bg-white rounded-xl shadow-lg p-6 flex flex-col xl:col-span-2">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 flex flex-col xl:col-span-2">
             <div className="flex justify-between items-center mb-4">
               <div>
-                <h2 className="text-xl font-semibold text-gray-800">Plan General de la Dieta</h2>
+                <h2 className="text-xl font-semibold text-gray-800 dark:text-white">Plan General de la Dieta</h2>
                 {dietaActual.length > 0 && (
-                  <p className="text-xs text-gray-400 mt-1 flex items-center gap-1">
+                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-1 flex items-center gap-1">
                     <GripVertical size={12} /> Arrastra las filas para reordenar
                   </p>
                 )}
@@ -432,14 +452,14 @@ const CalculadoraTab = ({ dietaActual, setDietaActual, setDistribucion, patientD
 
             <div className="overflow-x-auto">
               {dietaActual.length === 0 ? (
-                <div className="h-64 flex flex-col items-center justify-center text-gray-400 border-2 border-dashed rounded-xl">
+                <div className="h-64 flex flex-col items-center justify-center text-gray-400 dark:text-gray-500 border-2 border-dashed dark:border-gray-600 rounded-xl">
                   <Plus size={40} className="mb-2 opacity-30" />
                   <p>Agrega alimentos desde la Base de Alimentos</p>
                 </div>
               ) : (
                 <table className="w-full text-sm text-left">
                   <thead>
-                    <tr className="bg-gray-800 text-white text-xs uppercase">
+                    <tr className="bg-gray-800 dark:bg-gray-700 text-white text-xs uppercase">
                       {tableHeaders.map(h => (
                         <th key={h} className="px-2 py-3 whitespace-nowrap font-semibold first:rounded-tl-lg last:rounded-tr-lg">{h}</th>
                       ))}
@@ -455,33 +475,37 @@ const CalculadoraTab = ({ dietaActual, setDietaActual, setDistribucion, patientD
                           onDragEnter={() => handleDragEnter(index)}
                           onDragEnd={handleDragEnd}
                           onDragOver={e => e.preventDefault()}
-                          className={`border-b transition-colors cursor-grab active:cursor-grabbing hover:bg-green-50 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}
+                          className={`border-b dark:border-gray-700 transition-colors cursor-grab active:cursor-grabbing hover:bg-green-50 dark:hover:bg-green-900/20 ${
+                            index % 2 === 0
+                              ? 'bg-white dark:bg-gray-800'
+                              : 'bg-gray-50 dark:bg-gray-750'
+                          }`}
                         >
-                          <td className="px-2 py-2 text-gray-300 hover:text-gray-500"><GripVertical size={16} /></td>
-                          <td className="px-2 py-2 font-medium text-gray-800 whitespace-nowrap">{item.alimento.nombre}</td>
+                          <td className="px-2 py-2 text-gray-300 hover:text-gray-500 dark:text-gray-500 dark:hover:text-gray-300"><GripVertical size={16} /></td>
+                          <td className="px-2 py-2 font-medium text-gray-800 dark:text-white whitespace-nowrap">{item.alimento.nombre}</td>
                           <td className="px-2 py-2">
                             <input type="number"
                               value={item.cantidadUsada === 0 ? '' : item.cantidadUsada}
                               onChange={e => actualizarCantidad(item.id, e.target.value === '' ? 0 : parseFloat(e.target.value) || 0)}
                               onFocus={e => { if (e.target.value === '0') e.target.value = ''; }}
                               onBlur={e => { if (e.target.value === '') actualizarCantidad(item.id, 0); }}
-                              className="w-20 px-2 py-1 border rounded-md focus:ring-2 focus:ring-green-400 focus:outline-none"
+                              className="w-20 px-2 py-1 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:ring-2 focus:ring-green-400 focus:outline-none"
                               min="0"
                             />
                           </td>
                           <td className="px-2 py-2 font-bold text-green-600">{(item.alimento.calorias * factor).toFixed(1)}</td>
-                          <td className="px-2 py-2">{(item.alimento.hc * factor).toFixed(1)}</td>
-                          <td className="px-2 py-2">{(item.alimento.proteina * factor).toFixed(1)}</td>
-                          <td className="px-2 py-2">{(item.alimento.grasa * factor).toFixed(1)}</td>
-                          <td className="px-2 py-2">{(item.alimento.agua * factor).toFixed(1)}</td>
-                          <td className="px-2 py-2">{(item.alimento.na * factor).toFixed(1)}</td>
-                          <td className="px-2 py-2">{(item.alimento.k * factor).toFixed(1)}</td>
-                          <td className="px-2 py-2">{(item.alimento.p * factor).toFixed(1)}</td>
-                          <td className="px-2 py-2">{(item.alimento.ca * factor).toFixed(1)}</td>
-                          <td className="px-2 py-2">{(item.alimento.fe * factor).toFixed(1)}</td>
-                          <td className="px-2 py-2">{(item.alimento.colesterol * factor).toFixed(1)}</td>
-                          <td className="px-2 py-2">{(item.alimento.purinas * factor).toFixed(1)}</td>
-                          <td className="px-2 py-2">{(item.alimento.fibra * factor).toFixed(1)}</td>
+                          <td className="px-2 py-2 dark:text-gray-300">{(item.alimento.hc * factor).toFixed(1)}</td>
+                          <td className="px-2 py-2 dark:text-gray-300">{(item.alimento.proteina * factor).toFixed(1)}</td>
+                          <td className="px-2 py-2 dark:text-gray-300">{(item.alimento.grasa * factor).toFixed(1)}</td>
+                          <td className="px-2 py-2 dark:text-gray-300">{(item.alimento.agua * factor).toFixed(1)}</td>
+                          <td className="px-2 py-2 dark:text-gray-300">{(item.alimento.na * factor).toFixed(1)}</td>
+                          <td className="px-2 py-2 dark:text-gray-300">{(item.alimento.k * factor).toFixed(1)}</td>
+                          <td className="px-2 py-2 dark:text-gray-300">{(item.alimento.p * factor).toFixed(1)}</td>
+                          <td className="px-2 py-2 dark:text-gray-300">{(item.alimento.ca * factor).toFixed(1)}</td>
+                          <td className="px-2 py-2 dark:text-gray-300">{(item.alimento.fe * factor).toFixed(1)}</td>
+                          <td className="px-2 py-2 dark:text-gray-300">{(item.alimento.colesterol * factor).toFixed(1)}</td>
+                          <td className="px-2 py-2 dark:text-gray-300">{(item.alimento.purinas * factor).toFixed(1)}</td>
+                          <td className="px-2 py-2 dark:text-gray-300">{(item.alimento.fibra * factor).toFixed(1)}</td>
                           <td className="px-2 py-2">
                             <button onClick={() => eliminarDeDieta(item.id)} className="text-red-400 hover:text-red-600 transition-colors">
                               <Trash2 size={18} />
@@ -492,7 +516,7 @@ const CalculadoraTab = ({ dietaActual, setDietaActual, setDistribucion, patientD
                     })}
                   </tbody>
                   <tfoot>
-                    <tr className="bg-green-700 text-white font-bold text-sm">
+                    <tr className="bg-green-700 dark:bg-green-800 text-white font-bold text-sm">
                       <td className="px-2 py-3 rounded-bl-lg"></td>
                       <td className="px-2 py-3">TOTALES</td>
                       <td className="px-2 py-3">{totalesNutricionales.cantidadUsada.toFixed(1)}</td>
