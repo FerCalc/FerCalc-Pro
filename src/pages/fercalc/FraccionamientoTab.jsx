@@ -15,29 +15,29 @@ const Notification = ({ message, type, onDismiss }) => {
 
 const DistribucionNutricional = ({ calorias, hc, proteinas, lipidos, color = 'blue' }) => {
   const c = color === 'green'
-    ? { bg: 'bg-green-50', text: 'text-green-900', sub: 'text-green-800', icon: 'text-green-500' }
-    : { bg: 'bg-blue-50', text: 'text-blue-900', sub: 'text-blue-800', icon: 'text-blue-500' };
+    ? { bg: 'bg-green-50 dark:bg-green-900/20', text: 'text-green-900 dark:text-green-300', sub: 'text-green-800 dark:text-green-400', icon: 'text-green-500' }
+    : { bg: 'bg-blue-50 dark:bg-blue-900/20', text: 'text-blue-900 dark:text-blue-300', sub: 'text-blue-800 dark:text-blue-400', icon: 'text-blue-500' };
   return (
-    <div className="bg-white p-6 rounded-xl shadow-sm border mb-6">
-      <h3 className="text-lg font-bold text-gray-800 mb-4">Distribucion Nutricional del Plan</h3>
+    <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border dark:border-gray-700 mb-6">
+      <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-4">Distribucion Nutricional del Plan</h3>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
         <div className={`${c.bg} p-4 rounded-xl`}>
           <Zap className={`mx-auto h-6 w-6 ${c.icon} mb-1`} />
           <p className={`text-sm ${c.sub}`}>Calorias</p>
           <p className={`text-2xl font-bold ${c.text}`}>{parseFloat(calorias || 0).toFixed(0)}</p>
         </div>
-        <div className="bg-emerald-50 p-4 rounded-xl">
-          <p className="mt-1.5 text-sm text-emerald-800">HC (g)</p>
-          <p className="text-2xl font-bold text-emerald-900">{parseFloat(hc || 0).toFixed(1)}</p>
+        <div className="bg-emerald-50 dark:bg-emerald-900/20 p-4 rounded-xl">
+          <p className="mt-1.5 text-sm text-emerald-800 dark:text-emerald-400">HC (g)</p>
+          <p className="text-2xl font-bold text-emerald-900 dark:text-emerald-300">{parseFloat(hc || 0).toFixed(1)}</p>
         </div>
-        <div className="bg-red-50 p-4 rounded-xl">
-          <p className="mt-1.5 text-sm text-red-800">Proteinas (g)</p>
-          <p className="text-2xl font-bold text-red-900">{parseFloat(proteinas || 0).toFixed(1)}</p>
+        <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-xl">
+          <p className="mt-1.5 text-sm text-red-800 dark:text-red-400">Proteinas (g)</p>
+          <p className="text-2xl font-bold text-red-900 dark:text-red-300">{parseFloat(proteinas || 0).toFixed(1)}</p>
         </div>
-        <div className="bg-amber-50 p-4 rounded-xl">
+        <div className="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-xl">
           <Droplet className="mx-auto h-6 w-6 text-amber-500 mb-1" />
-          <p className="text-sm text-amber-800">Lipidos (g)</p>
-          <p className="text-2xl font-bold text-amber-900">{parseFloat(lipidos || 0).toFixed(1)}</p>
+          <p className="text-sm text-amber-800 dark:text-amber-400">Lipidos (g)</p>
+          <p className="text-2xl font-bold text-amber-900 dark:text-amber-300">{parseFloat(lipidos || 0).toFixed(1)}</p>
         </div>
       </div>
     </div>
@@ -56,7 +56,7 @@ const RecetarioModal = ({ mealKey, mealLabel, dayIndex, ingredientes, recetarios
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <div className="bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-5 rounded-t-2xl">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-3">
@@ -71,20 +71,20 @@ const RecetarioModal = ({ mealKey, mealLabel, dayIndex, ingredientes, recetarios
         </div>
         <div className="p-6 space-y-6">
           <div>
-            <h4 className="text-base font-bold text-gray-800 mb-3 flex items-center gap-2">
-              <span className="w-6 h-6 bg-green-100 text-green-700 rounded-full flex items-center justify-center text-xs font-bold">1</span>
+            <h4 className="text-base font-bold text-gray-800 dark:text-white mb-3 flex items-center gap-2">
+              <span className="w-6 h-6 bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400 rounded-full flex items-center justify-center text-xs font-bold">1</span>
               Ingredientes
             </h4>
             {ingredientes.length === 0 ? (
-              <div className="bg-gray-50 border border-dashed border-gray-300 rounded-xl p-4 text-center text-gray-400 text-sm">
-                Aun no hay alimentos asignados. Asigna alimentos primero para ver los ingredientes.
+              <div className="bg-gray-50 dark:bg-gray-700 border border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-4 text-center text-gray-400 text-sm">
+                Aun no hay alimentos asignados.
               </div>
             ) : (
-              <div className="bg-gray-50 rounded-xl border divide-y">
+              <div className="bg-gray-50 dark:bg-gray-700 rounded-xl border dark:border-gray-600 divide-y dark:divide-gray-600">
                 {ingredientes.map(({ nombre, cantidad, unidad }, i) => (
                   <div key={i} className="flex justify-between items-center px-4 py-3">
-                    <span className="text-sm font-medium text-gray-800">{nombre}</span>
-                    <span className="text-sm font-bold text-green-700 bg-green-50 px-3 py-1 rounded-full">
+                    <span className="text-sm font-medium text-gray-800 dark:text-white">{nombre}</span>
+                    <span className="text-sm font-bold text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/30 px-3 py-1 rounded-full">
                       {typeof cantidad === 'number' ? cantidad.toFixed(1) : cantidad} {unidad || 'g'}
                     </span>
                   </div>
@@ -93,21 +93,21 @@ const RecetarioModal = ({ mealKey, mealLabel, dayIndex, ingredientes, recetarios
             )}
           </div>
           <div>
-            <h4 className="text-base font-bold text-gray-800 mb-3 flex items-center gap-2">
-              <span className="w-6 h-6 bg-green-100 text-green-700 rounded-full flex items-center justify-center text-xs font-bold">2</span>
+            <h4 className="text-base font-bold text-gray-800 dark:text-white mb-3 flex items-center gap-2">
+              <span className="w-6 h-6 bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400 rounded-full flex items-center justify-center text-xs font-bold">2</span>
               Preparacion
             </h4>
             <textarea
               value={preparacion}
               onChange={e => setPreparacion(e.target.value)}
-              placeholder="Describe el modo de preparacion: pasos, tecnicas de coccion, tiempos, consejos..."
+              placeholder="Describe el modo de preparacion..."
               rows={7}
-              className="w-full p-4 border border-gray-200 rounded-xl text-sm text-gray-700 focus:ring-2 focus:ring-green-500 focus:outline-none resize-none placeholder-gray-400 leading-relaxed"
+              className="w-full p-4 border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 rounded-xl text-sm text-gray-700 focus:ring-2 focus:ring-green-500 focus:outline-none resize-none"
             />
             <p className="text-xs text-gray-400 mt-1 text-right">{preparacion.length} caracteres</p>
           </div>
           <div className="flex gap-3 pt-2">
-            <button onClick={onClose} className="flex-1 px-4 py-2.5 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 font-medium">Cancelar</button>
+            <button onClick={onClose} className="flex-1 px-4 py-2.5 bg-gray-100 dark:bg-gray-700 dark:text-gray-200 text-gray-700 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 font-medium">Cancelar</button>
             <button onClick={handleSave} className="flex-1 px-4 py-2.5 bg-green-600 text-white rounded-xl hover:bg-green-700 font-medium flex items-center justify-center gap-2">
               <Check size={16} /> Guardar Recetario
             </button>
@@ -118,7 +118,7 @@ const RecetarioModal = ({ mealKey, mealLabel, dayIndex, ingredientes, recetarios
   );
 };
 
-// ── MODAL NOMBRE DE MENÚ POR DÍA ──
+// ── MODAL NOMBRE DE MENÚ ──
 const MealNameModal = ({ mealKey, numberOfDays, onSave, onClose }) => {
   const [nombre, setNombre] = useState('');
   const [applyTo, setApplyTo] = useState('all');
@@ -126,7 +126,7 @@ const MealNameModal = ({ mealKey, numberOfDays, onSave, onClose }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm">
         <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4 rounded-t-2xl flex justify-between items-center">
           <div className="flex items-center gap-2">
             <Tag className="text-white" size={18} />
@@ -136,35 +136,35 @@ const MealNameModal = ({ mealKey, numberOfDays, onSave, onClose }) => {
         </div>
         <div className="p-5 space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Nombre para <span className="font-bold text-blue-600">{mealKey}</span>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
+              Nombre para <span className="font-bold text-blue-600 dark:text-blue-400">{mealKey}</span>
             </label>
             <input
               type="text"
               value={nombre}
               onChange={e => setNombre(e.target.value)}
               placeholder="Ej: Cafe con leche, Omelet..."
-              className="w-full p-2.5 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm"
+              className="w-full p-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm"
               autoFocus
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Aplicar a</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Aplicar a</label>
             <div className="space-y-2">
               <label className="flex items-center gap-2 cursor-pointer">
                 <input type="radio" checked={applyTo === 'all'} onChange={() => setApplyTo('all')} className="accent-blue-600" />
-                <span className="text-sm">Todos los dias</span>
+                <span className="text-sm text-gray-700 dark:text-gray-300">Todos los dias</span>
               </label>
               {numberOfDays > 1 && (
                 <>
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input type="radio" checked={applyTo === 'specific'} onChange={() => setApplyTo('specific')} className="accent-blue-600" />
-                    <span className="text-sm">Dias especificos</span>
+                    <span className="text-sm text-gray-700 dark:text-gray-300">Dias especificos</span>
                   </label>
                   {applyTo === 'specific' && (
                     <div className="flex flex-wrap gap-2 pl-6 pt-1">
                       {Array.from({ length: numberOfDays }, (_, i) => (
-                        <label key={i} className={`flex items-center gap-1 text-xs cursor-pointer px-2.5 py-1.5 rounded-lg border transition-colors ${selectedDays.includes(i) ? 'bg-blue-600 text-white border-blue-600' : 'bg-gray-50 text-gray-700 border-gray-200 hover:border-blue-400'}`}>
+                        <label key={i} className={`flex items-center gap-1 text-xs cursor-pointer px-2.5 py-1.5 rounded-lg border transition-colors ${selectedDays.includes(i) ? 'bg-blue-600 text-white border-blue-600' : 'bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:border-blue-400'}`}>
                           <input type="checkbox" checked={selectedDays.includes(i)}
                             onChange={e => setSelectedDays(prev => e.target.checked ? [...prev, i] : prev.filter(d => d !== i))}
                             className="hidden" />
@@ -178,7 +178,7 @@ const MealNameModal = ({ mealKey, numberOfDays, onSave, onClose }) => {
             </div>
           </div>
           <div className="flex gap-3 pt-1">
-            <button onClick={onClose} className="flex-1 px-4 py-2 bg-gray-100 rounded-xl hover:bg-gray-200 text-sm font-medium">Cancelar</button>
+            <button onClick={onClose} className="flex-1 px-4 py-2 bg-gray-100 dark:bg-gray-700 dark:text-gray-200 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 text-sm font-medium">Cancelar</button>
             <button
               onClick={() => {
                 if (!nombre.trim()) return;
@@ -266,7 +266,6 @@ const FraccionamientoDesarrollada = ({
       if (g > available + 0.01) errores.push(`${item.alimento.nombre}: max ${available.toFixed(1)}g disponibles hoy`);
     });
     if (errores.length > 0) { showNotification('error', errores[0]); return; }
-
     setDistribucion(prev => {
       const d = JSON.parse(JSON.stringify(prev));
       if (!d[dayIndex]) d[dayIndex] = {};
@@ -301,26 +300,27 @@ const FraccionamientoDesarrollada = ({
     const over = total > foodItem.cantidadUsada + 0.01;
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4">
-        <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-md">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-6 w-full max-w-md">
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-bold">Editar: {foodItem.alimento.nombre}</h3>
-            <button onClick={onCancel}><X className="text-gray-400 hover:text-gray-700" /></button>
+            <h3 className="text-lg font-bold text-gray-800 dark:text-white">Editar: {foodItem.alimento.nombre}</h3>
+            <button onClick={onCancel}><X className="text-gray-400 hover:text-gray-700 dark:hover:text-gray-200" /></button>
           </div>
-          <p className="text-sm text-gray-500 mb-4">
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
             Dia {dayIndex + 1} — Max por dia: <span className="font-bold">{foodItem.cantidadUsada}g</span> — Asignado: <span className={`font-bold ${over ? 'text-red-500' : 'text-green-600'}`}>{total.toFixed(1)}g</span>
           </p>
           <div className="space-y-3 max-h-64 overflow-y-auto pr-1">
             {mealSlots.map(mealKey => (
               <div key={mealKey} className="flex justify-between items-center">
-                <label className="text-gray-700 text-sm">{getMealLabel(mealKey, dayIndex)}</label>
+                <label className="text-gray-700 dark:text-gray-200 text-sm">{getMealLabel(mealKey, dayIndex)}</label>
                 <input type="number" min="0" value={local[mealKey] || ''}
                   onChange={e => setLocal(p => ({ ...p, [mealKey]: parseFloat(e.target.value) || 0 }))}
-                  placeholder="0 g" className="w-24 p-1.5 border rounded-lg text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none" />
+                  placeholder="0 g"
+                  className="w-24 p-1.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none" />
               </div>
             ))}
           </div>
           <div className="mt-6 flex justify-end gap-3">
-            <button onClick={onCancel} className="px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200">Cancelar</button>
+            <button onClick={onCancel} className="px-4 py-2 bg-gray-100 dark:bg-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600">Cancelar</button>
             <button onClick={() => { if (over) { showNotification('error', 'Supera el total disponible'); return; } onSave(dayIndex, foodItem.id, local); }}
               disabled={over} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50">Guardar</button>
           </div>
@@ -333,9 +333,10 @@ const FraccionamientoDesarrollada = ({
     <div>
       <DistribucionNutricional calorias={totalDieta.calorias} hc={totalDieta.hc} proteinas={totalDieta.proteinas} lipidos={totalDieta.lipidos} color="blue" />
 
-      <div className="bg-white p-6 rounded-xl shadow-sm border mb-6">
-        <h3 className="text-lg font-semibold mb-1">Banco de Alimentos para Distribuir</h3>
-        <p className="text-sm text-gray-500 mb-4">
+      {/* Banco de alimentos */}
+      <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border dark:border-gray-700 mb-6">
+        <h3 className="text-lg font-semibold mb-1 text-gray-800 dark:text-white">Banco de Alimentos para Distribuir</h3>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
           Cada alimento puede usarse cada dia hasta su cantidad total. Banco considera los {numberOfDays} dia{numberOfDays > 1 ? 's' : ''} del ciclo.
         </p>
         {(dietaActual || []).length === 0 ? (
@@ -345,9 +346,9 @@ const FraccionamientoDesarrollada = ({
             {(dietaActual || []).map(item => {
               const rem = remainingGrams[item.id] ?? (item.cantidadUsada * numberOfDays);
               return (
-                <div key={item.id} className={`p-3 border rounded-xl ${rem < -0.01 ? 'bg-red-50 border-red-300' : 'bg-gray-50 border-gray-200'}`}>
-                  <p className="font-medium text-sm text-gray-800">{item.alimento.nombre}</p>
-                  <p className="text-xs text-gray-400 mt-0.5">{item.cantidadUsada}g × {numberOfDays} dia{numberOfDays > 1 ? 's' : ''}</p>
+                <div key={item.id} className={`p-3 border rounded-xl ${rem < -0.01 ? 'bg-red-50 dark:bg-red-900/20 border-red-300 dark:border-red-700' : 'bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600'}`}>
+                  <p className="font-medium text-sm text-gray-800 dark:text-white">{item.alimento.nombre}</p>
+                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{item.cantidadUsada}g × {numberOfDays} dia{numberOfDays > 1 ? 's' : ''}</p>
                   <p className={`text-sm font-bold mt-1 ${Math.abs(rem) < 0.01 ? 'text-gray-400' : rem < 0 ? 'text-red-600' : 'text-green-600'}`}>
                     {rem.toFixed(1)}g restantes
                   </p>
@@ -361,20 +362,20 @@ const FraccionamientoDesarrollada = ({
       {/* Panel asignación rápida */}
       {assigningFood && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-end z-50">
-          <div className="bg-white w-full max-w-sm h-full overflow-y-auto shadow-2xl p-6 flex flex-col">
+          <div className="bg-white dark:bg-gray-800 w-full max-w-sm h-full overflow-y-auto shadow-2xl p-6 flex flex-col">
             <div className="flex justify-between items-center mb-2">
-              <h3 className="text-lg font-bold text-gray-800">Asignar: {getMealLabel(assigningFood.mealKey, assigningFood.dayIndex)}</h3>
-              <button onClick={() => { setAssigningFood(null); setQuickAssignState({}); }}><X className="text-gray-400 hover:text-gray-700" /></button>
+              <h3 className="text-lg font-bold text-gray-800 dark:text-white">Asignar: {getMealLabel(assigningFood.mealKey, assigningFood.dayIndex)}</h3>
+              <button onClick={() => { setAssigningFood(null); setQuickAssignState({}); }}><X className="text-gray-400 hover:text-gray-700 dark:hover:text-gray-200" /></button>
             </div>
-            <p className="text-sm text-gray-500 mb-4">Dia {assigningFood.dayIndex + 1} — Disponible solo para este dia</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Dia {assigningFood.dayIndex + 1}</p>
             <div className="flex-1 space-y-3 overflow-y-auto pr-1">
               {(dietaActual || []).map(item => {
                 const availableThisDay = getAvailableGramsForDay(item, assigningFood.dayIndex);
                 return (
-                  <div key={item.id} className="flex justify-between items-center p-2 bg-gray-50 rounded-lg">
+                  <div key={item.id} className="flex justify-between items-center p-2 bg-gray-50 dark:bg-gray-700 rounded-lg">
                     <div className="flex-1 min-w-0 pr-2">
-                      <p className="text-sm font-medium text-gray-800 truncate">{item.alimento.nombre}</p>
-                      <p className={`text-xs ${availableThisDay < 0 ? 'text-red-500' : 'text-gray-400'}`}>
+                      <p className="text-sm font-medium text-gray-800 dark:text-white truncate">{item.alimento.nombre}</p>
+                      <p className={`text-xs ${availableThisDay < 0 ? 'text-red-500' : 'text-gray-400 dark:text-gray-500'}`}>
                         {availableThisDay.toFixed(1)}g disponibles hoy
                       </p>
                     </div>
@@ -382,13 +383,13 @@ const FraccionamientoDesarrollada = ({
                       value={quickAssignState[item.id] || ''}
                       onChange={e => setQuickAssignState(p => ({ ...p, [item.id]: e.target.value }))}
                       placeholder="0g"
-                      className="w-20 p-1.5 border rounded-lg text-sm text-right focus:ring-2 focus:ring-blue-400 focus:outline-none" />
+                      className="w-20 p-1.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg text-sm text-right focus:ring-2 focus:ring-blue-400 focus:outline-none" />
                   </div>
                 );
               })}
             </div>
             <div className="mt-4 flex gap-3">
-              <button onClick={() => { setAssigningFood(null); setQuickAssignState({}); }} className="flex-1 px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200">Cancelar</button>
+              <button onClick={() => { setAssigningFood(null); setQuickAssignState({}); }} className="flex-1 px-4 py-2 bg-gray-100 dark:bg-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600">Cancelar</button>
               <button onClick={() => handleQuickAssignSave(assigningFood.dayIndex, assigningFood.mealKey)}
                 className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center justify-center gap-2">
                 <Check size={16} /> Guardar
@@ -401,11 +402,9 @@ const FraccionamientoDesarrollada = ({
       {editingFood && (
         <DistributionModal foodItem={editingFood.foodItem} dayIndex={editingFood.dayIndex} onSave={handleSaveDistribution} onCancel={() => setEditingFood(null)} />
       )}
-
       {mealNameModal && (
         <MealNameModal mealKey={mealNameModal} numberOfDays={numberOfDays} onSave={handleSaveMealName} onClose={() => setMealNameModal(null)} />
       )}
-
       {recetarioModal && (
         <RecetarioModal
           mealKey={recetarioModal.mealKey}
@@ -429,7 +428,6 @@ const FraccionamientoDesarrollada = ({
         const distribucionDelDia = distribucion[dayIndex] || {};
         const mealTimesForDay = getMealTimeForDay(dayIndex);
         const isCollapsed = collapsedDays[dayIndex] || false;
-
         const totalKcalDia = mealSlots.reduce((dayTotal, mealKey) => {
           return dayTotal + (dietaActual || []).reduce((mealTotal, foodItem) => {
             const grams = (distribucionDelDia[foodItem.id] || {})[mealKey] || 0;
@@ -454,12 +452,10 @@ const FraccionamientoDesarrollada = ({
               const mealLabel = getMealLabel(mealKey, dayIndex);
               const hasCustomName = mealNamesByDay[`${dayIndex}_${mealKey}`];
               const tieneRecetario = recetarios[`${dayIndex}_${mealKey}`]?.preparacion;
-
               const mealFoods = (dietaActual || []).map(foodItem => {
                 const grams = (distribucionDelDia[foodItem.id] || {})[mealKey] || 0;
                 return grams > 0 ? { foodItem, assignedGrams: grams } : null;
               }).filter(Boolean);
-
               const mealTotals = mealFoods.reduce((acc, { foodItem, assignedGrams }) => {
                 const factor = assignedGrams > 0 && foodItem.alimento.cantidad > 0 ? assignedGrams / foodItem.alimento.cantidad : 0;
                 acc.calorias += (foodItem.alimento.calorias || 0) * factor;
@@ -469,34 +465,33 @@ const FraccionamientoDesarrollada = ({
                 acc.gramos += assignedGrams;
                 return acc;
               }, { calorias: 0, hc: 0, proteina: 0, grasa: 0, gramos: 0 });
-
               const pctVCT = totalKcalDia > 0 ? (mealTotals.calorias / totalKcalDia) * 100 : 0;
 
               return (
-                <div key={mealKey} className="bg-white rounded-xl shadow-sm border border-l-4 border-l-blue-500 mb-3 overflow-hidden">
-                  <div className="px-5 py-3 flex justify-between items-center flex-wrap gap-2 bg-gray-50 border-b">
+                <div key={mealKey} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border dark:border-gray-700 border-l-4 border-l-blue-500 mb-3 overflow-hidden">
+                  <div className="px-5 py-3 flex justify-between items-center flex-wrap gap-2 bg-gray-50 dark:bg-gray-700/50 border-b dark:border-gray-700">
                     <div className="flex items-center gap-2 flex-wrap">
                       <div className="flex items-center gap-1.5">
-                        <h3 className="text-base font-bold text-gray-800">{mealLabel}</h3>
-                        {hasCustomName && <span className="text-xs text-gray-400 italic">({mealKey})</span>}
+                        <h3 className="text-base font-bold text-gray-800 dark:text-white">{mealLabel}</h3>
+                        {hasCustomName && <span className="text-xs text-gray-400 dark:text-gray-500 italic">({mealKey})</span>}
                         <button onClick={() => setMealNameModal(mealKey)} className="text-gray-300 hover:text-blue-500 transition-colors" title="Nombrar este menu">
                           <Edit size={13} />
                         </button>
                       </div>
                       {mealTimesForDay[mealKey] && (
-                        <span className="text-xs text-gray-500 flex items-center gap-1 bg-white border px-2 py-0.5 rounded-full">
+                        <span className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1 bg-white dark:bg-gray-700 border dark:border-gray-600 px-2 py-0.5 rounded-full">
                           <Clock size={12} />{mealTimesForDay[mealKey]}
                         </span>
                       )}
                       {mealTotals.calorias > 0 && (
-                        <span className="text-xs font-semibold text-blue-700 bg-blue-100 px-2 py-0.5 rounded-full">
+                        <span className="text-xs font-semibold text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/30 px-2 py-0.5 rounded-full">
                           {pctVCT.toFixed(1)}% VCT — {mealTotals.calorias.toFixed(0)} kcal
                         </span>
                       )}
                     </div>
                     <div className="flex gap-2">
                       <button onClick={() => setRecetarioModal({ dayIndex, mealKey })}
-                        className={`px-3 py-1.5 rounded-lg text-sm flex items-center gap-1 transition-colors border ${tieneRecetario ? 'bg-emerald-50 text-emerald-700 border-emerald-300 hover:bg-emerald-100' : 'bg-white text-gray-600 border-gray-200 hover:border-green-400 hover:text-green-600'}`}>
+                        className={`px-3 py-1.5 rounded-lg text-sm flex items-center gap-1 transition-colors border ${tieneRecetario ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border-emerald-300 dark:border-emerald-700 hover:bg-emerald-100' : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:border-green-400 hover:text-green-600'}`}>
                         <BookOpen size={14} />{tieneRecetario ? 'Ver Receta' : 'Recetario'}
                       </button>
                       <button onClick={() => { setQuickAssignState({}); setAssigningFood({ dayIndex, mealKey }); }}
@@ -508,7 +503,7 @@ const FraccionamientoDesarrollada = ({
                   {mealFoods.length > 0 ? (
                     <div className="overflow-x-auto p-2">
                       <table className="w-full text-sm whitespace-nowrap">
-                        <thead className="text-xs text-gray-500 uppercase">
+                        <thead className="text-xs text-gray-500 dark:text-gray-400 uppercase">
                           <tr>
                             <th className="px-3 py-2 text-left">Alimento</th>
                             <th className="px-3 py-2 text-left">g</th>
@@ -522,7 +517,7 @@ const FraccionamientoDesarrollada = ({
                             <th className="px-3 py-2 text-left">Edit</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y">
+                        <tbody className="divide-y dark:divide-gray-700">
                           {mealFoods.map(({ foodItem, assignedGrams }) => {
                             const factor = assignedGrams > 0 && foodItem.alimento.cantidad > 0 ? assignedGrams / foodItem.alimento.cantidad : 0;
                             const kcal = (foodItem.alimento.calorias || 0) * factor;
@@ -530,16 +525,16 @@ const FraccionamientoDesarrollada = ({
                             const prot = (foodItem.alimento.proteina || 0) * factor;
                             const grasa = (foodItem.alimento.grasa || 0) * factor;
                             return (
-                              <tr key={foodItem.id} className="hover:bg-gray-50">
-                                <td className="px-3 py-2 font-medium">{foodItem.alimento.nombre}</td>
-                                <td className="px-3 py-2">{assignedGrams.toFixed(1)}</td>
-                                <td className="px-3 py-2 font-bold text-blue-600">{kcal.toFixed(1)}</td>
-                                <td className="px-3 py-2">{hc.toFixed(1)}</td>
-                                <td className="px-3 py-2">{prot.toFixed(1)}</td>
-                                <td className="px-3 py-2">{grasa.toFixed(1)}</td>
-                                <td className="px-3 py-2 text-gray-500">{kcal > 0 ? ((hc * 4 / kcal) * 100).toFixed(0) : 0}%</td>
-                                <td className="px-3 py-2 text-gray-500">{kcal > 0 ? ((prot * 4 / kcal) * 100).toFixed(0) : 0}%</td>
-                                <td className="px-3 py-2 text-gray-500">{kcal > 0 ? ((grasa * 9 / kcal) * 100).toFixed(0) : 0}%</td>
+                              <tr key={foodItem.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                                <td className="px-3 py-2 font-medium text-gray-800 dark:text-white">{foodItem.alimento.nombre}</td>
+                                <td className="px-3 py-2 dark:text-gray-300">{assignedGrams.toFixed(1)}</td>
+                                <td className="px-3 py-2 font-bold text-blue-600 dark:text-blue-400">{kcal.toFixed(1)}</td>
+                                <td className="px-3 py-2 dark:text-gray-300">{hc.toFixed(1)}</td>
+                                <td className="px-3 py-2 dark:text-gray-300">{prot.toFixed(1)}</td>
+                                <td className="px-3 py-2 dark:text-gray-300">{grasa.toFixed(1)}</td>
+                                <td className="px-3 py-2 text-gray-500 dark:text-gray-400">{kcal > 0 ? ((hc * 4 / kcal) * 100).toFixed(0) : 0}%</td>
+                                <td className="px-3 py-2 text-gray-500 dark:text-gray-400">{kcal > 0 ? ((prot * 4 / kcal) * 100).toFixed(0) : 0}%</td>
+                                <td className="px-3 py-2 text-gray-500 dark:text-gray-400">{kcal > 0 ? ((grasa * 9 / kcal) * 100).toFixed(0) : 0}%</td>
                                 <td className="px-3 py-2">
                                   <button onClick={() => setEditingFood({ foodItem, dayIndex })} className="text-blue-400 hover:text-blue-700"><Edit size={15} /></button>
                                 </td>
@@ -548,7 +543,7 @@ const FraccionamientoDesarrollada = ({
                           })}
                         </tbody>
                         <tfoot>
-                          <tr className="bg-blue-50 font-bold text-blue-800">
+                          <tr className="bg-blue-50 dark:bg-blue-900/20 font-bold text-blue-800 dark:text-blue-300">
                             <td className="px-3 py-2">Total</td>
                             <td className="px-3 py-2">{mealTotals.gramos.toFixed(1)}</td>
                             <td className="px-3 py-2">{mealTotals.calorias.toFixed(1)}</td>
@@ -561,7 +556,7 @@ const FraccionamientoDesarrollada = ({
                       </table>
                     </div>
                   ) : (
-                    <p className="text-gray-400 text-center py-5 italic text-sm">Sin alimentos asignados</p>
+                    <p className="text-gray-400 dark:text-gray-500 text-center py-5 italic text-sm">Sin alimentos asignados</p>
                   )}
                 </div>
               );
@@ -658,26 +653,27 @@ const FraccionamientoIntercambio = ({
     const over = total > totalPortions + 0.01;
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4">
-        <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-md">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-6 w-full max-w-md">
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-bold">Editar: {groupName}</h3>
-            <button onClick={onCancel}><X className="text-gray-400 hover:text-gray-700" /></button>
+            <h3 className="text-lg font-bold text-gray-800 dark:text-white">Editar: {groupName}</h3>
+            <button onClick={onCancel}><X className="text-gray-400 hover:text-gray-700 dark:hover:text-gray-200" /></button>
           </div>
-          <p className="text-sm text-gray-500 mb-4">
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
             Dia {dayIndex + 1} — Max: <span className="font-bold">{totalPortions} porc.</span> — Asignado: <span className={`font-bold ${over ? 'text-red-500' : 'text-green-600'}`}>{total} porc.</span>
           </p>
           <div className="space-y-3 max-h-64 overflow-y-auto pr-1">
             {mealSlots.map(mealKey => (
               <div key={mealKey} className="flex justify-between items-center">
-                <label className="text-sm text-gray-700">{getMealLabel(mealKey, dayIndex)}</label>
+                <label className="text-sm text-gray-700 dark:text-gray-200">{getMealLabel(mealKey, dayIndex)}</label>
                 <input type="number" min="0" step="0.5" value={local[mealKey] || ''}
                   onChange={e => setLocal(p => ({ ...p, [mealKey]: parseFloat(e.target.value) || 0 }))}
-                  placeholder="0" className="w-24 p-1.5 border rounded-lg text-sm focus:ring-2 focus:ring-green-400 focus:outline-none" />
+                  placeholder="0"
+                  className="w-24 p-1.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg text-sm focus:ring-2 focus:ring-green-400 focus:outline-none" />
               </div>
             ))}
           </div>
           <div className="mt-6 flex justify-end gap-3">
-            <button onClick={onCancel} className="px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200">Cancelar</button>
+            <button onClick={onCancel} className="px-4 py-2 bg-gray-100 dark:bg-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600">Cancelar</button>
             <button onClick={() => { if (over) { showNotification('error', 'Supera el total'); return; } onSave(dayIndex, groupName, local); }}
               disabled={over} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50">Guardar</button>
           </div>
@@ -689,7 +685,7 @@ const FraccionamientoIntercambio = ({
   return (
     <div>
       {showNoDataWarning && (
-        <div className="bg-yellow-50 border-l-4 border-yellow-400 text-yellow-800 p-4 mb-6 rounded-r-xl flex gap-3">
+        <div className="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 text-yellow-800 dark:text-yellow-300 p-4 mb-6 rounded-r-xl flex gap-3">
           <AlertTriangle className="h-5 w-5 text-yellow-500 flex-shrink-0 mt-0.5" />
           <div>
             <p className="font-bold">Plan por Intercambio no definido</p>
@@ -700,9 +696,10 @@ const FraccionamientoIntercambio = ({
 
       <DistribucionNutricional calorias={totales?.calorias} hc={totales?.hc} proteinas={totales?.proteinas} lipidos={totales?.lipidos} color="green" />
 
-      <div className="bg-white p-6 rounded-xl shadow-sm border mb-6">
-        <h3 className="text-lg font-semibold mb-1">Banco de Porciones para Distribuir</h3>
-        <p className="text-sm text-gray-500 mb-4">
+      {/* Banco de porciones */}
+      <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border dark:border-gray-700 mb-6">
+        <h3 className="text-lg font-semibold mb-1 text-gray-800 dark:text-white">Banco de Porciones para Distribuir</h3>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
           Cada grupo puede usarse cada dia. Banco considera los {numberOfDays} dia{numberOfDays > 1 ? 's' : ''} del ciclo.
         </p>
         {Object.keys(porcionesDelPlan).length === 0 ? (
@@ -712,9 +709,9 @@ const FraccionamientoIntercambio = ({
             {Object.keys(porcionesDelPlan).map(groupName => {
               const remaining = remainingPortions[groupName];
               return (
-                <div key={groupName} className={`p-3 border rounded-xl ${remaining < -0.01 ? 'bg-red-50 border-red-300' : 'bg-gray-50 border-gray-200'}`}>
-                  <p className="font-medium text-sm text-gray-800">{groupName}</p>
-                  <p className="text-xs text-gray-400 mt-0.5">{porcionesDelPlan[groupName]} porc. × {numberOfDays} dia{numberOfDays > 1 ? 's' : ''}</p>
+                <div key={groupName} className={`p-3 border rounded-xl ${remaining < -0.01 ? 'bg-red-50 dark:bg-red-900/20 border-red-300 dark:border-red-700' : 'bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600'}`}>
+                  <p className="font-medium text-sm text-gray-800 dark:text-white">{groupName}</p>
+                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{porcionesDelPlan[groupName]} porc. × {numberOfDays} dia{numberOfDays > 1 ? 's' : ''}</p>
                   <p className={`text-sm font-bold mt-1 ${Math.abs(remaining) < 0.01 ? 'text-gray-400' : remaining < 0 ? 'text-red-600' : 'text-green-600'}`}>
                     {remaining.toFixed(1)} porc. restantes
                   </p>
@@ -728,32 +725,32 @@ const FraccionamientoIntercambio = ({
       {/* Panel asignación rápida */}
       {assigningGroup && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-end z-50">
-          <div className="bg-white w-full max-w-sm h-full overflow-y-auto shadow-2xl p-6 flex flex-col">
+          <div className="bg-white dark:bg-gray-800 w-full max-w-sm h-full overflow-y-auto shadow-2xl p-6 flex flex-col">
             <div className="flex justify-between items-center mb-2">
-              <h3 className="text-lg font-bold">Asignar: {getMealLabel(assigningGroup.mealKey, assigningGroup.dayIndex)}</h3>
-              <button onClick={() => { setAssigningGroup(null); setQuickAssignState({}); }}><X className="text-gray-400 hover:text-gray-700" /></button>
+              <h3 className="text-lg font-bold text-gray-800 dark:text-white">Asignar: {getMealLabel(assigningGroup.mealKey, assigningGroup.dayIndex)}</h3>
+              <button onClick={() => { setAssigningGroup(null); setQuickAssignState({}); }}><X className="text-gray-400 hover:text-gray-700 dark:hover:text-gray-200" /></button>
             </div>
-            <p className="text-sm text-gray-500 mb-4">Dia {assigningGroup.dayIndex + 1}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Dia {assigningGroup.dayIndex + 1}</p>
             <div className="flex-1 space-y-3 overflow-y-auto pr-1">
               {Object.keys(porcionesDelPlan).map(groupName => {
                 const availableToday = getAvailablePortionsForDay(groupName, assigningGroup.dayIndex);
                 return (
-                  <div key={groupName} className="flex justify-between items-center p-2 bg-gray-50 rounded-lg">
+                  <div key={groupName} className="flex justify-between items-center p-2 bg-gray-50 dark:bg-gray-700 rounded-lg">
                     <div className="flex-1 min-w-0 pr-2">
-                      <p className="text-sm font-medium text-gray-800 truncate">{groupName}</p>
-                      <p className={`text-xs ${availableToday < 0 ? 'text-red-500' : 'text-gray-400'}`}>{availableToday} porc. hoy</p>
+                      <p className="text-sm font-medium text-gray-800 dark:text-white truncate">{groupName}</p>
+                      <p className={`text-xs ${availableToday < 0 ? 'text-red-500' : 'text-gray-400 dark:text-gray-500'}`}>{availableToday} porc. hoy</p>
                     </div>
                     <input type="number" min="0" step="0.5" max={Math.max(0, availableToday)}
                       value={quickAssignState[groupName] || ''}
                       onChange={e => setQuickAssignState(p => ({ ...p, [groupName]: e.target.value }))}
                       placeholder="0"
-                      className="w-20 p-1.5 border rounded-lg text-sm text-right focus:ring-2 focus:ring-green-400 focus:outline-none" />
+                      className="w-20 p-1.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg text-sm text-right focus:ring-2 focus:ring-green-400 focus:outline-none" />
                   </div>
                 );
               })}
             </div>
             <div className="mt-4 flex gap-3">
-              <button onClick={() => { setAssigningGroup(null); setQuickAssignState({}); }} className="flex-1 px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200">Cancelar</button>
+              <button onClick={() => { setAssigningGroup(null); setQuickAssignState({}); }} className="flex-1 px-4 py-2 bg-gray-100 dark:bg-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600">Cancelar</button>
               <button onClick={() => handleQuickAssignSave(assigningGroup.dayIndex, assigningGroup.mealKey)}
                 className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center justify-center gap-2">
                 <Check size={16} /> Guardar
@@ -766,11 +763,9 @@ const FraccionamientoIntercambio = ({
       {editingGroup && (
         <DistributionModal groupName={editingGroup.groupName} dayIndex={editingGroup.dayIndex} onSave={handleSaveDistribution} onCancel={() => setEditingGroup(null)} />
       )}
-
       {mealNameModal && (
         <MealNameModal mealKey={mealNameModal} numberOfDays={numberOfDays} onSave={handleSaveMealName} onClose={() => setMealNameModal(null)} />
       )}
-
       {recetarioModal && (
         <RecetarioModal
           mealKey={recetarioModal.mealKey}
@@ -778,11 +773,10 @@ const FraccionamientoIntercambio = ({
           dayIndex={recetarioModal.dayIndex}
           ingredientes={(() => {
             const distribucionDelDia = distribucion[recetarioModal.dayIndex] || {};
-            return Object.keys(distribucionDelDia)
-              .map(groupName => {
-                const portions = (distribucionDelDia[groupName] || {})[recetarioModal.mealKey] || 0;
-                return portions > 0 ? { nombre: groupName, cantidad: portions, unidad: 'porciones' } : null;
-              }).filter(Boolean);
+            return Object.keys(distribucionDelDia).map(groupName => {
+              const portions = (distribucionDelDia[groupName] || {})[recetarioModal.mealKey] || 0;
+              return portions > 0 ? { nombre: groupName, cantidad: portions, unidad: 'porciones' } : null;
+            }).filter(Boolean);
           })()}
           recetarios={recetarios}
           setRecetarios={setRecetarios}
@@ -795,7 +789,6 @@ const FraccionamientoIntercambio = ({
         const distribucionDelDia = distribucion[dayIndex] || {};
         const mealTimesForDay = getMealTimeForDay(dayIndex);
         const isCollapsed = collapsedDays[dayIndex] || false;
-
         const totalKcalDia = mealSlots.reduce((total, mealKey) => {
           return total + Object.keys(distribucionDelDia).reduce((mealTotal, groupName) => {
             const portions = (distribucionDelDia[groupName] || {})[mealKey] || 0;
@@ -820,11 +813,9 @@ const FraccionamientoIntercambio = ({
               const mealLabel = getMealLabel(mealKey, dayIndex);
               const hasCustomName = mealNamesByDay[`${dayIndex}_${mealKey}`];
               const tieneRecetario = recetarios[`${dayIndex}_${mealKey}`]?.preparacion;
-
               const mealGroups = Object.keys(distribucionDelDia)
                 .filter(groupName => (distribucionDelDia[groupName][mealKey] || 0) > 0)
                 .map(groupName => ({ groupName, assignedPortions: distribucionDelDia[groupName][mealKey] }));
-
               const mealTotals = mealGroups.reduce((acc, { groupName, assignedPortions }) => {
                 const groupData = piramideData[groupName];
                 if (groupData) {
@@ -835,34 +826,31 @@ const FraccionamientoIntercambio = ({
                 }
                 return acc;
               }, { calorias: 0, hc: 0, proteinas: 0, lipidos: 0 });
-
               const pctVCT = totalKcalDia > 0 ? (mealTotals.calorias / totalKcalDia) * 100 : 0;
 
               return (
-                <div key={mealKey} className="bg-white rounded-xl shadow-sm border border-l-4 border-l-green-500 mb-3 overflow-hidden">
-                  <div className="px-5 py-3 flex justify-between items-center flex-wrap gap-2 bg-gray-50 border-b">
+                <div key={mealKey} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border dark:border-gray-700 border-l-4 border-l-green-500 mb-3 overflow-hidden">
+                  <div className="px-5 py-3 flex justify-between items-center flex-wrap gap-2 bg-gray-50 dark:bg-gray-700/50 border-b dark:border-gray-700">
                     <div className="flex items-center gap-2 flex-wrap">
                       <div className="flex items-center gap-1.5">
-                        <h3 className="text-base font-bold text-gray-800">{mealLabel}</h3>
-                        {hasCustomName && <span className="text-xs text-gray-400 italic">({mealKey})</span>}
-                        <button onClick={() => setMealNameModal(mealKey)} className="text-gray-300 hover:text-green-500 transition-colors">
-                          <Edit size={13} />
-                        </button>
+                        <h3 className="text-base font-bold text-gray-800 dark:text-white">{mealLabel}</h3>
+                        {hasCustomName && <span className="text-xs text-gray-400 dark:text-gray-500 italic">({mealKey})</span>}
+                        <button onClick={() => setMealNameModal(mealKey)} className="text-gray-300 hover:text-green-500 transition-colors"><Edit size={13} /></button>
                       </div>
                       {mealTimesForDay[mealKey] && (
-                        <span className="text-xs text-gray-500 flex items-center gap-1 bg-white border px-2 py-0.5 rounded-full">
+                        <span className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1 bg-white dark:bg-gray-700 border dark:border-gray-600 px-2 py-0.5 rounded-full">
                           <Clock size={12} />{mealTimesForDay[mealKey]}
                         </span>
                       )}
                       {mealTotals.calorias > 0 && (
-                        <span className="text-xs font-semibold text-green-700 bg-green-100 px-2 py-0.5 rounded-full">
+                        <span className="text-xs font-semibold text-green-700 dark:text-green-300 bg-green-100 dark:bg-green-900/30 px-2 py-0.5 rounded-full">
                           {pctVCT.toFixed(1)}% VCT — {mealTotals.calorias.toFixed(0)} kcal
                         </span>
                       )}
                     </div>
                     <div className="flex gap-2">
                       <button onClick={() => setRecetarioModal({ dayIndex, mealKey })}
-                        className={`px-3 py-1.5 rounded-lg text-sm flex items-center gap-1 transition-colors border ${tieneRecetario ? 'bg-emerald-50 text-emerald-700 border-emerald-300 hover:bg-emerald-100' : 'bg-white text-gray-600 border-gray-200 hover:border-green-400 hover:text-green-600'}`}>
+                        className={`px-3 py-1.5 rounded-lg text-sm flex items-center gap-1 transition-colors border ${tieneRecetario ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border-emerald-300 dark:border-emerald-700' : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:border-green-400 hover:text-green-600'}`}>
                         <BookOpen size={14} />{tieneRecetario ? 'Ver Receta' : 'Recetario'}
                       </button>
                       <button onClick={() => { setQuickAssignState({}); setAssigningGroup({ dayIndex, mealKey }); }}
@@ -874,7 +862,7 @@ const FraccionamientoIntercambio = ({
                   {mealGroups.length > 0 ? (
                     <div className="overflow-x-auto p-2">
                       <table className="w-full text-sm">
-                        <thead className="text-xs text-gray-500 uppercase">
+                        <thead className="text-xs text-gray-500 dark:text-gray-400 uppercase">
                           <tr>
                             <th className="px-3 py-2 text-left">Grupo</th>
                             <th className="px-3 py-2 text-left">Porciones</th>
@@ -885,17 +873,17 @@ const FraccionamientoIntercambio = ({
                             <th className="px-3 py-2 text-left">Edit</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y">
+                        <tbody className="divide-y dark:divide-gray-700">
                           {mealGroups.map(({ groupName, assignedPortions }) => {
                             const gd = piramideData[groupName];
                             return (
-                              <tr key={groupName} className="hover:bg-gray-50">
-                                <td className="px-3 py-2 font-medium">{groupName}</td>
-                                <td className="px-3 py-2">{assignedPortions}</td>
-                                <td className="px-3 py-2 font-bold text-green-600">{gd ? (gd.calorias * assignedPortions).toFixed(1) : 'N/A'}</td>
-                                <td className="px-3 py-2">{gd ? (gd.hc * assignedPortions).toFixed(1) : 'N/A'}</td>
-                                <td className="px-3 py-2">{gd ? (gd.proteinas * assignedPortions).toFixed(1) : 'N/A'}</td>
-                                <td className="px-3 py-2">{gd ? (gd.lipidos * assignedPortions).toFixed(1) : 'N/A'}</td>
+                              <tr key={groupName} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                                <td className="px-3 py-2 font-medium text-gray-800 dark:text-white">{groupName}</td>
+                                <td className="px-3 py-2 dark:text-gray-300">{assignedPortions}</td>
+                                <td className="px-3 py-2 font-bold text-green-600 dark:text-green-400">{gd ? (gd.calorias * assignedPortions).toFixed(1) : 'N/A'}</td>
+                                <td className="px-3 py-2 dark:text-gray-300">{gd ? (gd.hc * assignedPortions).toFixed(1) : 'N/A'}</td>
+                                <td className="px-3 py-2 dark:text-gray-300">{gd ? (gd.proteinas * assignedPortions).toFixed(1) : 'N/A'}</td>
+                                <td className="px-3 py-2 dark:text-gray-300">{gd ? (gd.lipidos * assignedPortions).toFixed(1) : 'N/A'}</td>
                                 <td className="px-3 py-2">
                                   <button onClick={() => setEditingGroup({ groupName, dayIndex })} className="text-green-400 hover:text-green-700"><Edit size={15} /></button>
                                 </td>
@@ -904,7 +892,7 @@ const FraccionamientoIntercambio = ({
                           })}
                         </tbody>
                         <tfoot>
-                          <tr className="bg-green-50 font-bold text-green-800">
+                          <tr className="bg-green-50 dark:bg-green-900/20 font-bold text-green-800 dark:text-green-300">
                             <td className="px-3 py-2">Total</td>
                             <td className="px-3 py-2">—</td>
                             <td className="px-3 py-2">{mealTotals.calorias.toFixed(1)}</td>
@@ -917,7 +905,7 @@ const FraccionamientoIntercambio = ({
                       </table>
                     </div>
                   ) : (
-                    <p className="text-gray-400 text-center py-5 italic text-sm">Sin grupos asignados</p>
+                    <p className="text-gray-400 dark:text-gray-500 text-center py-5 italic text-sm">Sin grupos asignados</p>
                   )}
                 </div>
               );
@@ -930,7 +918,6 @@ const FraccionamientoIntercambio = ({
 };
 
 // ── COMPONENTE PRINCIPAL ──
-// ✅ Ahora recibe todos los estados como props desde App.jsx
 const FraccionamientoTab = ({
   dietaActual, planIntercambio,
   mealSlots, setMealSlots,
@@ -1044,7 +1031,7 @@ const FraccionamientoTab = ({
     const activeColors = { blue: 'bg-blue-600 text-white', green: 'bg-green-600 text-white' };
     return (
       <button onClick={() => setActiveSubTab(tabId)}
-        className={`flex items-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-xl transition-all shadow-sm ${activeSubTab === tabId ? activeColors[color] : 'bg-white text-gray-600 hover:bg-gray-50 border'}`}>
+        className={`flex items-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-xl transition-all shadow-sm ${activeSubTab === tabId ? activeColors[color] : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 border dark:border-gray-600'}`}>
         {icon}{label}
       </button>
     );
@@ -1057,33 +1044,33 @@ const FraccionamientoTab = ({
       {/* Modal de hora */}
       {timeModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-sm">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-6 w-full max-w-sm">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-bold">Horario: {timeModal.mealKey}</h3>
-              <button onClick={() => setTimeModal(null)}><X className="text-gray-400 hover:text-gray-700" /></button>
+              <h3 className="text-lg font-bold text-gray-800 dark:text-white">Horario: {timeModal.mealKey}</h3>
+              <button onClick={() => setTimeModal(null)}><X className="text-gray-400 hover:text-gray-700 dark:hover:text-gray-200" /></button>
             </div>
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Hora</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Hora</label>
               <input type="time" value={tempTime} onChange={e => setTempTime(e.target.value)}
-                className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none" />
+                className="w-full p-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none" />
             </div>
             <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Aplicar a</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Aplicar a</label>
               <div className="space-y-2">
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input type="radio" checked={tempDays === 'all'} onChange={() => setTempDays('all')} className="accent-green-600" />
-                  <span className="text-sm">Todos los dias</span>
+                  <span className="text-sm text-gray-700 dark:text-gray-300">Todos los dias</span>
                 </label>
                 {numberOfDays > 1 && (
                   <div>
                     <label className="flex items-center gap-2 cursor-pointer mb-2">
                       <input type="radio" checked={Array.isArray(tempDays)} onChange={() => setTempDays([])} className="accent-green-600" />
-                      <span className="text-sm">Dias especificos</span>
+                      <span className="text-sm text-gray-700 dark:text-gray-300">Dias especificos</span>
                     </label>
                     {Array.isArray(tempDays) && (
                       <div className="flex flex-wrap gap-2 pl-6">
                         {Array.from({ length: numberOfDays }, (_, i) => (
-                          <label key={i} className={`flex items-center gap-1 text-xs cursor-pointer px-2.5 py-1.5 rounded-lg border transition-colors ${tempDays.includes(i) ? 'bg-green-600 text-white border-green-600' : 'bg-gray-50 text-gray-700 border-gray-200'}`}>
+                          <label key={i} className={`flex items-center gap-1 text-xs cursor-pointer px-2.5 py-1.5 rounded-lg border transition-colors ${tempDays.includes(i) ? 'bg-green-600 text-white border-green-600' : 'bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600'}`}>
                             <input type="checkbox" checked={tempDays.includes(i)}
                               onChange={e => setTempDays(prev => e.target.checked ? [...prev, i] : prev.filter(d => d !== i))}
                               className="hidden" />
@@ -1097,7 +1084,7 @@ const FraccionamientoTab = ({
               </div>
             </div>
             <div className="flex gap-3">
-              <button onClick={() => setTimeModal(null)} className="flex-1 px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200">Cancelar</button>
+              <button onClick={() => setTimeModal(null)} className="flex-1 px-4 py-2 bg-gray-100 dark:bg-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600">Cancelar</button>
               <button onClick={handleSaveTime} className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center justify-center gap-2">
                 <Check size={16} /> Confirmar
               </button>
@@ -1106,21 +1093,23 @@ const FraccionamientoTab = ({
         </div>
       )}
 
-      <div className="flex flex-wrap gap-3 p-3 bg-gray-100 rounded-xl">
+      {/* Sub-tabs */}
+      <div className="flex flex-wrap gap-3 p-3 bg-gray-100 dark:bg-gray-800/50 rounded-xl">
         <SubTabButton tabId="desarrollada" label="Por Desarrollada" icon={<ClipboardList size={16} />} color="blue" />
         <SubTabButton tabId="intercambio" label="Por Intercambio" icon={<Repeat size={16} />} color="green" />
       </div>
 
+      {/* Gestión de menús y configuración */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white p-6 rounded-xl shadow-sm border">
-          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-gray-800">
-            <Settings size={20} className="text-gray-500" /> Gestionar Menus y Horarios
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border dark:border-gray-700">
+          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-gray-800 dark:text-white">
+            <Settings size={20} className="text-gray-500 dark:text-gray-400" /> Gestionar Menus y Horarios
           </h3>
           <div className="flex gap-3 mb-4">
             <input type="text" value={newMealName} onChange={e => setNewMealName(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleAddMeal()}
               placeholder="Nombre del nuevo menu"
-              className="flex-grow p-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none text-sm" />
+              className="flex-grow p-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none text-sm" />
             <button onClick={handleAddMeal} className="bg-green-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-700 flex items-center gap-2 text-sm">
               <PlusCircle size={16} /> Anadir
             </button>
@@ -1132,11 +1121,11 @@ const FraccionamientoTab = ({
                 onDragEnter={() => handleMealDragEnter(index)}
                 onDragEnd={handleMealDragEnd}
                 onDragOver={e => e.preventDefault()}
-                className="flex items-center justify-between p-2.5 bg-gray-50 border rounded-xl gap-2 cursor-grab active:cursor-grabbing hover:bg-gray-100 transition-colors">
-                <GripVertical size={16} className="text-gray-300 flex-shrink-0" />
-                <span className="font-medium text-sm flex-grow text-gray-800">{mealKey}</span>
+                className="flex items-center justify-between p-2.5 bg-gray-50 dark:bg-gray-700 border dark:border-gray-600 rounded-xl gap-2 cursor-grab active:cursor-grabbing hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                <GripVertical size={16} className="text-gray-300 dark:text-gray-500 flex-shrink-0" />
+                <span className="font-medium text-sm flex-grow text-gray-800 dark:text-white">{mealKey}</span>
                 <button onClick={() => openTimeModal(mealKey)}
-                  className="flex items-center gap-1 text-xs text-gray-500 hover:text-green-700 bg-white border px-2 py-1 rounded-lg hover:border-green-400 transition-colors">
+                  className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 hover:text-green-700 dark:hover:text-green-400 bg-white dark:bg-gray-600 border dark:border-gray-500 px-2 py-1 rounded-lg hover:border-green-400 transition-colors">
                   <Clock size={13} />
                   {mealTimes[mealKey] ? mealTimes[mealKey] : 'Hora'}
                 </button>
@@ -1147,24 +1136,24 @@ const FraccionamientoTab = ({
               </div>
             ))}
           </div>
-          <p className="text-xs text-gray-400 mt-2 flex items-center gap-1"><GripVertical size={12} /> Arrastra para reordenar</p>
+          <p className="text-xs text-gray-400 dark:text-gray-500 mt-2 flex items-center gap-1"><GripVertical size={12} /> Arrastra para reordenar</p>
         </div>
 
-        <div className="bg-white p-6 rounded-xl shadow-sm border">
-          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-gray-800">
-            <CalendarDays size={20} className="text-gray-500" /> Configuracion del Ciclo
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border dark:border-gray-700">
+          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-gray-800 dark:text-white">
+            <CalendarDays size={20} className="text-gray-500 dark:text-gray-400" /> Configuracion del Ciclo
           </h3>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Numero de Dias</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Numero de Dias</label>
             <select value={numberOfDays} onChange={e => setNumberOfDays(Number(e.target.value))}
-              className="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none">
+              className="w-full p-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none">
               {Array.from({ length: 14 }, (_, i) => i + 1).map(day => (
                 <option key={day} value={day}>{day} {day > 1 ? 'dias' : 'dia'}</option>
               ))}
             </select>
           </div>
           {numberOfDays > 1 && (
-            <div className="mt-4 p-3 bg-blue-50 rounded-xl text-sm text-blue-700">
+            <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl text-sm text-blue-700 dark:text-blue-300">
               <p className="font-medium">Consejos</p>
               <ul className="text-xs mt-1 space-y-1 list-disc pl-4">
                 <li>Configura horarios diferentes por dia con el boton de reloj.</li>
@@ -1176,6 +1165,7 @@ const FraccionamientoTab = ({
         </div>
       </div>
 
+      {/* Contenido del sub-tab activo */}
       <div>
         {activeSubTab === 'desarrollada' && (
           <FraccionamientoDesarrollada
