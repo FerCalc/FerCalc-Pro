@@ -49,13 +49,20 @@ const Modal = ({ title, onClose, children, maxWidth = 'max-w-lg' }) => (
 
 // ── Formulario de Paciente ──
 const PatientForm = ({ initial, onSave, onCancel, loading }) => {
-  const [form, setForm] = useState({
-    nombre: '', apellido: '', email: '', telefono: '',
-    fechaNacimiento: '', sexo: 'Masculino', notas: '',
-    ...(initial || {}),
-    fechaNacimiento: initial?.fechaNacimiento
-      ? new Date(initial.fechaNacimiento).toISOString().split('T')[0]
-      : '',
+  const [form, setForm] = useState(() => {
+    // ✅ Usando función inicializadora — sin duplicar claves
+    const base = {
+      nombre: '', apellido: '', email: '', telefono: '',
+      fechaNacimiento: '', sexo: 'Masculino', notas: '',
+    };
+    if (!initial) return base;
+    return {
+      ...base,
+      ...initial,
+      fechaNacimiento: initial.fechaNacimiento
+        ? new Date(initial.fechaNacimiento).toISOString().split('T')[0]
+        : '',
+    };
   });
 
   return (
