@@ -36,8 +36,6 @@ const grupos = [
   { key: 'Azucar', label: 'Azucar' },
 ];
 
-// ✅ El componente ya NO maneja su propio estado de porciones
-// Lo recibe como prop desde CalculadoraTab para que persista
 const IntercambioSubTab = ({ patientData, dietGoals, onPlanUpdate, porciones, setPorciones }) => {
 
   const calculosPorGrupo = useMemo(() => {
@@ -79,16 +77,10 @@ const IntercambioSubTab = ({ patientData, dietGoals, onPlanUpdate, porciones, se
       if (!isNaN(numValue) && numValue > 0) acc[key] = numValue;
       return acc;
     }, {});
-    onPlanUpdate({
-      porciones: porcionesConValor,
-      totales: totalesCalculados,
-      piramideData,
-    });
+    onPlanUpdate({ porciones: porcionesConValor, totales: totalesCalculados, piramideData });
   }, [porciones, totalesCalculados, onPlanUpdate]);
 
-  useEffect(() => {
-    emitirPlan();
-  }, [emitirPlan]);
+  useEffect(() => { emitirPlan(); }, [emitirPlan]);
 
   const handlePorcionChange = (key, value) => {
     const numValue = value === '' ? '' : Math.max(0, parseFloat(value) || 0);
@@ -97,45 +89,31 @@ const IntercambioSubTab = ({ patientData, dietGoals, onPlanUpdate, porciones, se
 
   const objetivosCaloricos = useMemo(() => {
     const peso = patientData?.weight || 0;
-    return {
-      disminuir: peso * 25,
-      mantener: peso * 30,
-      aumentar: peso * 35,
-    };
+    return { disminuir: peso * 25, mantener: peso * 30, aumentar: peso * 35 };
   }, [patientData?.weight]);
 
-  // ✅ PAVB corregido - usa porciones directamente (no depende de calculosPorGrupo que puede ser stale)
   const pavbCalculos = useMemo(() => {
     const porcionesNum = Object.fromEntries(
       Object.entries(porciones).map(([k, v]) => [k, parseFloat(v) || 0])
     );
-
     let pavbGrams = 0;
-
     const pavbAnimalKeys = [
       'Carnes Altas en grasas', 'Carnes Bajas en grasas',
       'Lacteos Altos en grasa', 'Lacteos Medios en grasa', 'Lacteos Bajos en grasa'
     ];
-
     pavbAnimalKeys.forEach(key => {
       const porcion = porcionesNum[key] || 0;
       const base = piramideData[key];
-      if (base && porcion > 0) {
-        pavbGrams += base.proteinas * porcion;
-      }
+      if (base && porcion > 0) pavbGrams += base.proteinas * porcion;
     });
-
     const porcionesCereales = porcionesNum['Cereales'] || 0;
     const porcionesLeguminosas = porcionesNum['Leguminosas'] || 0;
     const numeroDePares = Math.min(porcionesCereales, porcionesLeguminosas);
-
     if (numeroDePares > 0) {
       pavbGrams += numeroDePares * (piramideData['Cereales'].proteinas + piramideData['Leguminosas'].proteinas);
     }
-
     const totalProteinas = totalesCalculados.proteinas;
     const pavbPercentage = totalProteinas > 0 ? (pavbGrams / totalProteinas) * 100 : 0;
-
     return { grams: pavbGrams, percentage: pavbPercentage };
   }, [porciones, totalesCalculados.proteinas]);
 
@@ -147,118 +125,124 @@ const IntercambioSubTab = ({ patientData, dietGoals, onPlanUpdate, porciones, se
   }), [totalesCalculados, dietGoals]);
 
   return (
-    <div className="space-y-6 bg-white p-6 rounded-lg shadow-lg">
+    <div className="space-y-6 bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg dark:shadow-gray-900">
+
+      {/* Cards superiores */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-        <div className="overflow-x-auto border rounded-lg p-4">
-          <h3 className="text-lg font-semibold mb-2">Objetivos Caloricos por Peso</h3>
+
+        {/* Objetivos calóricos */}
+        <div className="overflow-x-auto border dark:border-gray-700 rounded-lg p-4 bg-white dark:bg-gray-800">
+          <h3 className="text-lg font-semibold mb-2 text-gray-800 dark:text-white">Objetivos Caloricos por Peso</h3>
           <table className="w-full text-sm text-left">
-            <thead className="bg-gray-100">
+            <thead className="bg-gray-100 dark:bg-gray-700">
               <tr>
-                <th className="p-2 border font-semibold">Objetivo</th>
-                <th className="p-2 border font-semibold">Calorias Sugeridas</th>
+                <th className="p-2 border dark:border-gray-600 font-semibold text-gray-700 dark:text-gray-200">Objetivo</th>
+                <th className="p-2 border dark:border-gray-600 font-semibold text-gray-700 dark:text-gray-200">Calorias Sugeridas</th>
               </tr>
             </thead>
             <tbody>
-              <tr className="hover:bg-blue-50">
-                <td className="p-2 border flex items-center gap-2">
+              <tr className="hover:bg-blue-50 dark:hover:bg-blue-900/20">
+                <td className="p-2 border dark:border-gray-600 flex items-center gap-2 text-gray-700 dark:text-gray-200">
                   <TrendingDown className="text-red-500" size={16} /> Disminuir
                 </td>
-                <td className="p-2 border font-bold text-red-600">{objetivosCaloricos.disminuir.toFixed(0)} kcal</td>
+                <td className="p-2 border dark:border-gray-600 font-bold text-red-600">{objetivosCaloricos.disminuir.toFixed(0)} kcal</td>
               </tr>
-              <tr className="hover:bg-blue-50">
-                <td className="p-2 border flex items-center gap-2">
+              <tr className="hover:bg-blue-50 dark:hover:bg-blue-900/20">
+                <td className="p-2 border dark:border-gray-600 flex items-center gap-2 text-gray-700 dark:text-gray-200">
                   <Minus className="text-yellow-500" size={16} /> Mantener
                 </td>
-                <td className="p-2 border font-bold text-yellow-600">{objetivosCaloricos.mantener.toFixed(0)} kcal</td>
+                <td className="p-2 border dark:border-gray-600 font-bold text-yellow-600">{objetivosCaloricos.mantener.toFixed(0)} kcal</td>
               </tr>
-              <tr className="hover:bg-blue-50">
-                <td className="p-2 border flex items-center gap-2">
+              <tr className="hover:bg-blue-50 dark:hover:bg-blue-900/20">
+                <td className="p-2 border dark:border-gray-600 flex items-center gap-2 text-gray-700 dark:text-gray-200">
                   <TrendingUp className="text-green-500" size={16} /> Aumentar
                 </td>
-                <td className="p-2 border font-bold text-green-600">{objetivosCaloricos.aumentar.toFixed(0)} kcal</td>
+                <td className="p-2 border dark:border-gray-600 font-bold text-green-600">{objetivosCaloricos.aumentar.toFixed(0)} kcal</td>
               </tr>
             </tbody>
           </table>
-          <p className="text-xs text-gray-500 mt-1">Basado en el peso actual de: {patientData?.weight} kg</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Basado en el peso actual de: {patientData?.weight} kg</p>
         </div>
 
-        <div className="border rounded-lg p-4 bg-green-50">
-          <h3 className="text-lg font-semibold mb-2 flex items-center gap-2 text-green-800">
+        {/* PAVB */}
+        <div className="border dark:border-green-700 rounded-lg p-4 bg-green-50 dark:bg-green-900/20">
+          <h3 className="text-lg font-semibold mb-2 flex items-center gap-2 text-green-800 dark:text-green-300">
             <Award size={20} /> Proteina de Alto Valor Biologico (PAVB)
           </h3>
           <div className="space-y-3 mt-4">
             <div>
-              <p className="text-sm font-medium text-green-700">Gramos PAVB</p>
-              <p className="text-3xl font-bold text-green-600">{pavbCalculos.grams.toFixed(1)} g</p>
+              <p className="text-sm font-medium text-green-700 dark:text-green-400">Gramos PAVB</p>
+              <p className="text-3xl font-bold text-green-600 dark:text-green-300">{pavbCalculos.grams.toFixed(1)} g</p>
             </div>
-            <div className="border-t pt-3">
-              <p className="text-sm font-medium text-green-700">% PAVB del Total de Proteinas</p>
-              <p className="text-3xl font-bold text-green-600">{pavbCalculos.percentage.toFixed(1)} %</p>
+            <div className="border-t dark:border-green-700 pt-3">
+              <p className="text-sm font-medium text-green-700 dark:text-green-400">% PAVB del Total de Proteinas</p>
+              <p className="text-3xl font-bold text-green-600 dark:text-green-300">{pavbCalculos.percentage.toFixed(1)} %</p>
             </div>
           </div>
-          <p className="text-xs text-gray-500 mt-2">
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
             Suma de proteinas de carnes, lacteos y la combinacion 1 a 1 de cereales con leguminosas.
           </p>
         </div>
       </div>
 
+      {/* Tabla de grupos */}
       <div className="overflow-x-auto">
         <table className="w-full text-sm text-left border-collapse">
-          <thead className="bg-green-100">
+          <thead className="bg-green-100 dark:bg-green-900/30">
             <tr>
-              <th className="p-2 border font-semibold">GRUPO</th>
-              <th className="p-2 border font-semibold">PORCIONES</th>
-              <th className="p-2 border font-semibold">CALORIAS</th>
-              <th className="p-2 border font-semibold">HC (g)</th>
-              <th className="p-2 border font-semibold">LIPIDOS (g)</th>
-              <th className="p-2 border font-semibold">PROTEINAS (g)</th>
+              <th className="p-2 border dark:border-gray-600 font-semibold text-gray-700 dark:text-gray-200">GRUPO</th>
+              <th className="p-2 border dark:border-gray-600 font-semibold text-gray-700 dark:text-gray-200">PORCIONES</th>
+              <th className="p-2 border dark:border-gray-600 font-semibold text-gray-700 dark:text-gray-200">CALORIAS</th>
+              <th className="p-2 border dark:border-gray-600 font-semibold text-gray-700 dark:text-gray-200">HC (g)</th>
+              <th className="p-2 border dark:border-gray-600 font-semibold text-gray-700 dark:text-gray-200">LIPIDOS (g)</th>
+              <th className="p-2 border dark:border-gray-600 font-semibold text-gray-700 dark:text-gray-200">PROTEINAS (g)</th>
             </tr>
           </thead>
           <tbody>
             {grupos.map((grupo, index) => {
               if (grupo.type === 'header') {
                 return (
-                  <tr key={index} className="bg-gray-50">
-                    <td className="p-2 border font-semibold text-gray-600" colSpan="6">{grupo.label}</td>
+                  <tr key={index} className="bg-gray-50 dark:bg-gray-700">
+                    <td className="p-2 border dark:border-gray-600 font-semibold text-gray-600 dark:text-gray-300" colSpan="6">{grupo.label}</td>
                   </tr>
                 );
               }
               return (
-                <tr key={grupo.key} className="hover:bg-gray-50">
-                  <td className={`p-2 border ${grupo.indent ? 'pl-8' : ''}`}>{grupo.label}</td>
-                  <td className="p-2 border w-24">
+                <tr key={grupo.key} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                  <td className={`p-2 border dark:border-gray-600 text-gray-700 dark:text-gray-200 ${grupo.indent ? 'pl-8' : ''}`}>{grupo.label}</td>
+                  <td className="p-2 border dark:border-gray-600 w-24">
                     <input
                       type="number"
                       value={porciones[grupo.key] ?? ''}
                       onChange={e => handlePorcionChange(grupo.key, e.target.value)}
                       onFocus={e => { if (e.target.value === '0') e.target.value = ''; }}
-                      className="w-full p-1 border rounded focus:ring-2 focus:ring-green-500 focus:outline-none"
+                      className="w-full p-1 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded focus:ring-2 focus:ring-green-500 focus:outline-none"
                       placeholder="0"
                       min="0"
                     />
                   </td>
-                  <td className="p-2 border">{(calculosPorGrupo[grupo.key]?.calorias || 0).toFixed(1)}</td>
-                  <td className="p-2 border">{(calculosPorGrupo[grupo.key]?.hc || 0).toFixed(1)}</td>
-                  <td className="p-2 border">{(calculosPorGrupo[grupo.key]?.lipidos || 0).toFixed(1)}</td>
-                  <td className="p-2 border">{(calculosPorGrupo[grupo.key]?.proteinas || 0).toFixed(1)}</td>
+                  <td className="p-2 border dark:border-gray-600 text-gray-700 dark:text-gray-300">{(calculosPorGrupo[grupo.key]?.calorias || 0).toFixed(1)}</td>
+                  <td className="p-2 border dark:border-gray-600 text-gray-700 dark:text-gray-300">{(calculosPorGrupo[grupo.key]?.hc || 0).toFixed(1)}</td>
+                  <td className="p-2 border dark:border-gray-600 text-gray-700 dark:text-gray-300">{(calculosPorGrupo[grupo.key]?.lipidos || 0).toFixed(1)}</td>
+                  <td className="p-2 border dark:border-gray-600 text-gray-700 dark:text-gray-300">{(calculosPorGrupo[grupo.key]?.proteinas || 0).toFixed(1)}</td>
                 </tr>
               );
             })}
           </tbody>
           <tfoot className="font-bold">
-            <tr className="bg-green-200">
-              <td className="p-2 border" colSpan="2">TOTALES</td>
-              <td className="p-2 border">{totalesCalculados.calorias.toFixed(1)}</td>
-              <td className="p-2 border">{totalesCalculados.hc.toFixed(1)}</td>
-              <td className="p-2 border">{totalesCalculados.lipidos.toFixed(1)}</td>
-              <td className="p-2 border">{totalesCalculados.proteinas.toFixed(1)}</td>
+            <tr className="bg-green-200 dark:bg-green-800/40">
+              <td className="p-2 border dark:border-gray-600 text-gray-800 dark:text-white" colSpan="2">TOTALES</td>
+              <td className="p-2 border dark:border-gray-600 text-gray-800 dark:text-white">{totalesCalculados.calorias.toFixed(1)}</td>
+              <td className="p-2 border dark:border-gray-600 text-gray-800 dark:text-white">{totalesCalculados.hc.toFixed(1)}</td>
+              <td className="p-2 border dark:border-gray-600 text-gray-800 dark:text-white">{totalesCalculados.lipidos.toFixed(1)}</td>
+              <td className="p-2 border dark:border-gray-600 text-gray-800 dark:text-white">{totalesCalculados.proteinas.toFixed(1)}</td>
             </tr>
-            <tr className="bg-yellow-100">
-              <td className="p-2 border" colSpan="2">% ADECUACION (vs. Objetivos)</td>
-              <td className="p-2 border">{adecuacion.calorias.toFixed(1)}%</td>
-              <td className="p-2 border">{adecuacion.hc.toFixed(1)}%</td>
-              <td className="p-2 border">{adecuacion.lipidos.toFixed(1)}%</td>
-              <td className="p-2 border">{adecuacion.proteinas.toFixed(1)}%</td>
+            <tr className="bg-yellow-100 dark:bg-yellow-900/20">
+              <td className="p-2 border dark:border-gray-600 text-gray-800 dark:text-yellow-200" colSpan="2">% ADECUACION (vs. Objetivos)</td>
+              <td className="p-2 border dark:border-gray-600 text-gray-800 dark:text-yellow-200">{adecuacion.calorias.toFixed(1)}%</td>
+              <td className="p-2 border dark:border-gray-600 text-gray-800 dark:text-yellow-200">{adecuacion.hc.toFixed(1)}%</td>
+              <td className="p-2 border dark:border-gray-600 text-gray-800 dark:text-yellow-200">{adecuacion.lipidos.toFixed(1)}%</td>
+              <td className="p-2 border dark:border-gray-600 text-gray-800 dark:text-yellow-200">{adecuacion.proteinas.toFixed(1)}%</td>
             </tr>
           </tfoot>
         </table>

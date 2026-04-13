@@ -134,7 +134,7 @@ const CustomTooltip = ({ active, payload, label, config, ageInMonths, heightCm, 
             <p className="font-bold text-slate-700 border-b border-slate-100 pb-2 mb-2">{xLabel}</p>
             {measurement && patientPayload && (
                 <div className="flex items-center justify-between gap-4 py-1">
-                    <span className="text-slate-500">{measurement.label}</span>
+                    <span className="text-slate-500 dark:text-gray-400">{measurement.label}</span>
                     <span className="font-bold text-indigo-600">{measurement.value} {measurement.unit}</span>
                 </div>
             )}
@@ -311,7 +311,7 @@ export default function GrowthAndDevelopmentTab() {
     }, [currentConfig, ageInMonths, weightKg, heightCm, bmi, headCircumferenceCm, activeSubChart]);
 
     return (
-        <div className="bg-slate-50 p-4 sm:p-6 font-sans">
+        <div className="bg-slate-50 dark:bg-gray-900 p-4 sm:p-6 font-sans">
             <div className="max-w-7xl mx-auto space-y-5">
 
                 {/* Encabezado */}
@@ -320,13 +320,13 @@ export default function GrowthAndDevelopmentTab() {
                         <Activity className="h-6 w-6 text-sky-600" />
                     </div>
                     <div>
-                        <h1 className="text-2xl font-bold text-slate-800 leading-tight">Curvas de Crecimiento y Desarrollo</h1>
-                        <p className="text-sm text-slate-500">Evaluación basada en estándares de la OMS</p>
+                        <h1 className="text-2xl font-bold text-slate-800 dark:text-white leading-tight">Curvas de Crecimiento y Desarrollo</h1>
+                        <p className="text-sm text-slate-500 dark:text-gray-400">Evaluación basada en estándares de la OMS</p>
                     </div>
                 </header>
 
                 {/* Simulador */}
-                <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+                <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-slate-200 dark:border-gray-700 p-5">
                     <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-widest mb-4">Ingreso de Datos del Paciente</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                         <div>
@@ -361,7 +361,7 @@ export default function GrowthAndDevelopmentTab() {
                 {/* Contenido principal */}
                 <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
                     {/* Tabs principales */}
-                    <div className="border-b border-slate-200 px-4">
+                    <div className="border-b border-slate-200 dark:border-gray-700 px-4">
                         <nav className="flex gap-1 overflow-x-auto">
                             {Object.entries(availableMainTabs).map(([key, { name }]) => (
                                 <button key={key} onClick={() => handleMainTabClick(key)}
@@ -386,7 +386,7 @@ export default function GrowthAndDevelopmentTab() {
                                     <div className="inline-flex p-1 bg-slate-100 rounded-xl gap-1">
                                         {availableMainTabs[activeMainTab].charts.map(chartKey => (
                                             <button key={chartKey} onClick={() => setActiveSubChart(chartKey)}
-                                                className={`px-5 py-1.5 rounded-lg text-sm font-semibold transition-all ${activeSubChart === chartKey ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
+                                                className={`px-5 py-1.5 rounded-lg text-sm font-semibold transition-all ${activeSubChart === chartKey ? 'bg-white text-slate-800 shadow-sm dark:bg-gray-700 dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:text-gray-400 dark:hover:text-gray-200'}`}>
                                                 {chartConfig[chartKey].name}
                                             </button>
                                         ))}
@@ -455,20 +455,20 @@ export default function GrowthAndDevelopmentTab() {
                                         )}
 
                                         {/* Resumen del paciente */}
-                                        <div className="bg-slate-50 rounded-xl border border-slate-200 p-4">
+                                        <div className="bg-slate-50 dark:bg-gray-700 rounded-xl border border-slate-200 dark:border-gray-600 p-4">
                                             <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">Datos del Paciente</h4>
                                             <div className="space-y-2">
                                                 {patientSummary.map(({ label, value }) => (
                                                     <div key={label} className="flex justify-between items-center text-sm">
-                                                        <span className="text-slate-500">{label}</span>
-                                                        <span className="font-semibold text-slate-700">{value}</span>
+                                                        <span className="text-slate-500 dark:text-gray-400">{label}</span>
+                                                        <span className="font-semibold text-slate-700 dark:text-gray-200">{value}</span>
                                                     </div>
                                                 ))}
                                             </div>
                                         </div>
 
                                         {/* Diagnóstico */}
-                                        <div className="bg-white rounded-xl border border-slate-200 p-4 flex-grow">
+                                        <div className="bg-white dark:bg-gray-800 rounded-xl border border-slate-200 dark:border-gray-700 p-4 flex-grow">
                                             <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">Diagnóstico Nutricional</h4>
                                             {diagnosis ? (() => {
                                                 const s = diagnosisStyles[diagnosis.color];
