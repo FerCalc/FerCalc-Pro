@@ -1,11 +1,7 @@
 // src/GyTTab.jsx
-// VERSIÓN CORREGIDA: Se han recalibrado las constantes de mapeo visual de la curva
-// para garantizar una ubicación precisa del punto de diagnóstico.
-
 import React, { useMemo, useState } from 'react';
 import { Ruler, AreaChart, Table } from 'lucide-react';
 
-// Se asume que las imágenes están en la ruta correcta, no se modifica esta parte.
 import nomogramaImage from './assets/nomograma.png';
 import curvaImage from './assets/curva-embarazo.png';
 
@@ -535,40 +531,31 @@ const getNomogramaPTFromData = (talla, peso) => {
 };
 
 const CURVA_LIMITES = {
-    limiteA: { 10: 95, 11: 95, 12: 95, 13: 96, 14: 96, 15: 97, 16: 98, 17: 98.5, 18: 99, 19: 100, 20: 101, 21: 101, 22: 102, 23: 103, 24: 104, 25: 105, 26: 106, 27: 107.5, 28: 109, 29: 110, 30: 111, 31: 111.5, 32: 112.5, 33: 113.5, 34: 115, 35: 116, 36: 116.5, 37: 117.5, 38: 118.5, 39: 119, 40: 120, 41: 121, 42: 121.5 },
-    limiteB: { 10: 110, 11: 110, 12: 111, 13: 111, 14: 112, 15: 112, 16: 113, 17: 113, 18: 114, 19: 114, 20: 115, 21: 116, 22: 116, 23: 117, 24: 118, 25: 118, 26: 119, 27: 119.5, 28: 120, 29: 121, 30: 122, 31: 122.5, 32: 123.5, 33: 124, 34: 125, 35: 126, 36: 126.5, 37: 127, 38: 128, 39: 129, 40: 129, 41: 130, 42: 131 },
-    limiteC: { 10: 120, 11: 120, 12: 120.5, 13: 121, 14: 121, 15: 122, 16: 122, 17: 123, 18: 123, 19: 123.5, 20: 124, 21: 124.5, 22: 125, 23: 126, 24: 126.5, 25: 127, 26: 128, 27: 128, 28: 129, 29: 129, 30: 130, 31: 130, 32: 131, 33: 131, 34: 132, 35: 132, 36: 133, 37: 133, 38: 134, 39: 134, 40: 134.5, 41: 135, 42: 135.5 }
+  limiteA: { 10: 95, 11: 95, 12: 95, 13: 96, 14: 96, 15: 97, 16: 98, 17: 98.5, 18: 99, 19: 100, 20: 101, 21: 101, 22: 102, 23: 103, 24: 104, 25: 105, 26: 106, 27: 107.5, 28: 109, 29: 110, 30: 111, 31: 111.5, 32: 112.5, 33: 113.5, 34: 115, 35: 116, 36: 116.5, 37: 117.5, 38: 118.5, 39: 119, 40: 120, 41: 121, 42: 121.5 },
+  limiteB: { 10: 110, 11: 110, 12: 111, 13: 111, 14: 112, 15: 112, 16: 113, 17: 113, 18: 114, 19: 114, 20: 115, 21: 116, 22: 116, 23: 117, 24: 118, 25: 118, 26: 119, 27: 119.5, 28: 120, 29: 121, 30: 122, 31: 122.5, 32: 123.5, 33: 124, 34: 125, 35: 126, 36: 126.5, 37: 127, 38: 128, 39: 129, 40: 129, 41: 130, 42: 131 },
+  limiteC: { 10: 120, 11: 120, 12: 120.5, 13: 121, 14: 121, 15: 122, 16: 122, 17: 123, 18: 123, 19: 123.5, 20: 124, 21: 124.5, 22: 125, 23: 126, 24: 126.5, 25: 127, 26: 128, 27: 128, 28: 129, 29: 129, 30: 130, 31: 130, 32: 131, 33: 131, 34: 132, 35: 132, 36: 133, 37: 133, 38: 134, 39: 134, 40: 134.5, 41: 135, 42: 135.5 }
 };
 
 const getDiagnosticoCurva = (pt, semanas) => {
-    const semanaKey = Math.max(10, Math.min(42, Math.round(semanas)));
-    if (!pt || !CURVA_LIMITES.limiteA[semanaKey]) return { cat: 'Error', label: 'Datos inválidos' };
-    if (pt < CURVA_LIMITES.limiteA[semanaKey]) return { cat: 'A', label: 'Bajo Peso' };
-    if (pt < CURVA_LIMITES.limiteB[semanaKey]) return { cat: 'B', label: 'Normal' };
-    if (pt < CURVA_LIMITES.limiteC[semanaKey]) return { cat: 'C', label: 'Sobrepeso' };
-    return { cat: 'D', label: 'Obesidad' };
+  const semanaKey = Math.max(10, Math.min(42, Math.round(semanas)));
+  if (!pt || !CURVA_LIMITES.limiteA[semanaKey]) return { cat: 'Error', label: 'Datos inválidos' };
+  if (pt < CURVA_LIMITES.limiteA[semanaKey]) return { cat: 'A', label: 'Bajo Peso' };
+  if (pt < CURVA_LIMITES.limiteB[semanaKey]) return { cat: 'B', label: 'Normal' };
+  if (pt < CURVA_LIMITES.limiteC[semanaKey]) return { cat: 'C', label: 'Sobrepeso' };
+  return { cat: 'D', label: 'Obesidad' };
 };
 
-// --- MAPAS VISUALES ---
 const NOMOGRAMA_VISUAL_MAP = {
   talla: { valMin: 140, valMax: 175, x: 15.2344, yMin: 12.5598, yMax: 98.9631 },
   peso: { valMin: 30, valMax: 100, x: 51.0603, yMin: 12.4809, yMax: 98.9631 },
   pt: { valMin: 70, valMax: 135, x1: 59.1512, y1: 14.8314, x2: 81.0345, y2: 85.4382 }
 };
 
-// ===================================================================================
-// --- INICIO DE LA CORRECCIÓN ---
-// Se han ajustado y simplificado los valores para una calibración más precisa con la imagen de fondo.
-// Se eliminaron los promedios para mayor claridad y se afinaron las coordenadas.
 const CURVA_VISUAL_MAP = {
   semanas: { valMin: 10, valMax: 42, xMin: 16.8, xMax: 87.1 },
-  pt:      { valMin: 80, valMax: 150, yMin: 76.7, yMax: 6.8 }
+  pt: { valMin: 80, valMax: 150, yMin: 76.7, yMax: 6.8 }
 };
-// --- FIN DE LA CORRECCIÓN ---
-// ===================================================================================
 
-
-// --- FUNCIONES DE CÁLCULO GEOMÉTRICO ---
 const interpolate = (value, valMin, valMax, posMin, posMax) => {
   if (valMax === valMin) return posMin;
   const percentage = (value - valMin) / (valMax - valMin);
@@ -589,7 +576,6 @@ const getLineIntersection = (line1, line2) => {
 const useGyTLogic = (talla, peso, semanas) => {
   return useMemo(() => {
     if (!talla || !peso || talla <= 0 || peso <= 0) return { isValid: false };
-
     let finalTalla = talla;
     let finalPeso = peso;
     if (talla > 175) {
@@ -600,53 +586,51 @@ const useGyTLogic = (talla, peso, semanas) => {
       finalPeso = peso + ((140 - talla) * 0.5);
     }
     finalPeso = Math.max(30, Math.min(100, finalPeso));
-
-    // --- LÓGICA HÍBRIDA: NÚMERO DE DATOS, VISUAL GEOMÉTRICO ---
-    
-    // 1. La fuente de verdad para el NÚMERO es la tabla de datos.
     const porcentajePT = getNomogramaPTFromData(finalTalla, finalPeso);
-
-    // 2. La fuente de verdad para el GRÁFICO es la proyección geométrica.
     const mapN = NOMOGRAMA_VISUAL_MAP;
     const tallaPos = { x: mapN.talla.x, y: interpolate(finalTalla, mapN.talla.valMin, mapN.talla.valMax, mapN.talla.yMin, mapN.talla.yMax) };
     const pesoPos = { x: mapN.peso.x, y: interpolate(finalPeso, mapN.peso.valMin, mapN.peso.valMax, mapN.peso.yMin, mapN.peso.yMax) };
     const projectionLine = { x1: tallaPos.x, y1: tallaPos.y, x2: pesoPos.x, y2: pesoPos.y };
     const ptAxisLine = { x1: mapN.pt.x1, y1: mapN.pt.y1, x2: mapN.pt.x2, y2: mapN.pt.y2 };
     const ptPos = getLineIntersection(projectionLine, ptAxisLine);
-    
     if (!ptPos) return { isValid: false };
-
-    // --- Lógica de la Curva (Usa el %P/T de la tabla de datos, el más preciso) ---
     const mapC = CURVA_VISUAL_MAP;
     const puntoCurvaX = interpolate(semanas, mapC.semanas.valMin, mapC.semanas.valMax, mapC.semanas.xMin, mapC.semanas.xMax);
     const puntoCurvaY = interpolate(porcentajePT, mapC.pt.valMin, mapC.pt.valMax, mapC.pt.yMin, mapC.pt.yMax);
     const diagnostico = getDiagnosticoCurva(porcentajePT, semanas);
-
     return {
       isValid: true,
-      // El número viene de la tabla, los puntos vienen de la geometría.
       nomograma: { porcentajePT, tallaPos, pesoPos, ptPos },
       curva: { diagnostico, punto: { x: puntoCurvaX, y: puntoCurvaY } }
     };
   }, [talla, peso, semanas]);
 };
 
-// --- COMPONENTES DE RENDERIZADO (Sin cambios) ---
-
+// ── Calculadora %P/T ──
 const CalculadoraPT = ({ talla, peso, logic }) => {
   const { isValid, nomograma } = logic;
   return (
     <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg dark:shadow-gray-900">
-      <h3 className="text-xl font-semibold mb-4 flex items-center gap-2 dark:text-white"><Ruler /> Calculadora de Porcentaje Peso/Talla (%P/T)</h3>
+      <h3 className="text-xl font-semibold mb-4 flex items-center gap-2 text-gray-800 dark:text-white">
+        <Ruler /> Calculadora de Porcentaje Peso/Talla (%P/T)
+      </h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
         <div>
           <div className="space-y-4">
-            <div><p className="text-sm font-medium text-gray-600">Talla:</p><p className="text-2xl font-bold text-blue-600">{talla} cm</p></div>
-            <div><p className="text-sm font-medium text-gray-600">Peso Actual:</p><p className="text-2xl font-bold text-blue-600">{peso} kg</p></div>
+            <div>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Talla:</p>
+              <p className="text-2xl font-bold text-blue-600">{talla} cm</p>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Peso Actual:</p>
+              <p className="text-2xl font-bold text-blue-600">{peso} kg</p>
+            </div>
           </div>
-          <div className="mt-6 p-4 bg-green-50 rounded-lg text-center">
-            <p className="text-lg font-medium text-green-800">Resultado %P/T:</p>
-            <p className="text-5xl font-bold text-green-600">{isValid ? nomograma.porcentajePT.toFixed(1) : 'N/A'}</p>
+          <div className="mt-6 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
+            <p className="text-lg font-medium text-green-800 dark:text-green-300">Resultado %P/T:</p>
+            <p className="text-5xl font-bold text-green-600 dark:text-green-400">
+              {isValid ? nomograma.porcentajePT.toFixed(1) : 'N/A'}
+            </p>
           </div>
         </div>
         <div className="relative w-full max-w-sm mx-auto aspect-[389/557]">
@@ -654,11 +638,18 @@ const CalculadoraPT = ({ talla, peso, logic }) => {
           {isValid && (
             <>
               <svg className="absolute top-0 left-0 w-full h-full" style={{ zIndex: 1 }}>
-                <line x1={`${nomograma.tallaPos.x}%`} y1={`${nomograma.tallaPos.y}%`} x2={`${nomograma.ptPos.x}%`} y2={`${nomograma.ptPos.y}%`} stroke="red" strokeWidth="2" strokeDasharray="4 4" />
+                <line
+                  x1={`${nomograma.tallaPos.x}%`} y1={`${nomograma.tallaPos.y}%`}
+                  x2={`${nomograma.ptPos.x}%`} y2={`${nomograma.ptPos.y}%`}
+                  stroke="red" strokeWidth="2" strokeDasharray="4 4"
+                />
               </svg>
-              <div style={{ top: `${nomograma.tallaPos.y}%`, left: `${nomograma.tallaPos.x}%`, zIndex: 2 }} className="absolute w-3 h-3 bg-red-600 rounded-full transform -translate-x-1/2 -translate-y-1/2 border-2 border-white"></div>
-              <div style={{ top: `${nomograma.pesoPos.y}%`, left: `${nomograma.pesoPos.x}%`, zIndex: 2 }} className="absolute w-3 h-3 bg-red-600 rounded-full transform -translate-x-1/2 -translate-y-1/2 border-2 border-white"></div>
-              <div style={{ top: `${nomograma.ptPos.y}%`, left: `${nomograma.ptPos.x}%`, zIndex: 2 }} className="absolute w-3 h-3 bg-red-600 rounded-full transform -translate-x-1/2 -translate-y-1/2 border-2 border-white"></div>
+              <div style={{ top: `${nomograma.tallaPos.y}%`, left: `${nomograma.tallaPos.x}%`, zIndex: 2 }}
+                className="absolute w-3 h-3 bg-red-600 rounded-full transform -translate-x-1/2 -translate-y-1/2 border-2 border-white" />
+              <div style={{ top: `${nomograma.pesoPos.y}%`, left: `${nomograma.pesoPos.x}%`, zIndex: 2 }}
+                className="absolute w-3 h-3 bg-red-600 rounded-full transform -translate-x-1/2 -translate-y-1/2 border-2 border-white" />
+              <div style={{ top: `${nomograma.ptPos.y}%`, left: `${nomograma.ptPos.x}%`, zIndex: 2 }}
+                className="absolute w-3 h-3 bg-red-600 rounded-full transform -translate-x-1/2 -translate-y-1/2 border-2 border-white" />
             </>
           )}
         </div>
@@ -667,29 +658,189 @@ const CalculadoraPT = ({ talla, peso, logic }) => {
   );
 };
 
+// ── Curva de Incremento ──
 const CurvaIncremento = ({ logic }) => {
-    const { isValid, curva } = logic;
-    const CategoriaBadge = ({ letra, nombre, active }) => {
-        const colorClasses = { A: 'border-red-500 bg-red-500', B: 'border-green-500 bg-green-500', C: 'border-yellow-400 bg-yellow-400', D: 'border-orange-500 bg-orange-500', default: 'border-gray-300 bg-gray-400' };
-        const activeColor = colorClasses[letra] || colorClasses.default;
-        return ( <div className={`p-3 rounded-lg border-4 ${active ? activeColor.replace('bg-', 'border-') : 'border-transparent bg-gray-100'}`}> <div className="flex items-center gap-3"> <div className={`w-10 h-10 flex items-center justify-center text-xl font-bold text-white rounded ${active ? activeColor : 'bg-gray-400'}`}>{letra}</div> <span className={`text-lg font-semibold ${active ? 'text-gray-900' : 'text-gray-500'}`}>{nombre}</span> </div> </div> );
+  const { isValid, curva } = logic;
+
+  const CategoriaBadge = ({ letra, nombre, active }) => {
+    const colorMap = {
+      A: 'bg-red-500 border-red-500',
+      B: 'bg-green-500 border-green-500',
+      C: 'bg-yellow-400 border-yellow-400',
+      D: 'bg-orange-500 border-orange-500',
     };
-    return ( <div className="bg-white p-6 rounded-lg shadow-lg"> <h3 className="text-xl font-semibold mb-4 flex items-center gap-2"><AreaChart /> Diagnóstico según Curva de Incremento</h3> <div className="grid grid-cols-1 lg:grid-cols-2 gap-8"> <div className="relative w-full max-w-xl mx-auto"> <img src={curvaImage} alt="Curva de incremento" className="w-full h-auto" /> {isValid && ( <> <div style={{ top: `${curva.punto.y}%`, left: `${CURVA_VISUAL_MAP.semanas.xMin}%`, width: `${curva.punto.x - CURVA_VISUAL_MAP.semanas.xMin}%`, zIndex: 1 }} className="absolute h-0 border-t-2 border-dashed border-black"></div> <div style={{ left: `${curva.punto.x}%`, top: `${curva.punto.y}%`, height: `${CURVA_VISUAL_MAP.pt.yMin - curva.punto.y}%`, zIndex: 1 }} className="absolute w-0 border-l-2 border-dashed border-black"></div> <div style={{ top: `${curva.punto.y}%`, left: `${curva.punto.x}%`, zIndex: 2 }} className="absolute w-4 h-4 bg-white border-2 border-black rounded-full transform -translate-x-1/2 -translate-y-1/2"></div> </> )} </div> <div className="space-y-3 flex flex-col justify-center"> <div className="p-4 bg-blue-50 rounded-lg text-center mb-4"> <p className="text-md font-medium text-blue-800">Diagnóstico Nutricional:</p> <p className="text-3xl font-bold text-blue-600 my-1">{isValid ? curva.diagnostico.label : 'Datos insuficientes'}</p> </div> <h4 className="font-semibold text-center text-gray-700">Categorías del Estado Nutricional</h4> <CategoriaBadge letra="A" nombre="Bajo Peso" active={isValid && curva.diagnostico.cat === 'A'} /> <CategoriaBadge letra="B" nombre="Normal" active={isValid && curva.diagnostico.cat === 'B'} /> <CategoriaBadge letra="C" nombre="Sobrepeso" active={isValid && curva.diagnostico.cat === 'C'} /> <CategoriaBadge letra="D" nombre="Obesidad" active={isValid && curva.diagnostico.cat === 'D'} /> </div> </div> </div> );
+    const activeColor = colorMap[letra] || 'bg-gray-400 border-gray-400';
+    return (
+      <div className={`p-3 rounded-lg border-4 ${active ? activeColor.split(' ')[1] : 'border-transparent bg-gray-100 dark:bg-gray-700'}`}>
+        <div className="flex items-center gap-3">
+          <div className={`w-10 h-10 flex items-center justify-center text-xl font-bold text-white rounded ${active ? activeColor.split(' ')[0] : 'bg-gray-400'}`}>
+            {letra}
+          </div>
+          <span className={`text-lg font-semibold ${active ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400'}`}>
+            {nombre}
+          </span>
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg dark:shadow-gray-900">
+      <h3 className="text-xl font-semibold mb-4 flex items-center gap-2 text-gray-800 dark:text-white">
+        <AreaChart /> Diagnóstico según Curva de Incremento
+      </h3>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="relative w-full max-w-xl mx-auto">
+          <img src={curvaImage} alt="Curva de incremento" className="w-full h-auto" />
+          {isValid && (
+            <>
+              <div style={{
+                top: `${curva.punto.y}%`,
+                left: `${CURVA_VISUAL_MAP.semanas.xMin}%`,
+                width: `${curva.punto.x - CURVA_VISUAL_MAP.semanas.xMin}%`,
+                zIndex: 1
+              }} className="absolute h-0 border-t-2 border-dashed border-black" />
+              <div style={{
+                left: `${curva.punto.x}%`,
+                top: `${curva.punto.y}%`,
+                height: `${CURVA_VISUAL_MAP.pt.yMin - curva.punto.y}%`,
+                zIndex: 1
+              }} className="absolute w-0 border-l-2 border-dashed border-black" />
+              <div style={{
+                top: `${curva.punto.y}%`,
+                left: `${curva.punto.x}%`,
+                zIndex: 2
+              }} className="absolute w-4 h-4 bg-white border-2 border-black rounded-full transform -translate-x-1/2 -translate-y-1/2" />
+            </>
+          )}
+        </div>
+        <div className="space-y-3 flex flex-col justify-center">
+          <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-center mb-4">
+            <p className="text-md font-medium text-blue-800 dark:text-blue-300">Diagnóstico Nutricional:</p>
+            <p className="text-3xl font-bold text-blue-600 dark:text-blue-400 my-1">
+              {isValid ? curva.diagnostico.label : 'Datos insuficientes'}
+            </p>
+          </div>
+          <h4 className="font-semibold text-center text-gray-700 dark:text-gray-200">Categorías del Estado Nutricional</h4>
+          <CategoriaBadge letra="A" nombre="Bajo Peso" active={isValid && curva.diagnostico.cat === 'A'} />
+          <CategoriaBadge letra="B" nombre="Normal" active={isValid && curva.diagnostico.cat === 'B'} />
+          <CategoriaBadge letra="C" nombre="Sobrepeso" active={isValid && curva.diagnostico.cat === 'C'} />
+          <CategoriaBadge letra="D" nombre="Obesidad" active={isValid && curva.diagnostico.cat === 'D'} />
+        </div>
+      </div>
+    </div>
+  );
 };
 
+// ── Tabla IMC ──
 const TablaIMC = ({ pesoPreGestacional, talla }) => {
-    const imcPreGestacional = (talla > 0 && pesoPreGestacional > 0) ? (pesoPreGestacional / ((talla / 100) ** 2)) : 0;
-    const getCategoriaIMC = (imc) => { if (imc < 18.5) return 'Subnormal'; if (imc >= 18.5 && imc < 25) return 'Normal'; if (imc >= 25 && imc < 30) return 'Sobrepeso'; if (imc >= 30) return 'Obesidad'; return null; };
-    const categoriaActual = getCategoriaIMC(imcPreGestacional);
-    const data = [ { categoria: 'Peso subnormal (<18,5)', total: '12,5 – 18 kg', primerTrim: '0,5 a 2 kg', semanal: '500 g (440-580)', key: 'Subnormal' }, { categoria: 'Peso normal (18,5-25)', total: '11,5 – 16 kg', primerTrim: '0,5 a 2 kg', semanal: '400 g (350-500g)', key: 'Normal' }, { categoria: 'Sobrepeso (>25 y 30)', total: '7 – 11,5 kg', primerTrim: '0,5 a 2 kg', semanal: '300 g (230-330g)', key: 'Sobrepeso' }, { categoria: 'Obesidad (>30)', total: '5 a 9 kg', primerTrim: '0,5 a 2 kg', semanal: '200 g (170-270g)', key: 'Obesidad' }, { categoria: 'Gemelar', total: '15,5 - 30 kg', primerTrim: 'N/A', semanal: 'N/A', key: 'Gemelar' }, ];
-    return ( <div className="bg-white p-6 rounded-lg shadow-lg"> <h3 className="text-xl font-semibold mb-4 flex items-center gap-2"><Table /> Ganancia de Peso Recomendada según IMC Pre-Gestacional</h3> <div className="mb-4 p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg"><p className="text-sm font-medium text-indigo-800">IMC Pre-Gestacional Calculado:</p><p className="text-2xl font-bold text-indigo-600">{imcPreGestacional > 0 ? imcPreGestacional.toFixed(2) : 'N/A'}</p></div> <div className="overflow-x-auto"><table className="w-full text-left border-collapse"><thead><tr className="bg-gray-200 dark:bg-gray-700"><th className="p-3 font-semibold text-sm border dark:border-gray-600 dark:text-gray-200">Categoría de peso basada en el IMC</th><th className="p-3 font-semibold text-sm border dark:border-gray-600 dark:text-gray-200">Aumento de peso total al termino</th><th className="p-3 font-semibold text-sm border dark:border-gray-600 dark:text-gray-200">Aumento durante el primer trimestre</th><th className="p-3 font-semibold text-sm border dark:border-gray-600 dark:text-gray-200">Aumento semanal durante el 2º y 3er trimestre</th></tr></thead><tbody>{data.map((row) => (<tr key={row.key} ><td className="p-3 border dark:border-gray-600 dark:text-gray-200">{row.categoria}</td><td className="p-3 border dark:border-gray-600 dark:text-gray-200">{row.total}</td><td className="p-3 border dark:border-gray-600 dark:text-gray-200">{row.primerTrim}</td><td className="p-3 border dark:border-gray-600 dark:text-gray-200">{row.semanal}</td></tr>))}</tbody></table><p className="text-xs text-gray-500 mt-2">Fuente: Kathleen M. Rasmussen and Ann L. Yaktine, Editors; Committee to Reexamine IOM Pregnancy Weight Guidelines; Institute of Medicine; National Research Council, 2009.</p></div> </div> );
-};className={`text-sm ${row.key === categoriaActual ? 'bg-green-100 dark:bg-green-900/30 font-bold' : 'bg-white dark:bg-gray-800'}`}
+  const imcPreGestacional = (talla > 0 && pesoPreGestacional > 0)
+    ? (pesoPreGestacional / ((talla / 100) ** 2))
+    : 0;
 
+  const getCategoriaIMC = (imc) => {
+    if (imc < 18.5) return 'Subnormal';
+    if (imc >= 18.5 && imc < 25) return 'Normal';
+    if (imc >= 25 && imc < 30) return 'Sobrepeso';
+    if (imc >= 30) return 'Obesidad';
+    return null;
+  };
+
+  const categoriaActual = getCategoriaIMC(imcPreGestacional);
+
+  const data = [
+    { categoria: 'Peso subnormal (<18,5)', total: '12,5 – 18 kg', primerTrim: '0,5 a 2 kg', semanal: '500 g (440-580)', key: 'Subnormal' },
+    { categoria: 'Peso normal (18,5-25)', total: '11,5 – 16 kg', primerTrim: '0,5 a 2 kg', semanal: '400 g (350-500g)', key: 'Normal' },
+    { categoria: 'Sobrepeso (>25 y 30)', total: '7 – 11,5 kg', primerTrim: '0,5 a 2 kg', semanal: '300 g (230-330g)', key: 'Sobrepeso' },
+    { categoria: 'Obesidad (>30)', total: '5 a 9 kg', primerTrim: '0,5 a 2 kg', semanal: '200 g (170-270g)', key: 'Obesidad' },
+    { categoria: 'Gemelar', total: '15,5 - 30 kg', primerTrim: 'N/A', semanal: 'N/A', key: 'Gemelar' },
+  ];
+
+  return (
+    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg dark:shadow-gray-900">
+      <h3 className="text-xl font-semibold mb-4 flex items-center gap-2 text-gray-800 dark:text-white">
+        <Table /> Ganancia de Peso Recomendada según IMC Pre-Gestacional
+      </h3>
+      <div className="mb-4 p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg">
+        <p className="text-sm font-medium text-indigo-800 dark:text-indigo-300">IMC Pre-Gestacional Calculado:</p>
+        <p className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
+          {imcPreGestacional > 0 ? imcPreGestacional.toFixed(2) : 'N/A'}
+        </p>
+      </div>
+      <div className="overflow-x-auto">
+        <table className="w-full text-left border-collapse">
+          <thead>
+            <tr className="bg-gray-200 dark:bg-gray-700">
+              <th className="p-3 font-semibold text-sm border dark:border-gray-600 text-gray-700 dark:text-gray-200">Categoría de peso basada en el IMC</th>
+              <th className="p-3 font-semibold text-sm border dark:border-gray-600 text-gray-700 dark:text-gray-200">Aumento de peso total al termino</th>
+              <th className="p-3 font-semibold text-sm border dark:border-gray-600 text-gray-700 dark:text-gray-200">Aumento durante el primer trimestre</th>
+              <th className="p-3 font-semibold text-sm border dark:border-gray-600 text-gray-700 dark:text-gray-200">Aumento semanal durante el 2º y 3er trimestre</th>
+            </tr>
+          </thead>
+          <tbody>
+            {data.map((row) => (
+              <tr
+                key={row.key}
+                className={`text-sm ${
+                  row.key === categoriaActual
+                    ? 'bg-green-100 dark:bg-green-900/30 font-bold'
+                    : 'bg-white dark:bg-gray-800'
+                }`}
+              >
+                <td className="p-3 border dark:border-gray-600 text-gray-700 dark:text-gray-200">{row.categoria}</td>
+                <td className="p-3 border dark:border-gray-600 text-gray-700 dark:text-gray-200">{row.total}</td>
+                <td className="p-3 border dark:border-gray-600 text-gray-700 dark:text-gray-200">{row.primerTrim}</td>
+                <td className="p-3 border dark:border-gray-600 text-gray-700 dark:text-gray-200">{row.semanal}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+          Fuente: Kathleen M. Rasmussen and Ann L. Yaktine, Editors; Committee to Reexamine IOM Pregnancy Weight Guidelines; Institute of Medicine; National Research Council, 2009.
+        </p>
+      </div>
+    </div>
+  );
+};
+
+// ── Componente principal ──
 const GyTTab = ({ patientData }) => {
   const [activeSubTab, setActiveSubTab] = useState('pt');
   const logic = useGyTLogic(patientData.height, patientData.weight, patientData.semanasGestacion);
-  const SubTabButton = ({ tabId, label, icon }) => ( <button onClick={() => setActiveSubTab(tabId)} className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-all ${activeSubTab === tabId ? 'bg-green-600 text-white shadow-md' : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600'}`}> {icon} {label} </button> );
-  return ( <div className="space-y-6"> <div className="flex flex-wrap gap-3 p-2 bg-gray-100 rounded-lg"> <SubTabButton tabId="pt" label="Calculadora %P/T" icon={<Ruler size={16}/>} /> <SubTabButton tabId="curva" label="Curva de Incremento" icon={<AreaChart size={16}/>} /> <SubTabButton tabId="imc" label="Ganancia de Peso por IMC" icon={<Table size={16}/>} /> </div> <div> {activeSubTab === 'pt' && <CalculadoraPT talla={patientData.height} peso={patientData.weight} logic={logic} />} {activeSubTab === 'curva' && <CurvaIncremento logic={logic} />} {activeSubTab === 'imc' && <TablaIMC pesoPreGestacional={patientData.pesoPreGestacional} talla={patientData.height} />} </div> </div> );
+
+  const SubTabButton = ({ tabId, label, icon }) => (
+    <button
+      onClick={() => setActiveSubTab(tabId)}
+      className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-all ${
+        activeSubTab === tabId
+          ? 'bg-green-600 text-white shadow-md'
+          : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600'
+      }`}
+    >
+      {icon} {label}
+    </button>
+  );
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-wrap gap-3 p-2 bg-gray-100 dark:bg-gray-800 rounded-lg">
+        <SubTabButton tabId="pt" label="Calculadora %P/T" icon={<Ruler size={16} />} />
+        <SubTabButton tabId="curva" label="Curva de Incremento" icon={<AreaChart size={16} />} />
+        <SubTabButton tabId="imc" label="Ganancia de Peso por IMC" icon={<Table size={16} />} />
+      </div>
+      <div>
+        {activeSubTab === 'pt' && (
+          <CalculadoraPT talla={patientData.height} peso={patientData.weight} logic={logic} />
+        )}
+        {activeSubTab === 'curva' && (
+          <CurvaIncremento logic={logic} />
+        )}
+        {activeSubTab === 'imc' && (
+          <TablaIMC pesoPreGestacional={patientData.pesoPreGestacional} talla={patientData.height} />
+        )}
+      </div>
+    </div>
+  );
 };
 
 export default GyTTab;
