@@ -652,18 +652,30 @@ const PatientsPage = ({ getAllData }) => {
 
       {/* Header */}
       <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-3">
-            <Users className="text-green-600" size={28} />
-            Historial de Pacientes
-          </h1>
-          <p className="text-gray-500 text-sm mt-1">{patients.length} paciente{patients.length !== 1 ? 's' : ''} registrado{patients.length !== 1 ? 's' : ''}</p>
-        </div>
-        <button onClick={() => setModal('create')}
-          className="flex items-center gap-2 px-5 py-2.5 bg-green-600 text-white rounded-xl hover:bg-green-700 font-semibold transition-colors">
-          <Plus size={20} /> Nuevo Paciente
-        </button>
-      </div>
+  <div className="flex items-center gap-3">
+    {/* ✅ Botón volver */}
+    <button
+      onClick={() => navigate('/app')}
+      className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors"
+      title="Volver a FerCalc"
+    >
+      <ArrowLeft size={22} className="text-gray-600 dark:text-gray-300" />
+    </button>
+    <div>
+      <h1 className="text-2xl font-bold text-gray-800 dark:text-white flex items-center gap-3">
+        <Users className="text-green-600" size={28} />
+        Historial de Pacientes
+      </h1>
+      <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
+        {patients.length} paciente{patients.length !== 1 ? 's' : ''} registrado{patients.length !== 1 ? 's' : ''}
+      </p>
+    </div>
+  </div>
+  <button onClick={() => setModal('create')}
+    className="flex items-center gap-2 px-5 py-2.5 bg-green-600 text-white rounded-xl hover:bg-green-700 font-semibold transition-colors">
+    <Plus size={20} /> Nuevo Paciente
+  </button>
+</div>
 
       {/* Búsqueda */}
       <div className="mb-6">

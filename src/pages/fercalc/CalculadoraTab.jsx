@@ -166,15 +166,34 @@ const CalculadoraTab = ({ dietaActual, setDietaActual, setDistribucion, patientD
     { nombre: "Zapallito redondo (grande)", medida: "1 grande", cantidad: 250, unidad: "g", hc: 8.8, proteina: 2, grasa: 0.3, na: 5, k: 545, p: 35, ca: 45, fe: 5.8, colesterol: 0, purinas: 15, fibra: 1, agua: 237.5, calorias: 45.9, categoria: "VEGETALES B", origen: "vegetal" },
     { nombre: "Zuchini", medida: "1 taza (té)", cantidad: 100, unidad: "g", hc: 3.5, proteina: 0.8, grasa: 0.1, na: 95, k: 14, p: 14, ca: 18, fe: 2.3, colesterol: 0, purinas: 6, fibra: 0.4, agua: 95, calorias: 18.1, categoria: "VEGETALES B", origen: "vegetal" },
     { nombre: "Papa (pequeña)", medida: "1 pequeña", cantidad: 100, unidad: "g", hc: 17.9, proteina: 1.8, grasa: 0.1, na: 1, k: 410, p: 40, ca: 6, fe: 0.8, colesterol: 0, purinas: 5, fibra: 0.4, agua: 79, calorias: 79.7, categoria: "VEGETALES C", origen: "vegetal" },
-    { nombre: "Papa (grande)", medida: "1 grande", cantidad: 300, unidad: "g", hc: 53.7, proteina: 5.4, grasa: 0.3, na: 3, k: 1230, p: 120, ca: 18, fe: 2.4, colesterol: 0, purinas: 15, fibra: 1.2, agua: 237, calorias: 239.1, categoria: "VEGETALES C", origen: "vegetal" }
-  ];
+    { nombre: "Papa (grande)", medida: "1 grande", cantidad: 300, unidad: "g", hc: 53.7, proteina: 5.4, grasa: 0.3, na: 3, k: 1230, p: 120, ca: 18, fe: 2.4, colesterol: 0, purinas: 15, fibra: 1.2, agua: 237, calorias: 239.1, categoria: "VEGETALES C", origen: "vegetal" },
+    { nombre: "Yogur descremado hiperproteico (Trébol, Whey Protein)", medida: "1 pote chico", cantidad: 200, unidad: "g", hc: 13.2, proteina: 15, grasa: 0, na: 116, k: 0, p: 140, ca: 230, fe: 0, colesterol: 0.0, purinas: 0.0, fibra: 0, agua: 168, calorias: 112, categoria: "LÁCTEOS", origen: "animal" },
+    { nombre: "Leche entera en polvo", medida: "1 cucharada", cantidad: 5, unidad: "g", hc: 1.92, proteina: 1.32, grasa: 1.34, na: 18.55, k: 66.5, p: 38.8, ca: 45.6, fe: 0.02, colesterol: 4.85, purinas: 0.0, fibra: 0, agua: 0.12, calorias: 24.8, categoria: "LÁCTEOS", origen: "animal" },
+    { nombre: "Aguacate", medida: "3 cucharadas", cantidad: 90, unidad: "g", hc: 7.68, proteina: 1.8, grasa: 13.19, na: 6.3, k: 436.5, p: 46.8, ca: 10.8, fe: 0.5, colesterol: 0, purinas: 0.0, fibra: 6.03, agua: 65.9, calorias: 144, categoria: "GRASAS", origen: "vegetal" },
+    { nombre: "Aceituna verde envasada", medida: "11 unidades", cantidad: 115, unidad: "g", hc: 7.19, proteina: 0.97, grasa: 12.28, na: 1003, k: 9.2, p: 3.45, ca: 101.2, fe: 3.8, colesterol: 0, purinas: 0.0, fibra: 3.68, agua: 91.99, calorias: 132.25, categoria: "GRASAS", origen: "vegetal" },
+    { nombre: "Maní tostado con sal", medida: "30 unidades", cantidad: 30, unidad: "g", hc: 6.45, proteina: 7.1, grasa: 14.89, na: 244, k: 197.4, p: 107.4, ca: 16.2, fe: 0.68, colesterol: 0, purinas: 0.0, fibra: 2.4, agua: 0.47, calorias: 175.5, categoria: "GRASAS", origen: "vegetal" },
+    { nombre: "Maní tostado sin sal", medida: "30 unidades", cantidad: 30, unidad: "g", hc: 6.45, proteina: 7.1, grasa: 14.89, na: 1.8, k: 197.4, p: 107.4, ca: 16.2, fe: 0.68, colesterol: 0, purinas: 0.0, fibra: 2.4, agua: 0.47, calorias: 175.5, categoria: "GRASAS", origen: "vegetal" },
+    { nombre: "Mantequilla de maní con sal", medida: "1 cucharada", cantidad: 15, unidad: "g", hc: 2.93, proteina: 3.76, grasa: 7.56, na: 68.85, k: 97.35, p: 53.7, ca: 6.45, fe: 0.28, colesterol: 0, purinas: 0.0, fibra: 0.9, agua: 0.27, calorias: 88.2, categoria: "GRASAS", origen: "vegetal" },
+    { nombre: "Sardina enlatada en aceite", medida: "1/3 de taza", cantidad: 50, unidad: "g", hc: 0.0, proteina: 12.31, grasa: 5.73, na: 252.5, k: 198.5, p: 245, ca: 191, fe: 1.46, colesterol: 71, purinas: 128, fibra: 0, agua: 29.8, calorias: 104, categoria: "CARNE - PESCADO", origen: "animal" },
+    { nombre: "Batata roja (pequeña)", medida: "1 pequeña", cantidad: 100, unidad: "g", hc: 20.1, proteina: 1.6, grasa: 0.1, na: 55.0, k: 337.0, p: 47.0, ca: 30.0, fe: 0.6, colesterol: 0, purinas: 10, fibra: 3.0, agua: 77.3, calorias: 86, categoria: "VEGETALES C", origen: "vegetal" },
+    { nombre: "Rapiditas Bimbo (clásicas)", medida: "2 unidades", cantidad: 55, unidad: "g", hc: 28.0, proteina: 5.1, grasa: 3.7, na: 267.0, k: 70.0, p: 60.0, ca: 40.0, fe: 1.5, colesterol: 0.0, purinas: 0.0, fibra: 1.1, agua: 18.0, calorias: 166.0, categoria: "PANIFICADOS", origen: "vegetal" },
+
+// ── SEMILLAS ──
+{ nombre: "Semillas de chía", medida: "1 cucharada", cantidad: 10, unidad: "g", hc: 4.2, proteina: 1.7, grasa: 3.1, na: 1.6, k: 40.7, p: 86.0, ca: 63.0, fe: 0.77, colesterol: 0.0, purinas: 0.0, fibra: 3.4, agua: 0.6, calorias: 48.6, categoria: "SEMILLAS", origen: "vegetal" },
+{ nombre: "Semillas de girasol", medida: "1 cucharada", cantidad: 10, unidad: "g", hc: 2.0, proteina: 2.1, grasa: 5.1, na: 0.9, k: 64.5, p: 66.0, ca: 7.8, fe: 0.53, colesterol: 0.0, purinas: 0.0, fibra: 1.1, agua: 0.5, calorias: 58.4, categoria: "SEMILLAS", origen: "vegetal" },
+{ nombre: "Semillas de lino", medida: "1 cucharada", cantidad: 10, unidad: "g", hc: 2.9, proteina: 1.8, grasa: 4.2, na: 3.0, k: 81.3, p: 64.0, ca: 25.5, fe: 0.57, colesterol: 0.0, purinas: 0.0, fibra: 2.7, agua: 0.7, calorias: 53.4, categoria: "SEMILLAS", origen: "vegetal" },
+{ nombre: "Semillas de sésamo", medida: "1 cucharada", cantidad: 10, unidad: "g", hc: 2.3, proteina: 1.7, grasa: 5.0, na: 1.1, k: 46.8, p: 62.0, ca: 97.5, fe: 1.46, colesterol: 0.0, purinas: 0.0, fibra: 1.2, agua: 0.5, calorias: 57.3, categoria: "SEMILLAS", origen: "vegetal" }
+  
+];
 
   const [alimentos, setAlimentos] = useState(alimentosIniciales);
   const [activeSubTab, setActiveSubTab] = useState('intercambio');
   const [filtroCategoria, setFiltroCategoria] = useState('');
   const [busqueda, setBusqueda] = useState('');
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
+  const [showLimpiarModal, setShowLimpiarModal] = useState(false);
   const [alimentoEditando, setAlimentoEditando] = useState(null);
+  
 
   const [porcionesIntercambio, setPorcionesIntercambio] = useState({
     'Cereales': '', 'Verduras en gral': '', 'Verduras LC': '', 'Frutas': '',
@@ -237,12 +256,15 @@ const CalculadoraTab = ({ dietaActual, setDietaActual, setDistribucion, patientD
   };
 
   const limpiarDieta = () => {
-    if (window.confirm('¿Estás seguro de que quieres limpiar toda la dieta actual?')) {
-      setDietaActual([]);
-      if (setDistribucion) setDistribucion({});
-      toast('Dieta limpiada.', { icon: '🗑️' });
-    }
-  };
+  setShowLimpiarModal(true);
+};
+
+const confirmarLimpiar = () => {
+  setDietaActual([]);
+  if (setDistribucion) setDistribucion({});
+  toast('Dieta limpiada.', { icon: '🗑️' });
+  setShowLimpiarModal(false);
+};
 
   const handleNuevoAlimentoChange = (e) => {
     const { name, value } = e.target;
@@ -542,6 +564,39 @@ const CalculadoraTab = ({ dietaActual, setDietaActual, setDistribucion, patientD
           </div>
         </div>
       </div>
+    {/* ✅ Modal personalizado limpiar dieta */}
+      {showLimpiarModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 w-full max-w-md">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="bg-red-100 dark:bg-red-900/30 p-3 rounded-full flex-shrink-0">
+                <Trash2 className="w-6 h-6 text-red-600 dark:text-red-400" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-gray-800 dark:text-white">Limpiar Dieta</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Esta acción no se puede deshacer</p>
+              </div>
+            </div>
+            <p className="text-gray-600 dark:text-gray-300 mb-6">
+              Se eliminarán todos los alimentos del plan actual. ¿Querés continuar?
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setShowLimpiarModal(false)}
+                className="px-5 py-2.5 bg-gray-100 dark:bg-gray-700 dark:text-gray-200 text-gray-700 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 font-medium transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={confirmarLimpiar}
+                className="px-5 py-2.5 bg-red-600 text-white rounded-xl hover:bg-red-700 font-medium transition-colors flex items-center gap-2"
+              >
+                <Trash2 size={16} /> Limpiar todo
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
