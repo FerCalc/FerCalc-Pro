@@ -565,6 +565,7 @@ const PatientDetail = ({ patient, onBack, getAllData }) => {
 
 // ── PÁGINA PRINCIPAL ──
 const PatientsPage = ({ getAllData }) => {
+  const navigate = useNavigate();
   const [patients, setPatients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedPatient, setSelectedPatient] = useState(null);
