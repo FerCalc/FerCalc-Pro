@@ -177,8 +177,9 @@ const CalculadoraTab = ({ dietaActual, setDietaActual, setDistribucion, patientD
     { nombre: "Sardina enlatada en aceite", medida: "1/3 de taza", cantidad: 50, unidad: "g", hc: 0.0, proteina: 12.31, grasa: 5.73, na: 252.5, k: 198.5, p: 245, ca: 191, fe: 1.46, colesterol: 71, purinas: 128, fibra: 0, agua: 29.8, calorias: 104, categoria: "CARNE - PESCADO", origen: "animal" },
     { nombre: "Batata roja (pequeña)", medida: "1 pequeña", cantidad: 100, unidad: "g", hc: 20.1, proteina: 1.6, grasa: 0.1, na: 55.0, k: 337.0, p: 47.0, ca: 30.0, fe: 0.6, colesterol: 0, purinas: 10, fibra: 3.0, agua: 77.3, calorias: 86, categoria: "VEGETALES C", origen: "vegetal" },
     { nombre: "Rapiditas Bimbo (clásicas)", medida: "2 unidades", cantidad: 55, unidad: "g", hc: 28.0, proteina: 5.1, grasa: 3.7, na: 267.0, k: 70.0, p: 60.0, ca: 40.0, fe: 1.5, colesterol: 0.0, purinas: 0.0, fibra: 1.1, agua: 18.0, calorias: 166.0, categoria: "PANIFICADOS", origen: "vegetal" },
+    { nombre: "Pan Integral", medida: "1 unidad", cantidad: 50, unidad: "g", hc: 23.05, proteina: 4.85, grasa: 2.1, na: 263.5, k: 126.0, p: 114.5, ca: 36.0, fe: 1.65, colesterol: 0.0, purinas: 0.0, fibra: 3.45, agua: 18.85, calorias: 123.0, categoria: "PANIFICADOS", origen: "vegetal" },
 
-// ── SEMILLAS ──
+    // ── SEMILLAS ──
 { nombre: "Semillas de chía", medida: "1 cucharada", cantidad: 10, unidad: "g", hc: 4.2, proteina: 1.7, grasa: 3.1, na: 1.6, k: 40.7, p: 86.0, ca: 63.0, fe: 0.77, colesterol: 0.0, purinas: 0.0, fibra: 3.4, agua: 0.6, calorias: 48.6, categoria: "SEMILLAS", origen: "vegetal" },
 { nombre: "Semillas de girasol", medida: "1 cucharada", cantidad: 10, unidad: "g", hc: 2.0, proteina: 2.1, grasa: 5.1, na: 0.9, k: 64.5, p: 66.0, ca: 7.8, fe: 0.53, colesterol: 0.0, purinas: 0.0, fibra: 1.1, agua: 0.5, calorias: 58.4, categoria: "SEMILLAS", origen: "vegetal" },
 { nombre: "Semillas de lino", medida: "1 cucharada", cantidad: 10, unidad: "g", hc: 2.9, proteina: 1.8, grasa: 4.2, na: 3.0, k: 81.3, p: 64.0, ca: 25.5, fe: 0.57, colesterol: 0.0, purinas: 0.0, fibra: 2.7, agua: 0.7, calorias: 53.4, categoria: "SEMILLAS", origen: "vegetal" },
